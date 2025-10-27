@@ -1,0 +1,119 @@
+User Stories
+Based on Flowchart v2: EMR Flowchart v2.png
+
+Phase 1: Patient Entry & Encounter Creation
+Purpose: 
+To create a record of encounter for any patient entering and availing medical services in the hospital
+To schedule, view and check-in patients to ensure smooth clinical operations and patient flow
+
+Users: Scheduler, Registrar
+
+User Stories:
+
+General Stories:
+As a Scheduler, I want to search for available time slots of providers, specialty/department or clinic locations so that I can book appointments that best suit the patient’s needs.
+As a Scheduler, I want to search for existing appointments for a patient to avoid duplicate bookings or conflicts in scheduling.
+As a Scheduler, I want to confirm appointments and generate appointment details for confirmation so that patients receive accurate visit information.
+As a Registrar, I want to create a new patient record for a new patient so that all encounters have a corresponding patient profile.
+As a Registrar, I want to review and update patient demographic information (e.g. address, contact, insurance, etc.) during check-in so that records remain accurate.
+As a Registrar, I want to search for existing patients in the system so that duplicate records can be avoided.
+
+Scenario 1: Scheduled Visit
+As a Scheduler, I want to book an appointment for an existing or new patient so that the patient can be scheduled for treatment or assessment at a specific date and time.
+As a Scheduler, I want to modify or cancel appointment bookings so that I can accommodate the schedule changes of the patient.
+As a Registrar, I want to search for and retrieve a patient’s scheduled appointment when the patient arrives so that I can begin the check-in process.
+As a Registrar, I want to check in a patient for their scheduled visit so that their encounter is recorded in the system and linked to their appointment booking.
+As a Registrar, I want to mark the patient as a “No Show” so that the appointment booking reflects that the patient did not arrive at the scheduled time of the visit.
+
+Scenario 2: Unscheduled Visit
+As a Registrar, I want to create an encounter record for an unscheduled visit so that the patient can receive timely care.
+As a Registrar, I want to transfer the patient to the ER queue after registration so that clinical staff are notified and can begin triage.
+
+
+Phase 2: Clinical Workflow
+Purpose:
+To manage the main cycle of patient care
+To ensure that all clinical activities are accurately recorded and are traceable within a patient’s encounter
+
+Users: Registrar, Nurse, Clinician, Pharmacist, Laboratory Tech/Radiology Staff
+
+User Stories:
+
+General Stories:
+ As a Registrar, I want to search for available rooms/beds in a specific inpatient unit so that the patient is admitted and transferred in a timely manner.
+As a Clinician, I want to check if the patient already has an existing hospital record linked to their patient profile so that I can correctly review and update the patient’s medical history as the treatment progresses.
+As a Clinician, I want to conduct and document the initial medical history for a patient with no existing medical history record so that a clinical profile is created and care can proceed based on accurate and updated information.
+
+Scenario 1: Scheduled Visit (Continuation)
+As a Clinician and/or Nurse, I want to review the patient’s history and allergies so that I can provide accurate, safe and informed care
+As a Clinician, I want to document my assessment and treatment plan so that the patient’s progress and treatment decisions are recorded.
+As a Clinician, I want to enter orders for medication, laboratory tests or imaging so that the required diagnostics and treatment can be performed.
+As a Clinician, I want to review the updated patient profile containing records of dispensing medicine and laboratory or imaging results so that I can assess if the patient needs further testing, must be admitted or can be discharged.
+
+1.a. Medication Order Queue:
+As a Pharmacist, I want to verify medication orders against patient data so that orders with adverse drug interactions or contraindications are not dispensed.
+As a Pharmacist, I want to note my approval or disapproval for dispensing medicine written in the order so that a nurse may proceed with administering the medication (if approved) or  the clinician may review the orders for flags/concerns raised (if disapproved).
+As a Nurse, I want to view verified medication orders and record administrations so that medication delivery is properly tracked.
+As a Nurse, I want to request a restock of specific medication so that timely dispensing of the medications can be provided to the patient.
+As a Clinician, I want to review orders returned with flags/concerns raised so that an updated/corrected order for medication may be issued.
+
+1.b. Laboratory Order Queue:
+As a Lab tech or Radiology staff, I want to view and acknowledge the issued order so that I can confirm that the testing is in progress and the order status is updated accordingly.
+As a Lab tech or Radiology staff, I want to enter the lab results and confirm the completion of the testing so that the Clinician is updated on the progress and result of the order.
+
+Scenario 2: Unscheduled Visit (Continuation)
+As a Triage Nurse, I want to perform an initial clinical assessment and record vital information and care assignment so that the patient is assigned to the appropriate care location and providers can begin treatment or clinical workflow.
+As a Break-Glass Clinician, I want to gain immediate, broad read-access to a patient’s medical profile in emergency situations so I can provide urgent care based on the patient’s full history for time-sensitive decision-making.
+As a Clinician, I want to issue a patient referral to specialized expertise so that the treatment and care plans are appropriate and tailored to the patient’s current medical needs.
+
+Inpatient Admission:
+ As a Clinician, I want to create and issue an admission order for a patient who requires inpatient care so that the admission process can begin and the staff can prepare a bed.
+As an Admitting Nurse or Registar, I want to find an available bed in the appropriate inpatient unit so that the patient can be safely assigned to a room for admission.
+As an Admitting Nurse or Registrar, I want to update the patient’s encounter record to reflect the inpatient admission so that the patient’s chart and profile accurately reflects their admitted status.
+As a Nurse (or Transport Staff), I want to record where and when the patient has been physically transferred so that the patient’s current location and bed status remains accurate.
+
+Inpatient Care:
+As a Clinician, I want to document detailed daily progress notes during inpatient rounds so that the patient’s condition and treatment response are accurately recorded.
+As a Nurse, I want to record medication administrations as per the prescribed schedule so that medication delivery is actively tracked and patient safety is ensured.
+As a Nurse, I want to document daily scheduled vital signs and intake/output measurements so that patient monitoring data supports early detection of  changes and clinical decision-making.
+As a Clinician, I want to review the patient’s daily care plan and current progress so that I can determine if the patient is ready for discharge or if the care plans require adjustments.
+
+
+Phase 3: Encounter Conclusion
+Purpose: 
+To complete the patient’s encounter and begin clinical discharge documentation for the patient
+
+Users: Clinician, Registrar
+
+User Stories:
+
+General Stories for Phase 3:
+As a Clinician, I want to issue a final discharge order at the end of the patient’s visit so that the care staff and system know that the patient is ready for discharge.
+As a Clinician, I want to write a discharge summary documenting the care plans, outcomes and follow-up instructions so that the patient record accurately reflects the visit and supports continuity of care.
+As a Registrar, I want to update the patient’s encounter status to “Discharged” with the discharge date, time and disposition so that the hospital system accurately reflects the patient’s current status upon release and encounter closure.
+As a Registrar, I want to update the patient’s bed status to “Available” or “Cleaning” after discharge so that the bed can be prepared for the next patient.
+
+
+Phase 4: Back-Office & Finalization
+Purpose: 
+To ensure the patient’s encounter documentation is complete, accurate and properly coded after discharge for regulatory requirement compliance
+
+Users: HIM Coder, Clinician, Biller, Patient
+
+User Stories:
+
+Health Information Management:
+As an HIM Coder, I want to find and access all patient encounters with the status “Discharged” so that I can review and process the charts for coding.
+As an HIM Coder, I want to review all clinical notes associated with a discharged patient encounter so that I can accurately assign the final diagnoses and check for any inconsistencies.
+As an HIM Coder, I want to flag discrepancies such as missing signatures or incomplete notes so that clinicians are notified and correction is made before the final coding.
+As a Clinician, I want to receive an email notification regarding any discrepancies in the notes and charts so that I can correct and resolve them promptly .
+As an HIM Coder, I want to mark an encounter as fully coded after completing all reviews and corrections so that the system recognizes the encounter as final and ready for billing or archival.
+
+Billing (RCM):
+As a Biller, I want to find and access all finalized and coded patient encounters that have been marked as ready for billing so that I can compile the charges and generate the invoices for the completed visit.
+As a Biller, I want to generate and issue invoices for coded encounters so that patients can be billed accurately and promptly.
+As a Biller, I want to record payments received from patients so that the account balance and encounter ledger remain accurate and up to date.
+
+Patient Portal:
+As a Patient, I want to view my general medical profile so that I can stay informed about my health record and ensure its accuracy.
+As a Patient, I want to request an official copy of my lab results so that I can share them with another healthcare provider or keep a personal record.

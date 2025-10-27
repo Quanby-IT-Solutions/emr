@@ -1,0 +1,743 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  SYSTEM_ADMIN
+  SCHEDULER
+  REGISTRAR
+  CLINICIAN
+  NURSE
+  PHARMACIST
+  LAB_TECH
+  HIM_CODER
+  BILLER
+  PATIENT
+  AUDITOR
+}
+
+enum EncounterType {
+  OUTPATIENT
+  EMERGENCY
+  INPATIENT
+}
+
+enum EncounterStatus {
+  PLANNED
+  ACTIVE
+  DISCHARGED
+  CANCELLED
+}
+
+enum CodingStatus {
+  PENDING
+  IN_PROGRESS
+  QUERY_PENDING
+  COMPLETED
+}
+
+enum ClinicalNoteType {
+  H_AND_P
+  PROGRESS_NOTE
+  TRIAGE_NOTE
+  NURSING_NOTE
+  DISCHARGE_SUMMARY
+  CONSULT_NOTE
+}
+
+enum ClinicalNoteStatus {
+  DRAFT
+  SIGNED
+  AMENDED
+}
+
+enum OrderType {
+  MEDICATION
+  LAB
+  IMAGING
+  PROCEDURE
+  NURSING
+  ADMIT_INPATIENT
+  REFERRAL
+  DISCHARGE
+}
+
+enum OrderStatus {
+  PLACED
+  VERIFIED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderPriority {
+  STAT
+  URGENT
+  ROUTINE
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  CANCELLED
+  NO_SHOW
+  COMPLETED
+}
+
+enum MedAdminStatus {
+  GIVEN
+  HELD
+  REFUSED
+  PARTIAL_DOSE
+}
+
+enum HistoryType {
+  MEDICAL_HISTORY
+  SURGICAL_HISTORY
+  FAMILY_HISTORY
+  SOCIAL_HISTORY
+}
+
+enum HistoryStatus {
+  ACTIVE
+  RESOLVED
+  HISTORICAL
+}
+
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  UNKNOWN
+}
+
+enum AllergyStatus {
+  ACTIVE
+  REFUTED
+}
+
+enum ObservationType {
+  HEART_RATE
+  SYSTOLIC_BP
+  DIASTOLIC_BP
+  TEMPERATURE
+  RESPIRATORY_RATE
+  SPO2
+  PAIN_SCORE
+  WEIGHT
+  HEIGHT
+  FLUID_INTAKE_PO
+  FLUID_INTAKE_IV
+  FLUID_OUTPUT_URINE
+  BRADEN_SCORE
+  MORSE_FALL_SCORE
+  NEWS_SCORE
+}
+
+enum ObservationUnit {
+  BPM
+  MMHG
+  CELSIUS
+  FAHRENHEIT
+  BRPM
+  PERCENT
+  KG
+  LBS
+  CM
+  IN
+  ML
+  POINTS
+  NONE
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  INSURANCE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  PARTIALLY_PAID
+  VOID
+}
+
+enum PortalDataType {
+  LAB_RESULT
+  IMAGING_REPORT
+  CLINICAL_NOTE
+}
+
+enum PortalRequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+enum AuditActionType {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  BREAK_GLASS
+}
+
+enum DepartmentType {
+  CLINICAL
+  ADMINISTRATIVE
+}
+
+enum LocationStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  OUT_OF_SERVICE
+}
+
+enum PatientInsurancePriority {
+  PRIMARY
+  SECONDARY
+  TERTIARY
+}
+
+enum OrderVerificationStatus {
+  VERIFIED
+  REJECTED
+}
+
+// Models
+model Facility {
+  id           String  @id @default(cuid())
+  name         String
+  address      String?
+  contactPhone String?
+  isActive     Boolean
+
+  departments Department[]
+
+  @@map("facilities")
+}
+
+model Department {
+  id         String          @id @default(cuid())
+  facilityId String?
+  name       String
+  type       DepartmentType?
+
+  facility          Facility?          @relation(fields: [facilityId], references: [id])
+  locations         Location[]
+  staff             Staff[]
+  scheduleTemplates ScheduleTemplate[]
+  chargeMasterItems ChargeMasterItem[]
+
+  @@map("departments")
+}
+
+model Location {
+  id           String          @id @default(cuid())
+  departmentId String?
+  unit         String
+  roomNumber   String?
+  bedNumber    String?
+  status       LocationStatus?
+
+  department    Department?       @relation(fields: [departmentId], references: [id])
+  encounters    Encounter[]
+  transfersFrom PatientTransfer[] @relation("FromLocation")
+  transfersTo   PatientTransfer[] @relation("ToLocation")
+
+  @@map("locations")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  isActive     Boolean
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  staff     Staff?
+  patients  Patient[] // for portal users
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Staff {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  firstName           String
+  lastName            String
+  jobTitle            String?
+  primaryDepartmentId String?
+
+  user                  User                       @relation(fields: [userId], references: [id])
+  primaryDepartment     Department?                @relation(fields: [primaryDepartmentId], references: [id])
+  encounters            Encounter[]
+  clinicalNotes         ClinicalNote[]             @relation("NoteAuthor")
+  cosignedNotes         ClinicalNote[]             @relation("NoteCosigner")
+  ordersPlaced          Order[]                    @relation("OrderPlacer")
+  adminNursed           MedicationAdministration[] @relation("AdminNurse")
+  adminWitnessed        MedicationAdministration[] @relation("AdminWitness")
+  carePlans             CarePlan[]
+  flowsheetObservations FlowsheetObservation[]
+  appointments          Appointment[]
+  scheduleTemplates     ScheduleTemplate[]
+  chartDeficiencies     ChartDeficiency[]
+  encounterCodings      EncounterCoding[]
+  patientTransfers      PatientTransfer[]
+  orderVerifications    OrderVerification[]
+
+  @@map("staff")
+}
+
+model Patient {
+  id                  String   @id @default(cuid())
+  mrn                 String   @unique
+  firstName           String
+  lastName            String
+  dateOfBirth         DateTime
+  gender              String?
+  contactPhone        String?
+  email               String?
+  address             Json? // JSONB for address
+  portalUserId        String?
+  isVipOrConfidential Boolean
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  portalUser        User?              @relation(fields: [portalUserId], references: [id])
+  patientInsurances PatientInsurance[]
+  encounters        Encounter[]
+  patientHistories  PatientHistory[]
+  allergies         Allergy[]
+  appointments      Appointment[]
+  invoices          Invoice[]
+  payments          Payment[]
+  portalRequests    PortalRequest[]
+
+  @@map("patients")
+}
+
+model PatientInsurance {
+  id           String                   @id @default(cuid())
+  patientId    String
+  providerName String
+  policyNumber String
+  groupNumber  String?
+  priority     PatientInsurancePriority
+  isActive     Boolean
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("patient_insurance")
+}
+
+model Encounter {
+  id                   String          @id @default(cuid())
+  patientId            String
+  type                 EncounterType
+  status               EncounterStatus
+  startDateTime        DateTime
+  admissionDateTime    DateTime?
+  endDateTime          DateTime?
+  currentLocationId    String?
+  attendingProviderId  String?
+  dischargeDisposition String?
+  codingStatus         CodingStatus?
+
+  patient               Patient                @relation(fields: [patientId], references: [id])
+  currentLocation       Location?              @relation(fields: [currentLocationId], references: [id])
+  attendingProvider     Staff?                 @relation(fields: [attendingProviderId], references: [id])
+  patientTransfers      PatientTransfer[]
+  clinicalNotes         ClinicalNote[]
+  orders                Order[]
+  carePlans             CarePlan[]
+  flowsheetObservations FlowsheetObservation[]
+  appointments          Appointment[]
+  invoices              Invoice[]
+  chartDeficiencies     ChartDeficiency[]
+  encounterCodings      EncounterCoding[]
+
+  @@map("encounters")
+}
+
+model PatientTransfer {
+  id               String   @id @default(cuid())
+  encounterId      String
+  fromLocationId   String?
+  toLocationId     String
+  transferDateTime DateTime
+  transportStaffId String?
+
+  encounter      Encounter @relation(fields: [encounterId], references: [id])
+  fromLocation   Location? @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation     Location  @relation("ToLocation", fields: [toLocationId], references: [id])
+  transportStaff Staff?    @relation(fields: [transportStaffId], references: [id])
+
+  @@map("patient_transfer")
+}
+
+model ClinicalNote {
+  id          String             @id @default(cuid())
+  encounterId String
+  authorId    String
+  noteType    ClinicalNoteType
+  title       String?
+  content     String?
+  status      ClinicalNoteStatus
+  isSensitive Boolean
+  signedAt    DateTime?
+  cosignerId  String?
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+  author    Staff     @relation("NoteAuthor", fields: [authorId], references: [id])
+  cosigner  Staff?    @relation("NoteCosigner", fields: [cosignerId], references: [id])
+
+  @@map("clinical_notes")
+}
+
+model Order {
+  id                 String        @id @default(cuid())
+  encounterId        String
+  placerId           String
+  orderType          OrderType
+  details            Json? // JSONB
+  status             OrderStatus
+  priority           OrderPriority
+  clinicalIndication String?
+  createdAt          DateTime      @default(now())
+
+  encounter                 Encounter                  @relation(fields: [encounterId], references: [id])
+  placer                    Staff                      @relation("OrderPlacer", fields: [placerId], references: [id])
+  medicationAdministrations MedicationAdministration[]
+  labResults                LabResult[]
+  imagingReports            ImagingReport[]
+  orderVerifications        OrderVerification[]
+
+  @@map("orders")
+}
+
+model MedicationAdministration {
+  id                 String         @id @default(cuid())
+  orderId            String
+  nurseId            String
+  administrationTime DateTime
+  status             MedAdminStatus
+  reasonForOmission  String?
+  witnessId          String?
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  nurse   Staff  @relation("AdminNurse", fields: [nurseId], references: [id])
+  witness Staff? @relation("AdminWitness", fields: [witnessId], references: [id])
+
+  @@map("medication_administrations")
+}
+
+model PatientHistory {
+  id        String        @id @default(cuid())
+  patientId String
+  type      HistoryType
+  icd10Code String?
+  entry     String
+  status    HistoryStatus
+  onsetDate DateTime?
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("patient_history")
+}
+
+model Allergy {
+  id        String           @id @default(cuid())
+  patientId String
+  substance String
+  reaction  String?
+  severity  AllergySeverity?
+  status    AllergyStatus
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("allergies")
+}
+
+model CarePlan {
+  id               String   @id @default(cuid())
+  encounterId      String
+  authorId         String
+  nursingDiagnosis String
+  status           String
+  createdAt        DateTime @default(now())
+
+  encounter     Encounter      @relation(fields: [encounterId], references: [id])
+  author        Staff          @relation(fields: [authorId], references: [id])
+  carePlanTasks CarePlanTask[]
+
+  @@map("care_plans")
+}
+
+model CarePlanTask {
+  id          String  @id @default(cuid())
+  carePlanId  String
+  description String
+  frequency   String?
+  isCompleted Boolean
+
+  carePlan CarePlan @relation(fields: [carePlanId], references: [id])
+
+  @@map("care_plan_tasks")
+}
+
+model FlowsheetObservation {
+  id              String           @id @default(cuid())
+  encounterId     String
+  recorderId      String
+  recordedAt      DateTime
+  observationType ObservationType
+  value           String
+  unit            ObservationUnit?
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+  recorder  Staff     @relation(fields: [recorderId], references: [id])
+
+  @@map("flowsheet_observations")
+}
+
+model LabResult {
+  id             String    @id @default(cuid())
+  orderId        String
+  loincCode      String?
+  analyteName    String?
+  value          String?
+  unit           String?
+  referenceRange String?
+  flag           String?
+  status         String
+  observedAt     DateTime?
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("lab_results")
+}
+
+model ImagingReport {
+  id              String  @id @default(cuid())
+  orderId         String
+  accessionNumber String?
+  reportText      String?
+  status          String
+  viewerUrl       String?
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("imaging_reports")
+}
+
+model OrderVerification {
+  id           String                   @id @default(cuid())
+  orderId      String
+  pharmacistId String
+  verifiedAt   DateTime
+  status       OrderVerificationStatus?
+  notes        String?
+
+  order      Order @relation(fields: [orderId], references: [id])
+  pharmacist Staff @relation(fields: [pharmacistId], references: [id])
+
+  @@map("order_verifications")
+}
+
+model FormularyItem {
+  id           String  @id @default(cuid())
+  genericName  String
+  brandName    String?
+  rxnormCode   String?
+  isRestricted Boolean
+  notes        String?
+
+  @@map("formulary_items")
+}
+
+model ScheduleTemplate {
+  id           String    @id @default(cuid())
+  providerId   String
+  departmentId String
+  name         String?
+  timeSlots    Json? // JSONB
+  validFrom    DateTime?
+  validTo      DateTime?
+
+  provider   Staff      @relation(fields: [providerId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  @@map("schedule_templates")
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  patientId       String
+  providerId      String
+  startTime       DateTime
+  endTime         DateTime
+  status          AppointmentStatus
+  appointmentType String?
+  encounterId     String?
+
+  patient   Patient    @relation(fields: [patientId], references: [id])
+  provider  Staff      @relation(fields: [providerId], references: [id])
+  encounter Encounter? @relation(fields: [encounterId], references: [id])
+
+  @@map("appointments")
+}
+
+model ChargeMasterItem {
+  id           String  @id @default(cuid())
+  itemCode     String
+  description  String?
+  priceInCents Int // assuming cents as integer
+  departmentId String?
+  isActive     Boolean
+
+  department       Department?       @relation(fields: [departmentId], references: [id])
+  invoiceLineItems InvoiceLineItem[]
+
+  @@map("charge_master_items")
+}
+
+model Invoice {
+  id                 String        @id @default(cuid())
+  patientId          String
+  encounterId        String?
+  status             InvoiceStatus
+  totalAmountInCents Int
+  amountPaidInCents  Int
+  issueDate          DateTime?
+  dueDate            DateTime?
+
+  patient          Patient           @relation(fields: [patientId], references: [id])
+  encounter        Encounter?        @relation(fields: [encounterId], references: [id])
+  invoiceLineItems InvoiceLineItem[]
+  payments         Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id                 String  @id @default(cuid())
+  invoiceId          String
+  chargeMasterItemId String
+  description        String?
+  quantity           Int
+  unitPriceInCents   Int
+  totalPriceInCents  Int
+
+  invoice          Invoice          @relation(fields: [invoiceId], references: [id])
+  chargeMasterItem ChargeMasterItem @relation(fields: [chargeMasterItemId], references: [id])
+
+  @@map("invoice_line_items")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  patientId     String
+  amountInCents Int
+  paymentMethod PaymentMethod
+  transactionId String?
+  paymentDate   DateTime
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("payments")
+}
+
+model ChartDeficiency {
+  id                 String    @id @default(cuid())
+  encounterId        String
+  description        String?
+  responsibleStaffId String
+  status             String
+  createdAt          DateTime  @default(now())
+  resolvedAt         DateTime?
+
+  encounter        Encounter @relation(fields: [encounterId], references: [id])
+  responsibleStaff Staff     @relation(fields: [responsibleStaffId], references: [id])
+
+  @@map("chart_deficiencies")
+}
+
+model EncounterCoding {
+  id                   String  @id @default(cuid())
+  encounterId          String
+  coderId              String
+  icd10Code            String
+  isPrincipalDiagnosis Boolean
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+  coder     Staff     @relation(fields: [coderId], references: [id])
+
+  @@map("encounter_coding")
+}
+
+model PortalReleasePolicy {
+  id                String         @id @default(cuid())
+  dataType          PortalDataType
+  releaseDelayHours Int
+  isEnabled         Boolean
+  notes             String?
+
+  @@map("portal_release_policies")
+}
+
+model PortalRequest {
+  id              String              @id @default(cuid())
+  patientId       String
+  requestType     PortalDataType
+  status          PortalRequestStatus
+  requestedDataId String?
+  createdAt       DateTime            @default(now())
+  completedAt     DateTime?
+  notes           String?
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("portal_requests")
+}
+
+model AuditLog {
+  id              BigInt          @id @default(autoincrement())
+  timestamp       DateTime        @default(now())
+  userId          String?
+  actionType      AuditActionType
+  entityType      String?
+  entityId        String?
+  details         Json? // JSONB
+  reasonForAccess String?
+  ipAddress       String?
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
