@@ -3,6 +3,14 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
 
 export default function CheckInPage() {
   return (
@@ -15,8 +23,17 @@ export default function CheckInPage() {
               Check-in patients for appointments
             </p>
           </div>
-          <div className="px-4 lg:px-6">
-            <div>Sample page</div>
+          <div className="flex px-4 lg:px-6 gap-4">
+            <div className="w-1/2 px-2">
+              <Card>
+                <CardHeader></CardHeader>
+                  <CardTitle>Search Patient</CardTitle>
+                  <CardDescription>
+                    <Input placeholder="Enter patient name or ID" />
+                  </CardDescription>
+              </Card>
+            </div>
+            <div className="w-1/2">Sample page</div>
           </div>
         </div>
       </DashboardLayout>
