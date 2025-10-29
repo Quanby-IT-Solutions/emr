@@ -22,7 +22,6 @@ export default function ScheduleAppointmentPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>(undefined)
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined)
   const [selectedLocation, setSelectedLocation] = useState<string | undefined>(undefined)
-  const [patientName, setPatientName] = useState<string | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
 
   // Create New Patient dialog state
@@ -48,6 +47,9 @@ export default function ScheduleAppointmentPage() {
 
   // Generate Appointment Booking Details states
   const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
+
+  // For Testing: Patient Name
+  const [patientName, setPatientName] = useState<string | undefined>(undefined) 
 
 
   // Emergency relationship options
