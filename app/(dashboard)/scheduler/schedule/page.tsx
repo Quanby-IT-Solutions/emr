@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 export default function ScheduleAppointmentPage() {
   // Date and time state
@@ -29,22 +29,26 @@ export default function ScheduleAppointmentPage() {
   const [openNewPatient, setOpenNewPatient] = useState(false)
 
   // Patient info states
-  const [firstName, setFirstName] = useState("")
-  const [middleName, setMiddleName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [address, setAddress] = useState("")
-  const [birthday, setBirthday] = useState("")
-  const [age, setAge] = useState("")
-  const [phone, setPhone] = useState("")
-  const [telephone, setTelephone] = useState("")
-  const [email, setEmail] = useState("")
-  const [purpose, setPurpose] = useState("")
+  const [firstName, setFirstName] = useState<string | undefined>("")
+  const [middleName, setMiddleName] = useState<string | undefined>("")
+  const [lastName, setLastName] = useState<string | undefined>("")
+  const [address, setAddress] = useState<string | undefined>("")
+  const [birthday, setBirthday] = useState<string | undefined>("")
+  const [age, setAge] = useState<number | undefined>(undefined)
+  const [phone, setPhone] = useState<string | undefined>("")
+  const [telephone, setTelephone] = useState<string | undefined>("")
+  const [email, setEmail] = useState<string | undefined>("")
+  const [purpose, setPurpose] = useState<string | undefined>("")
 
   // Emergency contact states
-  const [emergencyName, setEmergencyName] = useState("")
-  const [emergencyNumber, setEmergencyNumber] = useState("")
-  const [emergencyRelation, setEmergencyRelation] = useState("")
-  const [emergencyRelationOther, setEmergencyRelationOther] = useState("")
+  const [emergencyName, setEmergencyName] = useState<string | undefined>("")
+  const [emergencyNumber, setEmergencyNumber] = useState<string | undefined>("")
+  const [emergencyRelation, setEmergencyRelation] = useState<string | undefined>("")
+  const [emergencyRelationOther, setEmergencyRelationOther] = useState<string | undefined>("")
+
+  // Generate Appointment Booking Details states
+  const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
+
 
   // Emergency relationship options
   const EMERGENCY_RELATIONSHIP_OPTIONS = Object.freeze([
@@ -86,10 +90,20 @@ export default function ScheduleAppointmentPage() {
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         computedAge--
       }
-      setAge(computedAge >= 0 ? computedAge.toString() : "")
+      setAge(computedAge >= 0 ? computedAge : undefined)
     } else {
-      setAge("")
+      setAge(undefined)
     }
+  }
+
+  const handleConfirmBooking = () => {
+    console.log("Confirming booking...")
+    setOpen(false)
+
+    // Open Generate Details Modal
+    // For testing:
+    setPatientName("Juan Santos Dela Cruz")
+    setOpenGenerateDetails(true)
   }
 
   // Reset all fields when modal closes
@@ -99,7 +113,7 @@ export default function ScheduleAppointmentPage() {
     setLastName("")
     setAddress("")
     setBirthday("")
-    setAge("")
+    setAge(undefined)
     setPhone("")
     setTelephone("")
     setEmail("")
@@ -280,9 +294,12 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="firstName"
                       name="firstName"
-                      placeholder="Juan"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      defaultValue="Juan"
+                      // value={firstName}
+                      onChange={() => 
+                        // setFirstName(e.target.value)
+                        setFirstName("Juan")
+                      }
                     />
                   </div>
                   <div className="grid gap-1">
@@ -290,9 +307,12 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="middleName"
                       name="middleName"
-                      placeholder="Santos"
-                      value={middleName}
-                      onChange={(e) => setMiddleName(e.target.value)}
+                      defaultValue="Santos"
+                      // value={middleName}
+                      onChange={() => 
+                        // setMiddleName(e.target.value)
+                        setMiddleName("Santos")
+                      }
                     />
                   </div>
                   <div className="grid gap-1">
@@ -300,9 +320,12 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="lastName"
                       name="lastName"
-                      placeholder="Dela Cruz"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      defaultValue="Dela Cruz"
+                      // value={lastName}
+                      onChange={() => 
+                        // setLastName(e.target.value)
+                        setLastName("Dela Cruz")
+                      }
                     />
                   </div>
                 </div>
@@ -313,9 +336,12 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="contact"
                       name="contact"
-                      placeholder="09XXXXXXXXX"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      defaultValue="09171234567"
+                      // value={phone}
+                      onChange={() => 
+                        // setPhone(e.target.value)
+                        setPhone("09171234567")
+                      }
                       inputMode="tel"
                     />
                   </div>
@@ -384,12 +410,74 @@ export default function ScheduleAppointmentPage() {
               </div>
             
               <div className="mt-6 flex gap-2">
-                <Button onClick={() => { setOpen(false); /* Logic to confirm booking */ }}>Confirm</Button>
+                <Button onClick={() => {handleConfirmBooking();}}>Confirm</Button>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               </div>
             </div>
             </DialogContent>
           </Dialog>
+          
+          {/* Generate Appointment Details Modal */}
+          <Dialog open={openGenerateDetails} onOpenChange={setOpenGenerateDetails}>
+            <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Appointment Booking Details</DialogTitle>
+                <DialogDescription className="mb-4">
+                  Details of the scheduled appointment.
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-5">
+                <div className="grid gap-1">
+                  <Label htmlFor="patientName" className="text-sm text-muted-foreground">Patient Name:</Label>
+                  <Input id="patientName" name="patientName" value={patientName} readOnly/>
+                </div>
+                <div className="grid gap-1">
+                  <Label htmlFor="appointmentID" className="text-sm text-muted-foreground">Appointment ID:</Label>
+                  <Input id="appointmentID" name="appointmentID" value="APT-20240915-001" readOnly/>
+                </div>
+                <div className="grid gap-1">
+                  <Label htmlFor="appointmentDetails" className="text-sm text-muted-foreground">Appointment Details Summary:</Label>
+                  {/* <Input id="appointmentDetails" name="appointmentDetails" value={purpose} readOnly/> */}
+                  <div className="overflow-x-auto">
+                    <table className="table-auto border-collapse border border-muted text-sm mx-4">
+                      <tbody>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium">Date</td>
+                          <td className="border border-muted px-2 py-1">{date ? date.toDateString() : ''}</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium">Time</td>
+                          <td className="border border-muted px-2 py-1">{selectedTime}</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium">Specialty/Department</td>
+                          <td className="border border-muted px-2 py-1">{selectedDepartment}</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium">Provider</td>
+                          <td className="border border-muted px-2 py-1">{selectedProvider}</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium">Location</td>
+                          <td className="border border-muted px-2 py-1">{selectedLocation}</td>
+                        </tr>
+                        <tr>
+                          <td className="border border-muted px-2 py-1 font-medium align-top">Purpose</td>
+                          <td className="border border-muted px-2 py-1">{purpose}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setOpenGenerateDetails(false)}>Done</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          {/* Note: Replace Patient with actual patient name. Var patientName is only for testing */}
 
           {/* Create New Patient Modal */}
           <Dialog open={openNewPatient} onOpenChange={setOpenNewPatient}>
