@@ -12,11 +12,15 @@ import { Badge } from "@/components/ui/badge"
 import { IconSearch } from "@tabler/icons-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
-import { format } from "date-fns"
+// import { format } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 // import { Calendar } from "@/components/ui/calendar"
 // import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 // import { cn } from "@/lib/utils"
-import { DateTimePicker } from "@/components/ui/date-time-picker"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
 
 interface Appointment {
   id: number;
@@ -39,32 +43,34 @@ export default function AppointmentsPage() {
   const [openCancel, setOpenCancel] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
-  // Produce a Date from selectedAppointment.date + selectedAppointment.time
-  const getSelectedDate = () => {
-    if (!selectedAppointment?.date) return undefined
-    // try to build an ISO datetime using stored date and time
-    try {
-      const datePart = selectedAppointment.date // expected yyyy-MM-dd
-      const timePart = selectedAppointment.time ? selectedAppointment.time : "00:00"
-      // if time is in "hh:mm AM/PM" convert to 24h by parsing via Date
-      const parsed = new Date(`${datePart} ${timePart}`)
-      if (isNaN(parsed.getTime())) return undefined
-      return parsed
-    } catch {
-      return undefined
-    }
-  }
+  const [date, setDate] = useState<Date | undefined>(new Date())
 
-  const handleDateTimeChange = (date: Date | null) => {
-    if (!date) return
-    setSelectedAppointment(prev =>
-      prev ? {
-        ...prev,
-        date: format(date, "yyyy-MM-dd"),
-        time: format(date, "hh:mm a")
-      } : null
-    )
-  }
+  // Produce a Date from selectedAppointment.date + selectedAppointment.time
+  // const getSelectedDate = () => {
+  //   if (!selectedAppointment?.date) return undefined
+  //   // try to build an ISO datetime using stored date and time
+  //   try {
+  //     const datePart = selectedAppointment.date // expected yyyy-MM-dd
+  //     const timePart = selectedAppointment.time ? selectedAppointment.time : "00:00"
+  //     // if time is in "hh:mm AM/PM" convert to 24h by parsing via Date
+  //     const parsed = new Date(`${datePart} ${timePart}`)
+  //     if (isNaN(parsed.getTime())) return undefined
+  //     return parsed
+  //   } catch {
+  //     return undefined
+  //   }
+  // }
+
+  // const handleDateTimeChange = (date: Date | null) => {
+  //   if (!date) return
+  //   setSelectedAppointment(prev =>
+  //     prev ? {
+  //       ...prev,
+  //       date: format(date, "yyyy-MM-dd"),
+  //       time: format(date, "hh:mm a")
+  //     } : null
+  //   )
+  // }
 
   // Edit Booking Appointment Modal Handler
   const handleEditBooking = (appointment: Appointment) => {
@@ -148,8 +154,8 @@ export default function AppointmentsPage() {
         </div>
 
         {/* Edit Booking Modal */}
-          <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-          <DialogContent>
+        <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+          <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Edit Appointment</DialogTitle>
               <DialogDescription>
@@ -157,39 +163,124 @@ export default function AppointmentsPage() {
               </DialogDescription>
             </DialogHeader>
             
-            {/* Patient Details */}
-            <div className="grid gap-4 mt-4">
-              <div className="grid gap-1 mb-4">
-                <Label htmlFor="patientName"><strong>Patient Name:</strong></Label>
-                <Input 
-                  id="patient" 
-                  name="patient" 
-                  value={selectedAppointment?.patient || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
+            <div className="flex-1 overflow-y-auto pr-1 space-y-5">
+              {/* Patient Details */}
+              <div className="grid gap-4 mt-4">
+                <Label className="font-semibold">Patient Details</Label>
+                <div className="grid gap-1">
+                  <Label htmlFor="patientName" className="text-muted-foreground">Patient Name</Label>
+                  <Input 
+                    id="patient" 
+                    name="patient" 
+                    value={selectedAppointment?.patient || ""}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                {/* Contact Info */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="grid gap-1">
+                    <Label htmlFor="contact" className="text-sm text-muted-foreground">Mobile Number</Label>
+                    <Input
+                      id="contact"
+                      name="contact"
+                      placeholder="09XXXXXXXXX"
+                      inputMode="tel"
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="telephone" className="text-sm text-muted-foreground">Telephone (optional)</Label>
+                    <Input
+                      id="telephone"
+                      name="telephone"
+                      placeholder="(02) XXXXXXX"
+                      inputMode="tel"
+                    />
+                  </div>
+                </div>
 
-              {/* Health Provider Details */}                
-              <div className="grid gap-1 mb-4">
-                <Label htmlFor="provider"><strong>Provider:</strong></Label>
-                <Input 
-                  id="provider" 
-                  name="provider" 
-                  value={selectedAppointment?.provider || ""}
-                  onChange={handleInputChange}
-                />
-              </div>
+                {/* Health Provider Details */}    
+                <Label className="font-semibold">Health Provider Details</Label>            
+                <div className="grid gap-1">
+                  <Label htmlFor="provider" className="text-muted-foreground">Provider</Label>
+                  <Input 
+                    id="provider" 
+                    name="provider" 
+                    value={selectedAppointment?.provider || ""}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  <div className="grid gap-1">
+                    <Label htmlFor="department" className="text-sm text-muted-foreground">Specialty/Department:</Label>
+                    <Input id="department" name="department" defaultValue="Cardiology" readOnly/>
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="location" className="text-sm text-muted-foreground">Location:</Label>
+                    <Input id="location" name="location" defaultValue="North Clinic" readOnly/>
+                  </div>                
+                </div>
+                
+                <Label><strong>Appointment Details</strong></Label>
+                <div className="grid md:grid-cols-[2fr_2fr] gap-3">
+                  {/* Appointment Date and Time*/}
+                  <div className="grid gap-1 ">
+                    <Label htmlFor="datetime" className="text-muted-foreground">Scheduled Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {date ? date.toDateString() : "Select date"}
+                          <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger> 
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          className="rounded-md border"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-              {/* Appointment Date and Time - used DateTimePicker component */}
-              <div className="grid gap-1">
-                <Label htmlFor="datetime"><strong>Appointment Date and Time:</strong></Label>
-                <DateTimePicker
-                  // id="datetime"
-                  value={getSelectedDate() || null}
-                  onChange={handleDateTimeChange}
-                />
+                  <div className="flex flex-col gap-3">
+                    <Label htmlFor="time-picker" className="text-muted-foreground">Scheduled Time</Label>
+                    <Input
+                      type="time"
+                      id="time-picker"
+                      step="1"
+                      defaultValue={selectedAppointment?.time ?
+                        // Convert "hh:mm AM/PM" to "HH:MM:SS" 24h format
+                        (() => {
+                          const [time, period] = selectedAppointment.time.split(" ");
+                          const [hours, minutes] = time.split(":");
+                          const hours24 = period === "AM" ? Number(hours) : Number(hours) + 12;
+                          return `${hours24.toString().padStart(2, "0")}:${minutes}:00`;
+                        })() : ""}
+                      className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    />
+                  </div>
+                  
+                  {/* Appointment Status*/}
+                  <div className="grid gap-1 ">
+                    <Label htmlFor="datetime" className="text-muted-foreground">Booking Status</Label>
+                    <Select
+                      name="status"
+                      defaultValue={selectedAppointment?.status || "pending"}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="confirmed">Confirmed</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="canceled">Canceled</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
+
           
             <div className="mt-6 flex gap-2">
               <Button onClick={() => { 

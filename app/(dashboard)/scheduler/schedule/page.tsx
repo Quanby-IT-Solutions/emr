@@ -331,10 +331,9 @@ export default function ScheduleAppointmentPage() {
                     />
                   </div>
                 </div>
-              
 
                 {/* Health Provider Details */}
-                <Label className="font-semibold">Provider Details</Label>
+                <Label className="font-semibold">Health Provider Details</Label>
                 <div className="grid gap-1">
                   <Label htmlFor="provider" className="text-sm text-muted-foreground">Provider:</Label>
                   <Input id="provider" name="provider" value={selectedProvider} readOnly/>

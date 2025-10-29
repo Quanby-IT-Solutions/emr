@@ -12,7 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// ✅ Define props interface
+// Define props interface
 interface DateTimePickerProps {
   value: Date | null;
   onChange: (date: Date | null) => void;
