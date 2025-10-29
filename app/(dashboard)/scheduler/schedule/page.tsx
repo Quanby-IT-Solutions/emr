@@ -181,75 +181,77 @@ export default function ScheduleAppointmentPage() {
           </div>
 
           {/* ---------------- Appointment Details ---------------- */}
-          <Card className="px-4 lg:px-6 mt-4">
-            <CardHeader>
-              <CardTitle>Appointment Details</CardTitle>
-              <CardDescription>
-                Select department, provider, location, and purpose
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-[2fr_2fr]">
-              <div className="grid gap-4">
-                <div className="space-y-1">
-                  <Label>Specialty/Department</Label>
-                  <Select onValueChange={setSelectedDepartment}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select specialty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Cardiology">Cardiology</SelectItem>
-                      <SelectItem value="Neurology">Neurology</SelectItem>
-                      <SelectItem value="Pediatrics">Pediatrics</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <div  className="grid gap-4 px-4 lg:px-6 mb-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Appointment Details</CardTitle>
+                <CardDescription>
+                  Select department, provider, location, and purpose
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-[2fr_2fr]">
+                <div className="grid gap-4">
+                  <div className="space-y-1">
+                    <Label>Specialty/Department</Label>
+                    <Select onValueChange={setSelectedDepartment}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select specialty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Cardiology">Cardiology</SelectItem>
+                        <SelectItem value="Neurology">Neurology</SelectItem>
+                        <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label>Provider</Label>
+                    <Select onValueChange={setSelectedProvider}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select provider" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Dr. John Smith">Dr. John Smith</SelectItem>
+                        <SelectItem value="Dr. Sarah Johnson">Dr. Sarah Johnson</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label>Location</Label>
+                    <Select onValueChange={setSelectedLocation}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Main Hospital">Main Hospital</SelectItem>
+                        <SelectItem value="North Clinic">North Clinic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <Label>Provider</Label>
-                  <Select onValueChange={setSelectedProvider}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select provider" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Dr. John Smith">Dr. John Smith</SelectItem>
-                      <SelectItem value="Dr. Sarah Johnson">Dr. Sarah Johnson</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Purpose of Appointment */}
+                <div className="grid gap-1">
+                  <Label htmlFor="appointmentPurpose">Purpose of Appointment</Label>
+                  <textarea
+                    id="appointmentPurpose"
+                    name="appointmentPurpose"
+                    rows={6}
+                    maxLength={600}
+                    value={purpose}
+                    onChange={(e) => setPurpose(e.target.value)}
+                    className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full"
+                    placeholder="Briefly describe the purpose (e.g. consultation, annual checkup, lab interpretation)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maximum 2 short paragraphs (600 characters)
+                  </p>
                 </div>
-
-                <div className="space-y-1">
-                  <Label>Location</Label>
-                  <Select onValueChange={setSelectedLocation}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Main Hospital">Main Hospital</SelectItem>
-                      <SelectItem value="North Clinic">North Clinic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Purpose of Appointment */}
-              <div className="grid gap-1">
-                <Label htmlFor="appointmentPurpose">Purpose of Appointment</Label>
-                <textarea
-                  id="appointmentPurpose"
-                  name="appointmentPurpose"
-                  rows={6}
-                  maxLength={600}
-                  value={purpose}
-                  onChange={(e) => setPurpose(e.target.value)}
-                  className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full"
-                  placeholder="Briefly describe the purpose (e.g. consultation, annual checkup, lab interpretation)"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Maximum 2 short paragraphs (600 characters)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="px-4 lg:px-6">
             <div className="flex gap-2">
