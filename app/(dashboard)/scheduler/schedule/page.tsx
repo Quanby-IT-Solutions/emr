@@ -3,14 +3,25 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { IconCirclePlusFilled } from "@tabler/icons-react"
+import { PatientDataTable, Patient } from "@/components/data-table-filtered"
+
+const mockPatients: Patient[] = [
+  { id: "P001", firstName: "John", middleName: "Alexander", lastName: "Smith", mobileNumber: "09171234567", birthday: "1985-03-12", age: 40 },
+  { id: "P002", firstName: "Maria", middleName: "Elena", lastName: "Garcia", mobileNumber: "09281234568", birthday: "1992-07-25", age: 33 },
+  { id: "P003", firstName: "David", middleName: "Lee", lastName: "Anderson", mobileNumber: "09391234569", birthday: "1978-11-02", age: 47 },
+  { id: "P004", firstName: "Sophia", middleName: "Grace", lastName: "Nguyen", mobileNumber: "09451234570", birthday: "1998-01-30", age: 27 },
+  { id: "P005", firstName: "Michael", middleName: "James", lastName: "Brown", mobileNumber: "09561234571", birthday: "1990-09-18", age: 35 },
+];
+
 
 export default function ScheduleAppointmentPage() {
   // Date and time state
@@ -39,6 +50,9 @@ export default function ScheduleAppointmentPage() {
   const [email, setEmail] = useState<string | undefined>("")
   const [purpose, setPurpose] = useState<string | undefined>("")
 
+  // Patient Selection
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+
   // Emergency contact states
   const [emergencyName, setEmergencyName] = useState<string | undefined>("")
   const [emergencyNumber, setEmergencyNumber] = useState<string | undefined>("")
@@ -48,10 +62,6 @@ export default function ScheduleAppointmentPage() {
   // Generate Appointment Booking Details states
   const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
 
-  // For Testing: Patient Name
-  const [patientName, setPatientName] = useState<string | undefined>(undefined) 
-
-
   // Emergency relationship options
   const EMERGENCY_RELATIONSHIP_OPTIONS = Object.freeze([
     { value: "parent", label: "Parent" },
@@ -59,7 +69,7 @@ export default function ScheduleAppointmentPage() {
     { value: "spouse", label: "Spouse" },
     { value: "child", label: "Child" },
     { value: "grandparent", label: "Grandparent" },
-    { value: "aunt", label: "Aunt" },
+    { value: "aunt", label: "Aunt" }, 
     { value: "uncle", label: "Uncle" },
     { value: "cousin", label: "Cousin" },
     { value: "niece", label: "Niece" },
@@ -77,7 +87,6 @@ export default function ScheduleAppointmentPage() {
   const handleCreateNewPatient = () => {
     console.log("Creating new patient...")
     setOpenNewPatient(true)
-    if (openNewPatient) resetNewPatientForm()
   }
 
   // Compute age automatically when birthday changes
@@ -103,9 +112,12 @@ export default function ScheduleAppointmentPage() {
     setOpen(false)
 
     // Open Generate Details Modal
-    // For testing:
-    setPatientName("Juan Santos Dela Cruz")
     setOpenGenerateDetails(true)
+  }
+
+  // Handle patient selection from data table
+  const handlePatientSelect = (patient: Patient | null) => {
+    setSelectedPatient(patient)
   }
 
   // Reset all fields when modal closes
@@ -140,24 +152,28 @@ export default function ScheduleAppointmentPage() {
 
           {/* ---------------- Patient and Schedule Details ---------------- */}
           <div className="grid gap-4 px-4 lg:px-6 md:grid-cols-2">
-          {/* Search Patient */}
+            {/* Search Patient */}
             <Card>
-              <CardHeader>
-                <CardTitle>Patient Information</CardTitle>
-                <CardDescription>Search or create patient</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Search Patient</Label>
-                  <Input
-                    placeholder="Enter patient name or ID..."
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                  />
+              <CardHeader className="grid md:grid-cols-[2fr_1fr]">
+                <div> 
+                  <CardTitle>Patient Information</CardTitle>
+                  <CardDescription>Search or create patient</CardDescription>
                 </div>
-                <Button variant="outline" className="w-full" onClick={handleCreateNewPatient}>
+                {/* Temporary placement */}
+                <Button 
+                  variant="outline" 
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground max-w-50 duration-200 ease-linear" 
+                  onClick={handleCreateNewPatient}>
+                  <IconCirclePlusFilled />
                   Create New Patient
                 </Button>
+              </CardHeader>
+              <CardContent>
+                <PatientDataTable
+                  data={mockPatients}
+                  onPatientSelect={handlePatientSelect}
+                  selectedPatientId={selectedPatient?.id || null}
+                />
               </CardContent>
             </Card>
 
@@ -271,7 +287,9 @@ export default function ScheduleAppointmentPage() {
 
           <div className="px-4 lg:px-6">
             <div className="flex gap-2">
-              <Button onClick={handleBookClick}>Book Appointment</Button>
+              <Button onClick={handleBookClick} disabled={!selectedPatient}>
+                Book Appointment
+              </Button>
               <Button variant="outline">Cancel</Button>
             </div>
           </div>
@@ -296,12 +314,8 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="firstName"
                       name="firstName"
-                      defaultValue="Juan"
-                      // value={firstName}
-                      onChange={() => 
-                        // setFirstName(e.target.value)
-                        setFirstName("Juan")
-                      }
+                      value={selectedPatient?.firstName || ""}
+                      readOnly
                     />
                   </div>
                   <div className="grid gap-1">
@@ -309,12 +323,8 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="middleName"
                       name="middleName"
-                      defaultValue="Santos"
-                      // value={middleName}
-                      onChange={() => 
-                        // setMiddleName(e.target.value)
-                        setMiddleName("Santos")
-                      }
+                      value={selectedPatient?.middleName || ""}
+                      readOnly
                     />
                   </div>
                   <div className="grid gap-1">
@@ -322,12 +332,8 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="lastName"
                       name="lastName"
-                      defaultValue="Dela Cruz"
-                      // value={lastName}
-                      onChange={() => 
-                        // setLastName(e.target.value)
-                        setLastName("Dela Cruz")
-                      }
+                      value={selectedPatient?.lastName || ""}
+                      readOnly
                     />
                   </div>
                 </div>
@@ -338,12 +344,8 @@ export default function ScheduleAppointmentPage() {
                     <Input
                       id="contact"
                       name="contact"
-                      defaultValue="09171234567"
-                      // value={phone}
-                      onChange={() => 
-                        // setPhone(e.target.value)
-                        setPhone("09171234567")
-                      }
+                      value={selectedPatient?.mobileNumber || ""}
+                      readOnly
                       inputMode="tel"
                     />
                   </div>
@@ -433,7 +435,12 @@ export default function ScheduleAppointmentPage() {
               <div className="flex-1 overflow-y-auto pr-1 space-y-5">
                 <div className="grid gap-1">
                   <Label htmlFor="patientName" className="text-sm text-muted-foreground">Patient Name:</Label>
-                  <Input id="patientName" name="patientName" value={patientName} readOnly/>
+                  <Input 
+                    id="patientName" 
+                    name="patientName" 
+                    value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.middleName} ${selectedPatient.lastName}` : ""} 
+                    readOnly
+                  />
                 </div>
                 <div className="grid gap-1">
                   <Label htmlFor="appointmentID" className="text-sm text-muted-foreground">Appointment ID:</Label>
@@ -441,7 +448,6 @@ export default function ScheduleAppointmentPage() {
                 </div>
                 <div className="grid gap-1">
                   <Label htmlFor="appointmentDetails" className="text-sm text-muted-foreground">Appointment Details Summary:</Label>
-                  {/* <Input id="appointmentDetails" name="appointmentDetails" value={purpose} readOnly/> */}
                   <div className="overflow-x-auto">
                     <table className="table-auto border-collapse border border-muted text-sm mx-4">
                       <tbody>
@@ -479,10 +485,12 @@ export default function ScheduleAppointmentPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          {/* Note: Replace Patient with actual patient name. Var patientName is only for testing */}
 
           {/* Create New Patient Modal */}
-          <Dialog open={openNewPatient} onOpenChange={setOpenNewPatient}>
+          <Dialog open={openNewPatient} onOpenChange={(isOpen) => {
+            if (!isOpen) resetNewPatientForm()
+            setOpenNewPatient(isOpen)
+          }}>
             <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Create New Patient Profile</DialogTitle>
@@ -680,7 +688,7 @@ export default function ScheduleAppointmentPage() {
 
               {/* Footer */}
               <div className="mt-6 flex justify-end gap-2 border-t pt-3">
-                <Button variant="outline" onClick={() => setOpenNewPatient(false)}>
+                <Button variant="outline" onClick={() => resetNewPatientForm()}>
                   Cancel
                 </Button>
                 <Button

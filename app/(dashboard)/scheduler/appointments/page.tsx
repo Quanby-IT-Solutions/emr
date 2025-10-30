@@ -12,12 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { IconSearch } from "@tabler/icons-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
-// import { format } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// import { Calendar } from "@/components/ui/calendar"
-// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-// import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
@@ -43,34 +38,7 @@ export default function AppointmentsPage() {
   const [openCancel, setOpenCancel] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
-  const [date, setDate] = useState<Date | undefined>(new Date())
-
-  // Produce a Date from selectedAppointment.date + selectedAppointment.time
-  // const getSelectedDate = () => {
-  //   if (!selectedAppointment?.date) return undefined
-  //   // try to build an ISO datetime using stored date and time
-  //   try {
-  //     const datePart = selectedAppointment.date // expected yyyy-MM-dd
-  //     const timePart = selectedAppointment.time ? selectedAppointment.time : "00:00"
-  //     // if time is in "hh:mm AM/PM" convert to 24h by parsing via Date
-  //     const parsed = new Date(`${datePart} ${timePart}`)
-  //     if (isNaN(parsed.getTime())) return undefined
-  //     return parsed
-  //   } catch {
-  //     return undefined
-  //   }
-  // }
-
-  // const handleDateTimeChange = (date: Date | null) => {
-  //   if (!date) return
-  //   setSelectedAppointment(prev =>
-  //     prev ? {
-  //       ...prev,
-  //       date: format(date, "yyyy-MM-dd"),
-  //       time: format(date, "hh:mm a")
-  //     } : null
-  //   )
-  // }
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   // Edit Booking Appointment Modal Handler
   const handleEditBooking = (appointment: Appointment) => {
