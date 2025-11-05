@@ -104,8 +104,8 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconUser,
     },
     {
-      title: "Check-In",
-      url: "/registrar/check-in",
+      title: "Appointments",
+      url: "/registrar/appointments",
       icon: IconFileCheck,
     },
     {

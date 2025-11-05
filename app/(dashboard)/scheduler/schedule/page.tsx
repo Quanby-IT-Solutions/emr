@@ -25,6 +25,24 @@ const mockPatients: Patient[] = [
   { id: "P008", firstName: "Olivia", middleName: "Sophia", lastName: "Chen", mobileNumber: "09891234574", birthday: "1995-06-15", age: 30 },
 ];
 
+// export interface BookingForm {
+//   patientId: string;
+//   firstName: string;
+//   middleName: string;
+//   lastName: string;
+//   age: number;
+//   address: string;
+//   birthday: string;
+//   email: string;
+//   phone: string;
+//   telephone: string;
+//   department: string;
+//   provider: string;
+//   location: string;
+//   date: string;
+//   time: string;
+//   purpose: string;
+// }
 
 export default function ScheduleAppointmentPage() {
   // Date and time state
@@ -80,6 +98,8 @@ export default function ScheduleAppointmentPage() {
     { value: "other", label: "Other" },
   ])
 
+   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+
   // Confirm Booking Modal Handler
   const handleBookClick = () => {
     console.log("Booking appointment...")
@@ -123,6 +143,10 @@ export default function ScheduleAppointmentPage() {
     setSelectedPatient(patient)
   }
 
+  const handleTestClick = () => {
+    setIsTestModalOpen(true);
+  };
+
   // Reset all fields when modal closes
   const resetNewPatientForm = () => {
     setFirstName("")
@@ -134,7 +158,6 @@ export default function ScheduleAppointmentPage() {
     setPhone("")
     setTelephone("")
     setEmail("")
-    setPurpose("")
     setEmergencyName("")
     setEmergencyNumber("")
     setEmergencyRelation("")

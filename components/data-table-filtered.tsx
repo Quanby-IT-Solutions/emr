@@ -58,6 +58,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     },
   ]
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -132,7 +133,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
                   onClick={() => handleRowClick(row.original)}
                   className={`cursor-pointer transition-colors duration-200 ease-linear ${
                     selectedPatientId === row.original.id
-                      ? '!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground'
+                      ? 'bg-primary! text-primary-foreground! hover:bg-primary/90! hover:text-primary-foreground!'
                       : ''
                   }`}
                 >
