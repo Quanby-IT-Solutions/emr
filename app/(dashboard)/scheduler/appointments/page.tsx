@@ -12,7 +12,6 @@ import { IconSearch } from "@tabler/icons-react"
 import { useState } from "react"
 import { CancelBookingModal } from "./components/cancelBookingModal"
 import { EditBookingModal } from "./components/editBookingModal"
-import { set } from "zod"
 
 interface Appointment {
   id: number;
@@ -33,6 +32,10 @@ export default function AppointmentsPage() {
   
   const [openEdit, setOpenEdit] = useState(false);
   const [openCancel, setOpenCancel] = useState(false);
+  const [appointments, setAppointments] = useState(mockAppointments.map(apt => ({
+    ...apt,
+    date: new Date(apt.date)
+  })));
   const [selectedAppointment, setSelectedAppointment] = useState<{
     id: number;
     patient: string;
@@ -44,29 +47,39 @@ export default function AppointmentsPage() {
 
   // Edit Booking Appointment Modal Handler
   const handleEditBooking = (appointment: Appointment) => {
-    setSelectedAppointment({
-      ...appointment,
-      date: new Date(appointment.date)
-    });
+    setSelectedAppointment(appointment);
     setOpenEdit(true);
   }
-
-  const handleDateChange = (date: Date) => {
-    setSelectedAppointment(prev => 
-      prev ? { ...prev, date } : null
-    );
-  };
-
 
   const handleCancelBooking = (appointment: Appointment) => {
     setOpenCancel(true);
     setSelectedAppointment(appointment);
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSelectedAppointment(prev => 
-      prev ? { ...prev, [name]: value } : null
+    const handleConfirmCancel = (appointmentId: number) => {
+      setAppointments(prev => 
+        prev.map(apt => 
+          apt.id === appointmentId 
+            ? { ...apt, status: "cancelled" }
+            : apt
+        )
+      );
+    };
+
+  const handleConfirmUpdate = (updatedAppointment: {
+    id: number;
+    patient: string;
+    provider: string;
+    date: Date;
+    time: string;
+    status: string;
+  }) => {
+    setAppointments(prev =>
+      prev.map(apt =>
+        apt.id === updatedAppointment.id
+          ? updatedAppointment
+          : apt
+      )
     );
   };
 
@@ -107,14 +120,14 @@ export default function AppointmentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockAppointments.map((appointment) => (
+                    {appointments.map((appointment) => (
                       <TableRow key={appointment.id}>
                         <TableCell className="font-medium">{appointment.patient}</TableCell>
                         <TableCell>{appointment.provider}</TableCell>
-                        <TableCell>{appointment.date}</TableCell>
+                        <TableCell>{appointment.date.toLocaleTimeString()}</TableCell>
                         <TableCell>{appointment.time}</TableCell>
                         <TableCell>
-                          <Badge variant={appointment.status === "confirmed" ? "default" : "secondary"}>
+                          <Badge variant={appointment.status === "confirmed" ? "default" : appointment.status === "cancelled" ? "destructive" : "secondary"}>
                             {appointment.status}
                           </Badge>
                         </TableCell>
@@ -135,16 +148,21 @@ export default function AppointmentsPage() {
 
         {/* Edit Booking Modal */}
         <EditBookingModal 
+          key={selectedAppointment?.id}
           selectedAppointment={selectedAppointment} 
           open={openEdit} 
           onOpenChange={setOpenEdit} 
-          handleInputChange={handleInputChange}
-          onDateChange={handleDateChange}
+          onConfirmUpdate={handleConfirmUpdate}
         />
         
         {/* Cancel Booking Appointment Modal */}
-        <CancelBookingModal selectedAppointment={selectedAppointment} open={openCancel} onOpenChange={setOpenCancel} />
-    
+        <CancelBookingModal 
+          selectedAppointment={selectedAppointment} 
+          open={openCancel} 
+          onOpenChange={setOpenCancel} 
+          onConfirmCancel={handleConfirmCancel} 
+        />
+
       </DashboardLayout>
     </ProtectedRoute>
   )

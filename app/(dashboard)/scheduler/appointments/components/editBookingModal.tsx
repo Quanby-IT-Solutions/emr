@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 interface EditBookingModalProps {
     open: boolean;
@@ -20,12 +21,60 @@ interface EditBookingModalProps {
         time: string;
         status: string;
     } | null;
-    handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onDateChange?: (date: Date) => void;
+    onConfirmUpdate: (updatedAppointment: {
+        id: number;
+        patient: string;
+        provider: string;
+        date: Date;
+        time: string;
+        status: string;
+    }) => void;
 }
 
-export function EditBookingModal({ open, onOpenChange, selectedAppointment, handleInputChange, onDateChange }: EditBookingModalProps) {
-    console.log(selectedAppointment)
+export function EditBookingModal({ open, onOpenChange, selectedAppointment, onConfirmUpdate }: EditBookingModalProps) {
+    const [patient, setPatient] = useState<string>(selectedAppointment?.patient || "");
+    const [provider, setProvider] = useState<string>(selectedAppointment?.provider || "");
+    const [date, setDate] = useState<Date | undefined>(selectedAppointment?.date);
+    const [time, setTime] = useState<string>(selectedAppointment?.time || "");
+    const [status, setStatus] = useState<string>(selectedAppointment?.status || "");
+
+    const handleUpdateData = () => {
+        if (selectedAppointment && date) {
+            onConfirmUpdate({
+                id: selectedAppointment.id,
+                patient,
+                provider,
+                date,
+                time,
+                status
+            });
+        }  
+        onOpenChange(false);
+    }
+
+    // Convert 24h time to 12h AM/PM format
+    const convertTo12Hour = (time24: string) => {
+        const [hours, minutes] = time24.split(":");
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minutes} ${period}`;
+    };
+
+    // Convert 12h AM/PM format to 24h format
+    const convertTo24Hour = (time12: string) => {
+        const [time, period] = time12.split(" ");
+        const [hours, minutes] = time.split(":");
+        let hour24 = parseInt(hours);
+        
+        if (period === "PM" && hour24 !== 12) {
+            hour24 += 12;
+        } else if (period === "AM" && hour24 === 12) {
+            hour24 = 0;
+        }
+        
+        return `${hour24.toString().padStart(2, "0")}:${minutes}:00`;
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,8 +95,8 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, hand
                   <Input 
                     id="patient" 
                     name="patient" 
-                    value={selectedAppointment?.patient || ""}
-                    onChange={handleInputChange}
+                    value={patient}
+                    onChange={(e) => setPatient(e.target.value)}
                   />
                 </div>
                 {/* Contact Info */}
@@ -79,8 +128,8 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, hand
                   <Input 
                     id="provider" 
                     name="provider" 
-                    value={selectedAppointment?.provider || ""}
-                    onChange={handleInputChange}
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value)}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -102,17 +151,17 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, hand
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between">
-                          {selectedAppointment?.date ? selectedAppointment.date.toDateString() : "Select date"}
+                          {date ? date.toDateString() : "Select date"}
                           <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger> 
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={selectedAppointment?.date}
+                          selected={date}
                           onSelect={(newDate) => {
-                            if (newDate && onDateChange) {
-                              onDateChange(newDate);
+                            if (newDate) {
+                              setDate(newDate);
                             }
                           }}
                           className="rounded-md border"
@@ -127,31 +176,30 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, hand
                       type="time"
                       id="time-picker"
                       step="1"
-                      defaultValue={selectedAppointment?.time ?
-                        // Convert "hh:mm AM/PM" to "HH:MM:SS" 24h format
-                        (() => {
-                          const [time, period] = selectedAppointment.time.split(" ");
-                          const [hours, minutes] = time.split(":");
-                          const hours24 = period === "AM" ? Number(hours) : Number(hours) + 12;
-                          return `${hours24.toString().padStart(2, "0")}:${minutes}:00`;
-                        })() : ""}
+                      value={time ? convertTo24Hour(time) : ""}
+                      onChange={(e) => {
+                        const time24 = e.target.value;
+                        const [hours, minutes] = time24.split(":");
+                        setTime(convertTo12Hour(`${hours}:${minutes}`));
+                      }}
                       className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                     />
                   </div>
                   
                   {/* Appointment Status*/}
                   <div className="grid gap-1 ">
-                    <Label htmlFor="datetime" className="text-muted-foreground">Booking Status</Label>
+                    <Label htmlFor="status" className="text-muted-foreground">Booking Status</Label>
                     <Select
                       name="status"
-                      defaultValue={selectedAppointment?.status || "pending"}>
+                      value={status}
+                      onValueChange={setStatus}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="confirmed">Confirmed</SelectItem>
                           <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="canceled">Canceled</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
                   </div>
@@ -161,9 +209,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, hand
 
             {/* Buttons */}
             <div className="mt-6 flex gap-2">
-              <Button onClick={() => { 
-                onOpenChange(false); 
-              }}>
+              <Button onClick={handleUpdateData}>
                 Confirm
               </Button>
               <Button 

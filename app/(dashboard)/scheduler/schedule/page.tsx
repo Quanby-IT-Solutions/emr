@@ -143,10 +143,6 @@ export default function ScheduleAppointmentPage() {
     setSelectedPatient(patient)
   }
 
-  const handleTestClick = () => {
-    setIsTestModalOpen(true);
-  };
-
   // Reset all fields when modal closes
   const resetNewPatientForm = () => {
     setFirstName("")

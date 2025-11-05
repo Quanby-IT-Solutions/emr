@@ -16,9 +16,16 @@ interface CancelBookingModalProps {
     selectedAppointment: Appointment | null
     open: boolean
     onOpenChange: (open: boolean) => void
+    onConfirmCancel: (appointmentID: number) => void
 }
 
-export function CancelBookingModal({ selectedAppointment, open, onOpenChange }: CancelBookingModalProps) {
+export function CancelBookingModal({ selectedAppointment, open, onOpenChange, onConfirmCancel }: CancelBookingModalProps) {
+    
+    const handleCancelBooking = () => {
+        if(selectedAppointment) onConfirmCancel(selectedAppointment.id);
+        onOpenChange(false);
+    }
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
@@ -31,7 +38,7 @@ export function CancelBookingModal({ selectedAppointment, open, onOpenChange }: 
                 <DialogFooter>
                     <div className="mt-2 flex gap-2">
                     <Button variant="destructive" onClick={() => {
-                        onOpenChange(false);
+                        handleCancelBooking();
                     }}>              
                         Confirm
                     </Button>
