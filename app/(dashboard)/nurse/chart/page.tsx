@@ -7,9 +7,9 @@ import { UserRole } from "@/lib/auth/roles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PatientChartTabs } from "@/components/shared/chart/patient-chart-tabs";
-import { IconUser, IconAlertCircle } from '@tabler/icons-react';
+import { IconUser, IconAlertCircle, IconHeart } from '@tabler/icons-react';
 
-// Mock patient data (same as before)
+// Same mock data as clinician
 const mockPatientData: Record<string, any> = {
   "1": {
     patient: {
@@ -67,14 +67,6 @@ const mockPatientData: Record<string, any> = {
           icd10Code: "E11.9",
           status: "ACTIVE",
           onsetDate: "2020-01-01"
-        },
-        {
-          id: "h2",
-          type: "MEDICAL_HISTORY",
-          entry: "Hypertension",
-          icd10Code: "I10",
-          status: "ACTIVE",
-          onsetDate: "2018-06-15"
         }
       ]
     },
@@ -85,17 +77,6 @@ const mockPatientData: Record<string, any> = {
         status: "VERIFIED",
         priority: "ROUTINE",
         createdAt: "2025-11-02T09:00:00",
-        placer: {
-          firstName: "Sarah",
-          lastName: "Johnson"
-        }
-      },
-      {
-        id: "o2",
-        orderType: "LAB",
-        status: "IN_PROGRESS",
-        priority: "STAT",
-        createdAt: "2025-11-02T07:30:00",
         placer: {
           firstName: "Sarah",
           lastName: "Johnson"
@@ -197,7 +178,7 @@ const mockPatientData: Record<string, any> = {
   }
 };
 
-export default function ClinicianChartPage() {
+export default function NurseChartPage() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
   
@@ -224,8 +205,8 @@ export default function ClinicianChartPage() {
 
   if (!patientId) {
     return (
-      <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
-        <DashboardLayout role={UserRole.CLINICIAN}>
+      <ProtectedRoute requiredRole={UserRole.NURSE}>
+        <DashboardLayout role={UserRole.NURSE}>
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="px-4 lg:px-6">
               <Card>
@@ -244,8 +225,8 @@ export default function ClinicianChartPage() {
 
   if (!data) {
     return (
-      <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
-        <DashboardLayout role={UserRole.CLINICIAN}>
+      <ProtectedRoute requiredRole={UserRole.NURSE}>
+        <DashboardLayout role={UserRole.NURSE}>
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
             <div className="px-4 lg:px-6">
               <Card className="border-red-500">
@@ -264,16 +245,16 @@ export default function ClinicianChartPage() {
   }
 
   // Mock staff ID - in production, get from auth context
-  const mockStaffId = "staff_doctor_1";
+  const mockStaffId = "staff_nurse_1";
 
   return (
-    <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
-      <DashboardLayout role={UserRole.CLINICIAN}>
+    <ProtectedRoute requiredRole={UserRole.NURSE}>
+      <DashboardLayout role={UserRole.NURSE}>
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
-            <h1 className="text-2xl font-bold">Patient Chart</h1>
+            <h1 className="text-2xl font-bold">Patient Chart - Nursing View</h1>
             <p className="text-muted-foreground">
-              Comprehensive patient hospital records
+              Patient care information and nursing assessments
             </p>
           </div>
 
@@ -297,7 +278,8 @@ export default function ClinicianChartPage() {
                     </div>
                   </div>
                   <Badge variant="outline">
-                    {data.patient.encounters.filter((e: any) => e.status === 'ACTIVE').length} Active Encounters
+                    <IconHeart className="h-4 w-4 mr-1" />
+                    Nursing Care
                   </Badge>
                 </div>
               </CardHeader>
@@ -312,8 +294,12 @@ export default function ClinicianChartPage() {
                     <p className="font-medium">{data.patient.contactPhone || 'N/A'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Email</p>
-                    <p className="font-medium">{data.patient.email || 'N/A'}</p>
+                    <p className="text-muted-foreground">Current Location</p>
+                    <p className="font-medium">
+                      {data.patient.encounters[0]?.currentLocation 
+                        ? `${data.patient.encounters[0].currentLocation.unit} - Room ${data.patient.encounters[0].currentLocation.roomNumber}`
+                        : 'N/A'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -325,7 +311,7 @@ export default function ClinicianChartPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-red-600">
                     <IconAlertCircle className="h-5 w-5" />
-                    Active Allergies - {data.patient.allergies.length} Alert(s)
+                    ALLERGY ALERT - {data.patient.allergies.length} Active Allergy(ies)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -333,10 +319,10 @@ export default function ClinicianChartPage() {
                     {data.patient.allergies.map((allergy: any) => (
                       <div key={allergy.id} className="flex items-center justify-between p-3 bg-red-50 rounded border border-red-200">
                         <div>
-                          <p className="font-semibold text-red-900">{allergy.substance}</p>
+                          <p className="font-semibold text-red-900 text-lg">{allergy.substance}</p>
                           <p className="text-sm text-red-700">{allergy.reaction}</p>
                         </div>
-                        <Badge variant="destructive">
+                        <Badge variant="destructive" className="text-base px-3 py-1">
                           {allergy.severity}
                         </Badge>
                       </div>
@@ -349,7 +335,7 @@ export default function ClinicianChartPage() {
             {/* Tabs Component */}
             <PatientChartTabs 
               patientData={data} 
-              role={UserRole.CLINICIAN}
+              role={UserRole.NURSE}
               staffId={mockStaffId}
             />
           </div>
