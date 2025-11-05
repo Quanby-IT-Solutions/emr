@@ -5,6 +5,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   useReactTable,
   ColumnDef,
 } from "@tanstack/react-table"
@@ -17,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export type Patient = {
   id: string
@@ -61,6 +63,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     state: {
       globalFilter,
     },
@@ -76,6 +79,11 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
         patient.lastName.toLowerCase().includes(searchValue)
       )
     },
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
   })
 
   const handleRowClick = (patient: Patient) => {
@@ -89,13 +97,15 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
 
   return (
     <div className="space-y-4">
-      <Input
-        placeholder="Search by name or ID..."
-        value={globalFilter ?? ""}
-        onChange={(event) => setGlobalFilter(event.target.value)}
-        className="max-w-sm"
-      />
       <div className="rounded-md border">
+        <div className="p-4 border-b">
+          <Input
+            placeholder="Search by name or ID..."
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className="w-full"
+          />
+        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -148,6 +158,38 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
             )}
           </TableBody>
         </Table>
+        <div className="flex items-center justify-between px-4 py-3 border-t">
+          <div className="text-sm text-muted-foreground">
+            Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+            {Math.min(
+              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              table.getFilteredRowModel().rows.length
+            )}{" "}
+            of {table.getFilteredRowModel().rows.length} results
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <div className="text-sm font-medium">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
