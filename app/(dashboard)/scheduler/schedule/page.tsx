@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { IconCirclePlusFilled } from "@tabler/icons-react"
 import { PatientDataTable, Patient } from "@/components/data-table-filtered"
+
+import { Departments } from "../schedule/lib/dummy-providers"
 
 const mockPatients: Patient[] = [
   { id: "P001", firstName: "John", middleName: "Alexander", lastName: "Smith", mobileNumber: "09171234567", birthday: "1985-03-12", age: 40 },
@@ -24,25 +26,6 @@ const mockPatients: Patient[] = [
   { id: "P007", firstName: "Daniel", middleName: "Robert", lastName: "Kim", mobileNumber: "09781234573", birthday: "1988-12-05", age: 37 },
   { id: "P008", firstName: "Olivia", middleName: "Sophia", lastName: "Chen", mobileNumber: "09891234574", birthday: "1995-06-15", age: 30 },
 ];
-
-// export interface BookingForm {
-//   patientId: string;
-//   firstName: string;
-//   middleName: string;
-//   lastName: string;
-//   age: number;
-//   address: string;
-//   birthday: string;
-//   email: string;
-//   phone: string;
-//   telephone: string;
-//   department: string;
-//   provider: string;
-//   location: string;
-//   date: string;
-//   time: string;
-//   purpose: string;
-// }
 
 export default function ScheduleAppointmentPage() {
   // Date and time state
@@ -98,8 +81,6 @@ export default function ScheduleAppointmentPage() {
     { value: "other", label: "Other" },
   ])
 
-   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-
   // Confirm Booking Modal Handler
   const handleBookClick = () => {
     console.log("Booking appointment...")
@@ -141,6 +122,106 @@ export default function ScheduleAppointmentPage() {
   // Handle patient selection from data table
   const handlePatientSelect = (patient: Patient | null) => {
     setSelectedPatient(patient)
+  }
+
+  const availableDepartments = useMemo(() => 
+    Departments.map((d) => d.department), []
+  )
+
+  // Get all unique locations
+  const allLocations = useMemo(() => 
+    Array.from(new Set(Departments.map(d => d.providers).flat().map(p => p.officeLocation))),
+    []
+  )
+
+  // Filter providers based on selected department
+  const availableProviders = useMemo(() => {
+    if (!selectedDepartment) {
+      // If no department selected, return all providers
+      return Departments.flatMap(d => d.providers)
+    }
+    
+    // Filter providers by selected department
+    const dept = Departments.find(d => d.department === selectedDepartment)
+    return dept?.providers || []
+  }, [selectedDepartment])
+
+  // Filter locations based on selected department and/or provider
+  const availableLocations = useMemo(() => {
+    if (selectedProvider) {
+      // If provider is selected, show only their location
+      const provider = Departments.flatMap(d => d.providers)
+        .find(p => p.name === selectedProvider)
+      return provider ? [provider.officeLocation] : allLocations
+    }
+    
+    if (selectedDepartment) {
+      // If department is selected, show that department's clinic location
+      const dept = Departments.find(d => d.department === selectedDepartment)
+      return dept ? [dept.clinicLocation] : allLocations
+    }
+    
+    return allLocations
+  }, [selectedDepartment, selectedProvider, allLocations])
+
+  // Handle department selection
+  const handleDepartmentChange = (dept: string) => {
+    setSelectedDepartment(dept)
+    
+    // Auto-select location based on department
+    const deptData = Departments.find(d => d.department === dept)
+    // if (deptData) {
+    //   setSelectedLocation(deptData.clinicLocation)
+    // }
+    
+    // Clear provider if it's not in the new department
+    if (selectedProvider) {
+      const providerStillValid = deptData?.providers.some(p => p.name === selectedProvider)
+      if (!providerStillValid) {
+        setSelectedProvider("")
+      }
+    }
+  }
+
+  // Handle provider selection
+  const handleProviderChange = (providerName: string) => {
+    setSelectedProvider(providerName)
+    
+    // Find the provider across all departments
+    for (const dept of Departments) {
+      const provider = dept.providers.find(p => p.name === providerName)
+      if (provider) {
+        // Auto-select department
+        setSelectedDepartment(provider.department)
+        // Auto-select location (provider's office location)
+        setSelectedLocation(provider.officeLocation)
+        break
+      }
+    }
+  }
+
+  // Handle location selection
+  const handleLocationChange = (loc: string) => {
+    setSelectedLocation(loc)
+    
+    // Find if this location belongs to a specific department's clinic
+    // const deptWithLocation = Departments.find(d => d.clinicLocation === loc)
+    
+    // if (deptWithLocation && !selectedDepartment) {
+    //   // If no department selected yet, auto-select the department
+    //   setSelectedDepartment(deptWithLocation.department)
+    // }
+    
+    // Check if a provider has this as their office location
+    if (!selectedProvider) {
+      const providerWithLocation = Departments.flatMap(d => d.providers)
+        .find(p => p.officeLocation === loc)
+      
+      if (providerWithLocation) {
+        setSelectedProvider(providerWithLocation.name)
+        setSelectedDepartment(providerWithLocation.department)
+      }
+    }
   }
 
   // Reset all fields when modal closes
@@ -247,40 +328,57 @@ export default function ScheduleAppointmentPage() {
                 <div className="grid gap-4">
                   <div className="space-y-1">
                     <Label>Specialty/Department</Label>
-                    <Select onValueChange={setSelectedDepartment}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select specialty" />
+                    <Select value={selectedDepartment} onValueChange={handleDepartmentChange}>
+                      <SelectTrigger className="w-sm">
+                        <SelectValue placeholder="Select department" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Cardiology">Cardiology</SelectItem>
-                        <SelectItem value="Neurology">Neurology</SelectItem>
-                        <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                        {availableDepartments.map((department) => (
+                          <SelectItem
+                            key={department}
+                            value={department}
+                          >
+                            {department}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-1">
                     <Label>Provider</Label>
-                    <Select onValueChange={setSelectedProvider}>
-                      <SelectTrigger>
+                    <Select value={selectedProvider} onValueChange={handleProviderChange}>
+                      <SelectTrigger className="w-sm">
                         <SelectValue placeholder="Select provider" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Dr. John Smith">Dr. John Smith</SelectItem>
-                        <SelectItem value="Dr. Sarah Johnson">Dr. Sarah Johnson</SelectItem>
+                        {availableProviders.map((provider) => (
+                          <SelectItem
+                            key={provider.name}
+                            value={provider.name}
+                          >
+                            {provider.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-1">
                     <Label>Location</Label>
-                    <Select onValueChange={setSelectedLocation}>
-                      <SelectTrigger>
+                    <Select value={selectedLocation} onValueChange={handleLocationChange}>
+                      <SelectTrigger className="w-sm">
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Main Hospital">Main Hospital</SelectItem>
-                        <SelectItem value="North Clinic">North Clinic</SelectItem>
+                        {availableLocations.map((location) => (
+                          <SelectItem
+                            key={location}
+                            value={location}
+                          >
+                            {location}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
