@@ -1,5 +1,14 @@
 "use client"
 
+export type AppointmentStatus = 
+  | "SCHEDULED" 
+  | "ARRIVED" 
+  | "CHECKED_IN" 
+  | "CANCELLED" 
+  | "NO_SHOW" 
+  | "IN_TRIAGE"
+  | "REFERRED"
+
 export interface Appointment {
   id: string
   patientId: string
@@ -10,178 +19,80 @@ export interface Appointment {
   appointmentTime: string
   department: string
   physician: string
-  visitType: "NEW" | "FOLLOW_UP"
-  status: "SCHEDULED" | "ARRIVED" | "CHECKED_IN" | "CANCELLED"
   reasonForVisit: string
+  status: AppointmentStatus
+  visitType: "NEW" | "FOLLOWUP"
 }
 
 export const dummyAppointments: Appointment[] = [
   {
-    id: "APT-2024-0001",
-    patientId: "PAT-2024-0001",
-    patientName: "Dela Cruz, Juan Santos",
+    id: "APT-001",
+    patientId: "PAT-001",
+    patientName: "Dela Cruz, Juan Pablo",
     age: 45,
     gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "09:00 AM",
-    department: "GENERAL",
-    physician: "Maria Santos",
-    visitType: "FOLLOW_UP",
+    appointmentDate: new Date().toISOString(),
+    appointmentTime: "09:00",
+    department: "CARDIOLOGY",
+    physician: "Santos",
+    reasonForVisit: "Chest pain and shortness of breath",
     status: "SCHEDULED",
-    reasonForVisit: "Hypertension follow-up check-up"
+    visitType: "NEW"
   },
   {
-    id: "APT-2024-0002",
-    patientId: "PAT-2024-0002",
-    patientName: "Reyes, Maria Garcia",
+    id: "APT-002",
+    patientId: "PAT-002",
+    patientName: "Reyes, Maria Clara",
     age: 32,
     gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "09:30 AM",
-    department: "OB-GYN",
-    physician: "Ana Rodriguez",
-    visitType: "NEW",
+    appointmentDate: new Date().toISOString(),
+    appointmentTime: "09:30",
+    department: "OBSTETRICS",
+    physician: "Garcia",
+    reasonForVisit: "Prenatal checkup",
     status: "ARRIVED",
-    reasonForVisit: "Prenatal check-up"
+    visitType: "FOLLOWUP"
   },
   {
-    id: "APT-2024-0003",
-    patientId: "PAT-2024-0003",
-    patientName: "Santos, Pedro Martinez",
-    age: 58,
+    id: "APT-003",
+    patientId: "PAT-003",
+    patientName: "Gonzales, Pedro Luis",
+    age: 28,
     gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "10:00 AM",
-    department: "CARDIOLOGY",
-    physician: "Roberto Cruz",
-    visitType: "FOLLOW_UP",
-    status: "SCHEDULED",
-    reasonForVisit: "Chest pain, shortness of breath"
-  },
-  {
-    id: "APT-2024-0004",
-    patientId: "PAT-2024-0004",
-    patientName: "Gonzales, Ana Cruz",
-    age: 27,
-    gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "10:30 AM",
-    department: "DERMATOLOGY",
-    physician: "Sofia Mendoza",
-    visitType: "NEW",
+    appointmentDate: new Date().toISOString(),
+    appointmentTime: "10:00",
+    department: "ORTHOPEDICS",
+    physician: "Ramos",
+    reasonForVisit: "Knee injury from sports",
     status: "CHECKED_IN",
-    reasonForVisit: "Skin rash and allergies"
+    visitType: "NEW"
   },
   {
-    id: "APT-2024-0005",
-    patientId: "PAT-2024-0005",
-    patientName: "Mendoza, Jose Ramos",
-    age: 41,
-    gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "11:00 AM",
-    department: "ORTHOPEDICS",
-    physician: "Carlos Bautista",
-    visitType: "FOLLOW_UP",
-    status: "SCHEDULED",
-    reasonForVisit: "Knee pain and swelling"
-  },
-  {
-    id: "APT-2024-0006",
-    patientId: "PAT-2024-0006",
-    patientName: "Aquino, Luz Torres",
-    age: 65,
+    id: "APT-004",
+    patientId: "PAT-004",
+    patientName: "Santos, Ana Marie",
+    age: 55,
     gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "11:30 AM",
+    appointmentDate: new Date().toISOString(),
+    appointmentTime: "10:30",
     department: "GENERAL",
-    physician: "Maria Santos",
-    visitType: "FOLLOW_UP",
-    status: "CANCELLED",
-    reasonForVisit: "Diabetes management"
-  },
-  {
-    id: "APT-2024-0007",
-    patientId: "PAT-2024-0007",
-    patientName: "Rivera, Carlos Bautista",
-    age: 29,
-    gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "02:00 PM",
-    department: "ENT",
-    physician: "Elena Diaz",
-    visitType: "NEW",
+    physician: "Cruz",
+    reasonForVisit: "Annual physical examination",
     status: "SCHEDULED",
-    reasonForVisit: "Ear infection"
+    visitType: "FOLLOWUP"
   },
   {
-    id: "APT-2024-0008",
-    patientId: "PAT-2024-0008",
-    patientName: "Fernandez, Rosa Flores",
-    age: 52,
-    gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "02:30 PM",
+    id: "APT-005",
+    patientId: "PAT-005",
+    patientName: "Bautista, Carlos Miguel",
+    age: 8,
+    gender: "MALE",
+    appointmentDate: new Date().toISOString(),
+    appointmentTime: "11:00",
     department: "PEDIATRICS",
-    physician: "Carmen Salazar",
-    visitType: "NEW",
+    physician: "Mendoza",
+    reasonForVisit: "Fever and cough for 3 days",
     status: "ARRIVED",
-    reasonForVisit: "Child vaccination"
-  },
-  {
-    id: "APT-2024-0009",
-    patientId: "PAT-2024-0009",
-    patientName: "Bautista, Ramon Cruz",
-    age: 38,
-    gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "03:00 PM",
-    department: "GENERAL",
-    physician: "Maria Santos",
-    visitType: "NEW",
-    status: "SCHEDULED",
-    reasonForVisit: "Annual physical examination"
-  },
-  {
-    id: "APT-2024-0010",
-    patientId: "PAT-2024-0010",
-    patientName: "Cruz, Elena Martinez",
-    age: 44,
-    gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "03:30 PM",
-    department: "CARDIOLOGY",
-    physician: "Roberto Cruz",
-    visitType: "FOLLOW_UP",
-    status: "SCHEDULED",
-    reasonForVisit: "High blood pressure monitoring"
-  },
-  {
-    id: "APT-2024-0011",
-    patientId: "PAT-2024-0011",
-    patientName: "Torres, Miguel Santos",
-    age: 50,
-    gender: "MALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "04:00 PM",
-    department: "ORTHOPEDICS",
-    physician: "Carlos Bautista",
-    visitType: "NEW",
-    status: "ARRIVED",
-    reasonForVisit: "Lower back pain"
-  },
-  {
-    id: "APT-2024-0012",
-    patientId: "PAT-2024-0012",
-    patientName: "Ramos, Carmen Dela Cruz",
-    age: 36,
-    gender: "FEMALE",
-    appointmentDate: "2024-11-02",
-    appointmentTime: "04:30 PM",
-    department: "OB-GYN",
-    physician: "Ana Rodriguez",
-    visitType: "FOLLOW_UP",
-    status: "SCHEDULED",
-    reasonForVisit: "Pregnancy ultrasound"
+    visitType: "NEW"
   }
 ]
