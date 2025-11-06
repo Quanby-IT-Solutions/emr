@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -78,6 +78,27 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
       },
     },
   })
+
+  // When a new patient is selected, navigate to the page containing that patient
+  useEffect(() => {
+    if (!selectedPatientId) return
+
+    const timer = setTimeout(() => {
+      const rows = table.getFilteredRowModel().rows
+      const selectedRowIndex = rows.findIndex(
+        (row) => row.original.id === selectedPatientId
+      )
+
+      if (selectedRowIndex !== -1) {
+        const pageSize = table.getState().pagination.pageSize
+        const targetPage = Math.floor(selectedRowIndex / pageSize)
+        table.setPageIndex(targetPage)
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [selectedPatientId, table])
+
 
   const handleRowClick = (patient: Patient) => {
     if (selectedPatientId === patient.id) {

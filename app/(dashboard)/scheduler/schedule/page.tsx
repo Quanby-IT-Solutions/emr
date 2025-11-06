@@ -7,69 +7,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
-import {  ChevronsUpDown, Check } from "lucide-react"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { useState, useMemo } from "react"
-import { cn } from "@/lib/utils"
+import { useState, useMemo, useCallback } from "react"
 import { PatientDataTable } from "@/app/(dashboard)/scheduler/schedule/components/data-table-filtered"
 import { Patient, mockPatients } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
-import { Departments } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
+import { Departments, mockWeeklyAvailability } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
 import { ConfirmBookingModal } from "./components/modals/confirm-booking"
 import { CreateNewPatientModal } from "./components/modals/create-new-patient"
 import { GenerateBookingModal } from "./components/modals/generate-booking"
-
-interface ComboboxOption {
-  value: string
-  label: string
-}
-
-interface ComboboxProps {
-  options: ComboboxOption[]
-  value?: string
-  onChange: (value: string) => void
-  placeholder?: string
-  emptyMessage?: string
-}
-
-function Combobox({ options, value, onChange, placeholder = "Select...", emptyMessage = "No results found." }: ComboboxProps) {
-  const [open, setOpen] = useState(false)
-  const selectedLabel = options.find((option) => option.value === value)?.label || placeholder
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
-          {selectedLabel}
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0 m-1">
-        <Command>
-          <CommandInput placeholder={`Search...`} />
-          <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup>
-            {options.map((option) => (
-              <CommandItem key={option.value} value={option.value} onSelect={(currentValue) => { onChange(currentValue === value ? "" : currentValue); setOpen(false) }}>
-                <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
-                {option.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
+import { Combobox } from "./components/combo-box"
 
 export default function ScheduleAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
-  const timeSlots = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "2:00 PM", "2:30 PM"]
 
   const [open, setOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>(undefined)
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined)
-  const [selectedLocation, setSelectedLocation] = useState<string | undefined>(undefined)
+  const [selectedDeptLocation, setSelectedDeptLocation] = useState<string | undefined>(undefined)
+  const [selectedOfficeLocation, setSelectedOfficeLocation] = useState<string | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
 
   const [openNewPatient, setOpenNewPatient] = useState(false)
@@ -78,58 +32,219 @@ export default function ScheduleAppointmentPage() {
   const [telephone, setTelephone] = useState<string | undefined>("")
   const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
 
-  const handleBookClick = () => { console.log("Booking appointment..."); setOpen(true) }
-  const handleCreateNewPatient = () => { console.log("Creating new patient..."); setOpenNewPatient(true) }
-  const handleConfirmBooking = () => { console.log("Confirming booking..."); setOpen(false); setOpenGenerateDetails(true) }
-  const handlePatientSelect = (patient: Patient | null) => { setSelectedPatient(patient) }
+  // Patient list state
+  const [patients, setPatients] = useState<Patient[]>(mockPatients)
 
-  const availableDepartments = useMemo(() => Departments.map((d) => d.department), [])
-  const allLocations = useMemo(() => Array.from(new Set(Departments.map((d) => d.providers).flat().map((p) => p.officeLocation))), [])
+  // Handlers
+  const handleBookClick = () => { 
+    console.log("Booking appointment...") 
+    setOpen(true) 
+  }
   
+  const handleCreateNewPatient = () => { 
+    console.log("Creating new patient...") 
+    setOpenNewPatient(true) 
+  }
+  
+  const handleConfirmBooking = () => { 
+    console.log("Confirming booking...") 
+    setOpen(false) 
+    setOpenGenerateDetails(true) 
+  }
+  
+  const handlePatientSelect = (patient: Patient | null) => { 
+    setSelectedPatient(patient) 
+  }
+
+  // Handle creating new patient
+  const handleCreatePatient = useCallback((patientData: {
+    firstName: string
+    middleName?: string
+    lastName: string
+    address?: string
+    birthday?: string
+    age?: number
+    phone?: string
+    telephone?: string
+    email?: string
+    emergencyName?: string
+    emergencyNumber?: string
+    emergencyRelation?: string
+    emergencyRelationOther?: string
+  }) => {
+    // Generate new patient ID
+    const newId = `P${String(patients.length + 1).padStart(3, '0')}`
+    
+    // Create new patient object matching the Patient interface
+    const newPatient: Patient = {
+      id: newId,
+      firstName: patientData.firstName,
+      middleName: patientData.middleName || "",
+      lastName: patientData.lastName,
+      mobileNumber: patientData.phone || "",
+      birthday: patientData.birthday || "",
+      age: patientData.age || 0,
+    }
+    
+    console.log("Creating new patient:", newPatient)
+    
+    // Add to patient list
+    setPatients(prev => [...prev, newPatient])
+    
+    // Automatically select the new patient
+    setSelectedPatient(newPatient)
+    setOpenNewPatient(false)
+  }, [patients.length])
+
+  // Check if booking is valid
+  const isBookingValid = useMemo(() => {
+    return !!(selectedPatient && selectedProvider && date && selectedTime)
+  }, [selectedPatient, selectedProvider, date, selectedTime])
+
+  // Appointment Details - Available Options
+  const allOfficeLocations = useMemo(() => 
+    Array.from(new Set(Departments.flatMap((d) => d.providers).map((p) => p.officeLocation))), 
+    []
+  )
+  
+  const allDeptLocations = useMemo(() => 
+    Departments.map((d) => d.clinicLocation), 
+    []
+  )
+  
+  const availableDepartments = useMemo(() => 
+    Departments.map((d) => d.department), 
+    []
+  )
+
   const availableProviders = useMemo(() => {
     if (!selectedDepartment) return Departments.flatMap((d) => d.providers)
     const dept = Departments.find((d) => d.department === selectedDepartment)
     return dept?.providers || []
   }, [selectedDepartment])
 
-  const availableLocations = useMemo(() => {
+  const availableDeptLocations = useMemo(() => {
+    if (selectedDepartment) {
+      const dept = Departments.find((d) => d.department === selectedDepartment)
+      return dept ? [dept.clinicLocation] : allDeptLocations
+    }
+    return allDeptLocations
+  }, [selectedDepartment, allDeptLocations])
+
+  const availableOfficeLocations = useMemo(() => {
     if (selectedProvider) {
       const provider = Departments.flatMap((d) => d.providers).find((p) => p.name === selectedProvider)
-      return provider ? [provider.officeLocation] : allLocations
+      return provider ? [provider.officeLocation] : allOfficeLocations
     }
     if (selectedDepartment) {
       const dept = Departments.find((d) => d.department === selectedDepartment)
-      return dept ? [dept.clinicLocation] : allLocations
+      return dept ? dept.providers.map((p) => p.officeLocation) : allOfficeLocations
     }
-    return allLocations
-  }, [selectedDepartment, selectedProvider, allLocations])
+    return allOfficeLocations
+  }, [selectedDepartment, selectedProvider, allOfficeLocations])
 
+  // Get available time slots based on selected provider and date
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedProvider || !date) return []
+    
+    // Get day of week from selected date
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    const dayOfWeek = dayNames[date.getDay()]
+    
+    // Get time slots for this provider on this day
+    const providerSchedule = mockWeeklyAvailability[selectedProvider]
+    if (!providerSchedule) return []
+    
+    return providerSchedule[dayOfWeek] || []
+  }, [selectedProvider, date])
+
+  // Appointment Detail Handlers
   const handleDepartmentChange = (dept: string) => {
+    if (!dept) {
+      setSelectedDepartment(undefined)
+      setSelectedDeptLocation(undefined)
+      return
+    }
+    
     setSelectedDepartment(dept)
+    
     const deptData = Departments.find((d) => d.department === dept)
+    setSelectedDeptLocation(deptData?.clinicLocation)
+
+    // If current provider doesn't belong to this department, clear it
     if (selectedProvider) {
       const providerStillValid = deptData?.providers.some((p) => p.name === selectedProvider)
-      if (!providerStillValid) setSelectedProvider("")
+      if (!providerStillValid) {
+        setSelectedProvider(undefined)
+        setSelectedOfficeLocation(undefined)
+      }
     }
   }
+
+  const handleDeptLocationChange = (loc: string) => {
+    if (!loc) {
+      setSelectedDeptLocation(undefined)
+      return
+    }
+    
+    setSelectedDeptLocation(loc)
+    
+    // Find the department with this clinic location and fill related fields
+    const deptWithLocation = Departments.find((d) => d.clinicLocation === loc)
+    
+    if (deptWithLocation) {
+      setSelectedDepartment(deptWithLocation.department)
+      
+      // Clear provider and office location if they don't belong to this department
+      if (selectedProvider) {
+        const providerStillValid = deptWithLocation.providers.some((p) => p.name === selectedProvider)
+        if (!providerStillValid) {
+          setSelectedProvider(undefined)
+          setSelectedOfficeLocation(undefined)
+        }
+      }
+    }
+  }
+
   const handleProviderChange = (providerName: string) => {
+    if (!providerName) {
+      setSelectedProvider(undefined)
+      setSelectedOfficeLocation(undefined)
+      return
+    }
+    
     setSelectedProvider(providerName)
+    
+    // Find the provider and fill in ALL related fields
     for (const dept of Departments) {
       const provider = dept.providers.find((p) => p.name === providerName)
       if (provider) {
         setSelectedDepartment(provider.department)
-        setSelectedLocation(provider.officeLocation)
+        setSelectedDeptLocation(dept.clinicLocation)
+        setSelectedOfficeLocation(provider.officeLocation)
         break
       }
     }
   }
-  const handleLocationChange = (loc: string) => {
-    setSelectedLocation(loc)
-    if (!selectedProvider) {
-      const providerWithLocation = Departments.flatMap((d) => d.providers).find((p) => p.officeLocation === loc)
-      if (providerWithLocation) {
-        setSelectedProvider(providerWithLocation.name)
-        setSelectedDepartment(providerWithLocation.department)
+
+  const handleOfficeLocationChange = (loc: string) => {
+    if (!loc) {
+      setSelectedOfficeLocation(undefined)
+      return
+    }
+    
+    setSelectedOfficeLocation(loc)
+    
+    // Find the provider with this office location and fill ALL related fields
+    const providerWithLocation = Departments.flatMap((d) => d.providers).find((p) => p.officeLocation === loc)
+    
+    if (providerWithLocation) {
+      setSelectedProvider(providerWithLocation.name)
+      setSelectedDepartment(providerWithLocation.department)
+      
+      const dept = Departments.find((d) => d.department === providerWithLocation.department)
+      if (dept) {
+        setSelectedDeptLocation(dept.clinicLocation)
       }
     }
   }
@@ -150,12 +265,20 @@ export default function ScheduleAppointmentPage() {
                   <CardTitle>Patient Information</CardTitle>
                   <CardDescription>Search or create patient</CardDescription>
                 </div>
-                <Button variant="outline" className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" onClick={handleCreateNewPatient}>
+                <Button 
+                  variant="outline" 
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" 
+                  onClick={handleCreateNewPatient}
+                >
                   Create New Patient
                 </Button>
               </CardHeader>
               <CardContent>
-                <PatientDataTable data={mockPatients} onPatientSelect={handlePatientSelect} selectedPatientId={selectedPatient?.id || null} />
+                <PatientDataTable 
+                  data={patients} 
+                  onPatientSelect={handlePatientSelect} 
+                  selectedPatientId={selectedPatient?.id || null} 
+                />
               </CardContent>
             </Card>
 
@@ -165,14 +288,36 @@ export default function ScheduleAppointmentPage() {
                 <CardDescription>Select date and time</CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-[2fr_2fr] gap-4">
-                <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
+                <Calendar 
+                  mode="single" 
+                  selected={date} 
+                  onSelect={setDate} 
+                  className="rounded-md border" 
+                />
                 <div className="space-y-2">
                   <Label>Available Time Slots:</Label>
-                  <div className="grid grid-cols-1 gap-2">
-                    {timeSlots.map((slot) => (
-                      <Button key={slot} variant={selectedTime === slot ? "default" : "outline"} onClick={() => setSelectedTime(slot)} size="sm">{slot}</Button>
-                    ))}
-                  </div>
+                  {!selectedProvider ? (
+                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground border rounded-md p-4">
+                      Please select a provider first to view available time slots
+                    </div>
+                  ) : availableTimeSlots.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground border rounded-md p-4">
+                      No available time slots for {date?.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2">
+                      {availableTimeSlots.map((slot) => (
+                        <Button 
+                          key={slot} 
+                          variant={selectedTime === slot ? "default" : "outline"} 
+                          onClick={() => setSelectedTime(slot)} 
+                          size="sm"
+                        >
+                          {slot}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -186,40 +331,61 @@ export default function ScheduleAppointmentPage() {
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-[2fr_2fr]">
                 <div className="grid gap-4">
-                  <div className="space-y-1">
-                    <Label>Specialty/Department</Label>
-                    <Combobox 
-                      options={availableDepartments.map((d) => ({ value: d, label: d }))} 
-                      value={selectedDepartment} 
-                      onChange={handleDepartmentChange} 
-                      placeholder="Select department" 
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label>Specialty/Department</Label>
+                      <Combobox 
+                        options={availableDepartments.map((d) => ({ value: d, label: d }))} 
+                        value={selectedDepartment} 
+                        onChange={handleDepartmentChange} 
+                        placeholder="Select department" 
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Department Location</Label>
+                      <Combobox 
+                        options={availableDeptLocations.map((loc) => ({ value: loc, label: loc }))} 
+                        value={selectedDeptLocation} 
+                        onChange={handleDeptLocationChange} 
+                        placeholder="Select location" 
+                      />
+                    </div>
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label>Provider</Label>
+                      <Combobox 
+                        options={availableProviders.map((p) => ({ value: p.name, label: p.name }))} 
+                        value={selectedProvider} 
+                        onChange={handleProviderChange} 
+                        placeholder="Select provider" 
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <Label>Provider</Label>
-                    <Combobox 
-                      options={availableProviders.map((p) => ({ value: p.name, label: p.name }))} 
-                      value={selectedProvider} 
-                      onChange={handleProviderChange} 
-                      placeholder="Select provider" 
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label>Location</Label>
-                    <Combobox 
-                      options={availableLocations.map((loc) => ({ value: loc, label: loc }))} 
-                      value={selectedLocation} 
-                      onChange={handleLocationChange} 
-                      placeholder="Select location" 
-                    />
+                    <div className="space-y-1">
+                      <Label>Office Location</Label>
+                      <Combobox 
+                        options={availableOfficeLocations.map((loc) => ({ value: loc, label: loc }))} 
+                        value={selectedOfficeLocation} 
+                        onChange={handleOfficeLocationChange} 
+                        placeholder="Select location" 
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="grid gap-1">
                   <Label htmlFor="appointmentPurpose">Purpose of Appointment</Label>
-                  <textarea id="appointmentPurpose" rows={6} maxLength={600} value={purpose} onChange={(e) => setPurpose(e.target.value)} className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full" placeholder="Briefly describe the purpose" />
+                  <textarea 
+                    id="appointmentPurpose" 
+                    rows={6} 
+                    maxLength={600} 
+                    value={purpose} 
+                    onChange={(e) => setPurpose(e.target.value)} 
+                    className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full" 
+                    placeholder="Briefly describe the purpose" 
+                  />
                   <p className="text-xs text-muted-foreground">Maximum 600 characters</p>
                 </div>
               </CardContent>
@@ -228,9 +394,22 @@ export default function ScheduleAppointmentPage() {
 
           <div className="px-4 lg:px-6">
             <div className="flex gap-2">
-              <Button onClick={handleBookClick} disabled={!selectedPatient}>Book Appointment</Button>
+              <Button 
+                onClick={handleBookClick} 
+                disabled={!isBookingValid}
+              >
+                Book Appointment
+              </Button>
               <Button variant="outline">Cancel</Button>
             </div>
+            {!isBookingValid && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {!selectedPatient && "Please select a patient. "}
+                {!selectedProvider && "Please select a provider. "}
+                {!date && "Please select a date. "}
+                {!selectedTime && "Please select a time slot. "}
+              </p>
+            )}
           </div>
 
           <ConfirmBookingModal 
@@ -239,7 +418,8 @@ export default function ScheduleAppointmentPage() {
             selectedPatient={selectedPatient} 
             selectedProvider={selectedProvider} 
             selectedDepartment={selectedDepartment} 
-            selectedLocation={selectedLocation} 
+            selectedDeptLocation={selectedDeptLocation} 
+            selectedOfficeLocation={selectedOfficeLocation}
             date={date} 
             selectedTime={selectedTime} 
             purpose={purpose} 
@@ -255,7 +435,8 @@ export default function ScheduleAppointmentPage() {
             selectedPatient={selectedPatient} 
             selectedProvider={selectedProvider} 
             selectedDepartment={selectedDepartment} 
-            selectedLocation={selectedLocation} 
+            selectedDeptLocation={selectedDeptLocation} 
+            selectedOfficeLocation={selectedOfficeLocation}
             date={date} 
             selectedTime={selectedTime} 
             purpose={purpose} 
@@ -264,10 +445,7 @@ export default function ScheduleAppointmentPage() {
           <CreateNewPatientModal 
             open={openNewPatient} 
             onOpenChange={setOpenNewPatient} 
-            onCreate={(patientData) => { 
-              console.log("New patient created:", patientData); 
-              setOpenNewPatient(false) 
-            }} 
+            onCreate={handleCreatePatient}
           />
         </div>
       </DashboardLayout>

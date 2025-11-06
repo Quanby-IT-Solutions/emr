@@ -51,6 +51,19 @@ export const Departments: DepartmentList[] = [
         contactSchedulerOnly: "310-862-0026",
         publicContact: "(555) 722-3321"
       },
+      {
+        name: "Liam Macintyre",
+        department: "Internal Medicine",
+        shift: "6:00 AM - 12:00 PM",
+        availability: ["7:00 AM - 8:00 AM", "9:00 AM - 10:30 AM"],
+        appointments: [
+          { time: "7:30 AM", patient: "Sam Clide" },
+          { time: "9:00 AM", patient: "Janet Halworth" },
+        ],
+        officeLocation: "Room 204A",
+        contactSchedulerOnly: "310-862-0039",
+        publicContact: "(555) 722-4463"
+      },
     ],
   },
   {
@@ -88,9 +101,7 @@ export const Departments: DepartmentList[] = [
 ]
 
 
-// --------------------
 // Weekly Availability
-// --------------------
 export const mockWeeklyAvailability: WeeklyAvailability = {
   "Corey McDonald": {
     Monday: ["9:00 AM", "10:00 AM", "1:00 PM"],
@@ -98,6 +109,13 @@ export const mockWeeklyAvailability: WeeklyAvailability = {
     Wednesday: [],
     Thursday: ["11:00 AM", "3:00 PM"],
     Friday: ["8:30 AM", "1:30 PM"],
+  },
+  "Liam Macintyre": {
+    Monday: ["7:00 AM", "9:00 AM"],
+    Tuesday: ["9:30 AM"],
+    Wednesday: ["7:30 AM"],
+    Thursday: ["9:00 AM", "9:45 AM"],
+    Friday: ["9:30 AM"],
   },
   "Kurt Clark": {
     Monday: ["10:30 AM"],

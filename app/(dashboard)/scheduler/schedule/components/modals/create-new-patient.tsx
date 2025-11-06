@@ -1,13 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -47,11 +41,7 @@ const EMERGENCY_RELATIONSHIP_OPTIONS = Object.freeze([
   { value: "other", label: "Other" },
 ])
 
-export function CreateNewPatientModal({
-  open,
-  onOpenChange,
-  onCreate,
-}: CreateNewPatientModalProps) {
+export function CreateNewPatientModal({ open, onOpenChange, onCreate,}: CreateNewPatientModalProps) {
   // --------------------------- State ---------------------------
   const [firstName, setFirstName] = useState("")
   const [middleName, setMiddleName] = useState("")
@@ -122,7 +112,6 @@ export function CreateNewPatientModal({
     handleReset()
   }
 
-  // --------------------------- Render ---------------------------
   return (
     <Dialog open={open} onOpenChange={handleReset}>
       <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">

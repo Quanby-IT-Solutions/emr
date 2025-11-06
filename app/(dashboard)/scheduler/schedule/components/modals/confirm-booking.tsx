@@ -10,7 +10,8 @@ interface ConfirmBookingModalProps {
   selectedPatient: Patient | null
   selectedProvider: string | undefined
   selectedDepartment: string | undefined
-  selectedLocation: string | undefined
+  selectedDeptLocation: string | undefined
+  selectedOfficeLocation: string | undefined
   date: Date | undefined
   selectedTime: string | undefined
   purpose: string | undefined
@@ -26,7 +27,8 @@ export function ConfirmBookingModal({
   selectedPatient,
   selectedProvider,
   selectedDepartment,
-  selectedLocation,
+  selectedDeptLocation,
+  selectedOfficeLocation,
   date,
   selectedTime,
   purpose,
@@ -105,9 +107,15 @@ export function ConfirmBookingModal({
 
             {/* Health Provider Details */}
             <Label className="font-semibold">Health Provider Details</Label>
-            <div className="grid gap-1">
-              <Label htmlFor="provider" className="text-sm text-muted-foreground">Provider:</Label>
-              <Input id="provider" name="provider" value={selectedProvider} readOnly/>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              <div className="grid gap-1">
+                <Label htmlFor="provider" className="text-sm text-muted-foreground">Provider:</Label>
+                <Input id="provider" name="provider" value={selectedProvider} readOnly/>
+              </div>
+              <div className="grid gap-1">
+                <Label htmlFor="location" className="text-sm text-muted-foreground">Office Location:</Label>
+                <Input id="location" name="location" value={selectedOfficeLocation} readOnly/>
+              </div>                
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
@@ -116,8 +124,8 @@ export function ConfirmBookingModal({
                 <Input id="department" name="department" value={selectedDepartment} readOnly/>
               </div>
               <div className="grid gap-1">
-                <Label htmlFor="location" className="text-sm text-muted-foreground">Location:</Label>
-                <Input id="location" name="location" value={selectedLocation} readOnly/>
+                <Label htmlFor="location" className="text-sm text-muted-foreground">Department Location:</Label>
+                <Input id="location" name="location" value={selectedDeptLocation} readOnly/>
               </div>                
             </div>
 

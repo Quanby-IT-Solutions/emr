@@ -10,7 +10,8 @@ interface GenerateBookingModalProps {
   selectedPatient: Patient | null
   selectedProvider: string | undefined
   selectedDepartment: string | undefined
-  selectedLocation: string | undefined
+  selectedDeptLocation: string | undefined
+  selectedOfficeLocation: string | undefined
   date: Date | undefined
   selectedTime: string | undefined
   purpose: string | undefined
@@ -22,7 +23,8 @@ export function GenerateBookingModal({
   selectedPatient,
   selectedProvider,
   selectedDepartment,
-  selectedLocation,
+  selectedDeptLocation,
+  selectedOfficeLocation,
   date,
   selectedTime,
   purpose,
@@ -66,7 +68,7 @@ export function GenerateBookingModal({
                     <td className="border border-muted px-2 py-1">{selectedTime}</td>
                   </tr>
                   <tr>
-                    <td className="border border-muted px-2 py-1 font-medium">Specialty/Department</td>
+                    <td className="border border-muted px-2 py-1 font-medium">Department</td>
                     <td className="border border-muted px-2 py-1">{selectedDepartment}</td>
                   </tr>
                   <tr>
@@ -75,7 +77,7 @@ export function GenerateBookingModal({
                   </tr>
                   <tr>
                     <td className="border border-muted px-2 py-1 font-medium">Location</td>
-                    <td className="border border-muted px-2 py-1">{selectedLocation}</td>
+                    <td className="border border-muted px-2 py-1">{selectedDeptLocation + ", " + selectedOfficeLocation}</td>
                   </tr>
                   <tr>
                     <td className="border border-muted px-2 py-1 font-medium align-top">Purpose</td>
