@@ -86,11 +86,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/scheduler/providers",
       icon: IconStethoscope,
     },
-    // {
-    //   title: "Patients",
-    //   url: "/scheduler/patients",
-    //   icon: IconUser,
-    // },
+    {
+      title: "Patients",
+      url: "/scheduler/patients",
+      icon: IconUser,
+    },
   ],
   [UserRole.REGISTRAR]: [
     {

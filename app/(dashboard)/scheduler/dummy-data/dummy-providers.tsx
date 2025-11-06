@@ -1,14 +1,10 @@
-// --------------------
 // Appointment details
-// --------------------
 export interface Appointment {
   time: string
   patient: string
 }
 
-// --------------------
 // Provider model
-// --------------------
 export interface Provider {
   name: string
   department: string
@@ -20,9 +16,7 @@ export interface Provider {
   publicContact: string
 }
 
-// --------------------
 // Department model
-// --------------------
 export interface DepartmentList {
   department: string
   clinicLocation: string
@@ -30,18 +24,14 @@ export interface DepartmentList {
   providers: Provider[]
 }
 
-// --------------------
 // Weekly availability structure
-// --------------------
 export type WeeklyAvailability = {
   [providerName: string]: {
     [day: string]: string[]
   }
 }
 
-// --------------------
 // Mock Data
-// --------------------
 export const Departments: DepartmentList[] = [
   {
     department: "Internal Medicine",

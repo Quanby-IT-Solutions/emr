@@ -20,15 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export type Patient = {
-  id: string
-  firstName: string
-  middleName: string
-  lastName: string
-  mobileNumber: string
-  birthday: string
-  age: number
-}
+import { Patient } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
 
 interface DataTableProps {
   data: Patient[]
@@ -160,7 +152,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
           </TableBody>
         </Table>
         <div className="flex items-center justify-between px-4 py-3 border-t">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
@@ -195,3 +187,5 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     </div>
   )
 }
+
+export type { Patient }

@@ -10,8 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { IconSearch } from "@tabler/icons-react"
 import { useState } from "react"
-import { CancelBookingModal } from "./components/cancelBookingModal"
-import { EditBookingModal } from "./components/editBookingModal"
+import { CancelBookingModal } from "./components/cancel-booking-modal"
+import { EditBookingModal } from "./components/edit-booking-modal"
 
 interface Appointment {
   id: number;
