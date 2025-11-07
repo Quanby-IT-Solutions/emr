@@ -50,21 +50,24 @@ export function Combobox({
         <Command>
           <CommandInput placeholder={`Search...`} />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup>
-            {options.map((option) => (
-              <CommandItem 
-                key={option.value} 
-                value={option.value} 
-                onSelect={(currentValue) => { 
-                  onChange(currentValue === value ? "" : currentValue)
-                  setOpen(false) 
-                }}
-              >
-                <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
-                {option.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {/* Scrollable container for options */}
+          <div className="max-h-[200px] overflow-y-auto">
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem 
+                  key={option.value} 
+                  value={option.value} 
+                  onSelect={(currentValue) => { 
+                    onChange(currentValue === value ? "" : currentValue)
+                    setOpen(false) 
+                  }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === option.value ? "opacity-100" : "opacity-0")} />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </div>
         </Command>
       </PopoverContent>
     </Popover>

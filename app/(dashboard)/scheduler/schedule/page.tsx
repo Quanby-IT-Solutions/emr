@@ -9,12 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { useState, useMemo, useCallback } from "react"
 import { PatientDataTable } from "@/app/(dashboard)/scheduler/schedule/components/data-table-filtered"
-import { Patient, mockPatients } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
+import { Patient, PatientEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
 import { Departments, mockWeeklyAvailability } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
 import { ConfirmBookingModal } from "./components/modals/confirm-booking"
 import { CreateNewPatientModal } from "./components/modals/create-new-patient"
 import { GenerateBookingModal } from "./components/modals/generate-booking"
-import { Combobox } from "./components/combo-box"
+import { Combobox } from "@/components/ui/combo-box"
 
 export default function ScheduleAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
@@ -33,7 +33,7 @@ export default function ScheduleAppointmentPage() {
   const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
 
   // Patient list state
-  const [patients, setPatients] = useState<Patient[]>(mockPatients)
+  const [patients, setPatients] = useState<Patient[]>(PatientEntry)
 
   // Handlers
   const handleBookClick = () => { 
@@ -102,15 +102,6 @@ export default function ScheduleAppointmentPage() {
   }, [selectedPatient, selectedProvider, date, selectedTime])
 
   // Appointment Details - Available Options
-  const allOfficeLocations = useMemo(() => 
-    Array.from(new Set(Departments.flatMap((d) => d.providers).map((p) => p.officeLocation))), 
-    []
-  )
-  
-  const allDeptLocations = useMemo(() => 
-    Departments.map((d) => d.clinicLocation), 
-    []
-  )
   
   const availableDepartments = useMemo(() => 
     Departments.map((d) => d.department), 
@@ -122,26 +113,6 @@ export default function ScheduleAppointmentPage() {
     const dept = Departments.find((d) => d.department === selectedDepartment)
     return dept?.providers || []
   }, [selectedDepartment])
-
-  const availableDeptLocations = useMemo(() => {
-    if (selectedDepartment) {
-      const dept = Departments.find((d) => d.department === selectedDepartment)
-      return dept ? [dept.clinicLocation] : allDeptLocations
-    }
-    return allDeptLocations
-  }, [selectedDepartment, allDeptLocations])
-
-  const availableOfficeLocations = useMemo(() => {
-    if (selectedProvider) {
-      const provider = Departments.flatMap((d) => d.providers).find((p) => p.name === selectedProvider)
-      return provider ? [provider.officeLocation] : allOfficeLocations
-    }
-    if (selectedDepartment) {
-      const dept = Departments.find((d) => d.department === selectedDepartment)
-      return dept ? dept.providers.map((p) => p.officeLocation) : allOfficeLocations
-    }
-    return allOfficeLocations
-  }, [selectedDepartment, selectedProvider, allOfficeLocations])
 
   // Get available time slots based on selected provider and date
   const availableTimeSlots = useMemo(() => {
@@ -181,31 +152,6 @@ export default function ScheduleAppointmentPage() {
     }
   }
 
-  const handleDeptLocationChange = (loc: string) => {
-    if (!loc) {
-      setSelectedDeptLocation(undefined)
-      return
-    }
-    
-    setSelectedDeptLocation(loc)
-    
-    // Find the department with this clinic location and fill related fields
-    const deptWithLocation = Departments.find((d) => d.clinicLocation === loc)
-    
-    if (deptWithLocation) {
-      setSelectedDepartment(deptWithLocation.department)
-      
-      // Clear provider and office location if they don't belong to this department
-      if (selectedProvider) {
-        const providerStillValid = deptWithLocation.providers.some((p) => p.name === selectedProvider)
-        if (!providerStillValid) {
-          setSelectedProvider(undefined)
-          setSelectedOfficeLocation(undefined)
-        }
-      }
-    }
-  }
-
   const handleProviderChange = (providerName: string) => {
     if (!providerName) {
       setSelectedProvider(undefined)
@@ -223,28 +169,6 @@ export default function ScheduleAppointmentPage() {
         setSelectedDeptLocation(dept.clinicLocation)
         setSelectedOfficeLocation(provider.officeLocation)
         break
-      }
-    }
-  }
-
-  const handleOfficeLocationChange = (loc: string) => {
-    if (!loc) {
-      setSelectedOfficeLocation(undefined)
-      return
-    }
-    
-    setSelectedOfficeLocation(loc)
-    
-    // Find the provider with this office location and fill ALL related fields
-    const providerWithLocation = Departments.flatMap((d) => d.providers).find((p) => p.officeLocation === loc)
-    
-    if (providerWithLocation) {
-      setSelectedProvider(providerWithLocation.name)
-      setSelectedDepartment(providerWithLocation.department)
-      
-      const dept = Departments.find((d) => d.department === providerWithLocation.department)
-      if (dept) {
-        setSelectedDeptLocation(dept.clinicLocation)
       }
     }
   }
@@ -297,15 +221,15 @@ export default function ScheduleAppointmentPage() {
                 <div className="space-y-2">
                   <Label>Available Time Slots:</Label>
                   {!selectedProvider ? (
-                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground border rounded-md p-4">
+                    <div className="flex items-center justify-center text-sm text-muted-foreground rounded-md p-4">
                       Please select a provider first to view available time slots
                     </div>
                   ) : availableTimeSlots.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground border rounded-md p-4">
+                    <div className="flex items-center justify-center text-sm text-muted-foreground rounded-md p-4">
                       No available time slots for {date?.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 gap-1">
                       {availableTimeSlots.map((slot) => (
                         <Button 
                           key={slot} 
@@ -343,11 +267,12 @@ export default function ScheduleAppointmentPage() {
                     </div>
                     <div className="space-y-1">
                       <Label>Department Location</Label>
-                      <Combobox 
-                        options={availableDeptLocations.map((loc) => ({ value: loc, label: loc }))} 
-                        value={selectedDeptLocation} 
-                        onChange={handleDeptLocationChange} 
-                        placeholder="Select location" 
+                      <input
+                        type="text"
+                        value={selectedDeptLocation || ""}
+                        readOnly
+                        className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
+                        placeholder="Department Building"
                       />
                     </div>
                   </div>
@@ -365,17 +290,18 @@ export default function ScheduleAppointmentPage() {
 
                     <div className="space-y-1">
                       <Label>Office Location</Label>
-                      <Combobox 
-                        options={availableOfficeLocations.map((loc) => ({ value: loc, label: loc }))} 
-                        value={selectedOfficeLocation} 
-                        onChange={handleOfficeLocationChange} 
-                        placeholder="Select location" 
+                      <input
+                        type="text"
+                        value={selectedOfficeLocation || ""}
+                        readOnly
+                        className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
+                        placeholder="Office Room"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid gap-1">
+                <div className="grid gap-1 ml-5">
                   <Label htmlFor="appointmentPurpose">Purpose of Appointment</Label>
                   <textarea 
                     id="appointmentPurpose" 

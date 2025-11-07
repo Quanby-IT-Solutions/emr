@@ -62,16 +62,23 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     },
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
-      const searchValue = filterValue.toLowerCase()
-      const patient = row.original
-      
-      return (
-        patient.id.toLowerCase().includes(searchValue) ||
-        patient.firstName.toLowerCase().includes(searchValue) ||
-        patient.middleName.toLowerCase().includes(searchValue) ||
-        patient.lastName.toLowerCase().includes(searchValue)
-      )
-    },
+    const searchValue = filterValue.toLowerCase().trim()
+    const patient = row.original
+
+    const fullName = [
+      patient.firstName,
+      patient.middleName,
+      patient.lastName
+    ]
+      .filter(Boolean) // remove undefined or empty strings
+      .join(" ")
+      .toLowerCase()
+
+    return (
+      patient.id.toLowerCase().includes(searchValue) ||
+      fullName.includes(searchValue)
+    )
+  },
     initialState: {
       pagination: {
         pageSize: 5,
@@ -111,15 +118,16 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
 
   return (
     <div className="space-y-4">
+      <div>
+        <Input
+          placeholder="Search by name or ID..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          className="w-full"
+        />
+      </div>
+
       <div className="rounded-md border">
-        <div className="p-4 border-b">
-          <Input
-            placeholder="Search by name or ID..."
-            value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            className="w-full"
-          />
-        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -190,7 +198,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
             >
               Previous
             </Button>
-            <div className="text-sm font-medium">
+            <div className="text-sm">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>

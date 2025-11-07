@@ -29,6 +29,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
+// import { NoShowModal } from "./noShowModal"
 
 interface AppointmentListProps {
   appointments: Appointment[]
@@ -114,21 +115,13 @@ export function AppointmentList({
     setSelectedAppointment(null)
   }
 
-  const confirmNoShow = () => {
-    if (selectedAppointment && onNoShow) {
-      onNoShow(selectedAppointment)
-    }
-    setNoShowDialogOpen(false)
-    setSelectedAppointment(null)
-  }
-
   return (
     <>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Today's Appointments</CardTitle>
+              <CardTitle>Today&apos;s Appointments</CardTitle>
               <CardDescription>
                 Showing {startIndex + 1}-{Math.min(endIndex, appointments.length)} of {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
               </CardDescription>
@@ -250,7 +243,7 @@ export function AppointmentList({
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
-                                  onClick={() => handleNoShowClick(appointment.id)}
+                                  onClick={() => onNoShow?.(appointment.id)}
                                   className="text-orange-600 focus:text-orange-600"
                                 >
                                   <UserX className="mr-2 h-4 w-4" />
@@ -384,7 +377,7 @@ export function AppointmentList({
       </AlertDialog>
 
       {/* No-Show Dialog */}
-      <AlertDialog open={noShowDialogOpen} onOpenChange={setNoShowDialogOpen}>
+      {/* <AlertDialog open={noShowDialogOpen} onOpenChange={setNoShowDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -392,7 +385,7 @@ export function AppointmentList({
               Mark as No-Show
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Mark this appointment as "No-Show"? This indicates the patient did not arrive
+              Mark this appointment as &quot;No-Show&quot;? This indicates the patient did not arrive
               at their scheduled time. This may affect future appointment privileges.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -406,7 +399,7 @@ export function AppointmentList({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </>
   )
 }

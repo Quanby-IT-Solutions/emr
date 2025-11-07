@@ -28,6 +28,7 @@ import {
   ArrowRight,
   Activity
 } from "lucide-react"
+import { NoShowModal } from "./components/noShowModal"
 
 function CheckInPageContent() {
   const { state, dispatch, createEncounter } = usePatientContext()
@@ -41,6 +42,8 @@ function CheckInPageContent() {
   const [isScheduleOpen, setIsScheduleOpen] = useState(false)
   const [isWalkInOpen, setIsWalkInOpen] = useState(false)
   const [isTriageOpen, setIsTriageOpen] = useState(false)
+  const [isNoShowOpen, setIsNoShowOpen] = useState(false)
+  const [selectedNoShow, setSelectedNoShow] = useState<Appointment | null>(null)
   const [currentPatientId, setCurrentPatientId] = useState<string>("")
 
   // Filter appointments
@@ -60,7 +63,7 @@ function CheckInPageContent() {
   const totalScheduled = appointments.filter(a => a.status === "SCHEDULED").length
   const totalCheckedIn = appointments.filter(a => a.status === "CHECKED_IN").length
   const totalArrived = appointments.filter(a => a.status === "ARRIVED").length
-  const totalCancelled = appointments.filter(a => a.status === "CANCELLED").length
+  const totalCancelled = appointments.filter(a => a.status === "CANCELLED" || a.status === "NO_SHOW").length
   const totalInTriage = state.patients.filter(p => p.status === "InTriage").length
   const totalReferred = state.patients.filter(p => p.status === "Referred").length
 
@@ -111,6 +114,25 @@ function CheckInPageContent() {
       
       setIsModalOpen(false)
       setSelectedAppointment(null)
+    }
+  }
+
+  const handleNoShow = (appointmentId: string) => {
+    setSelectedNoShow(appointments.find(apt => apt.id === appointmentId) || null)
+    setIsNoShowOpen(true)
+  }
+
+  const handleConfirmNoShow = () => {
+    if (selectedNoShow) {
+      setAppointments(prev =>
+        prev.map(apt =>
+          apt.id === selectedNoShow.id
+            ? { ...apt, status: "NO_SHOW" as const }
+            : apt
+        )
+      )
+      setIsNoShowOpen(false)
+      setSelectedNoShow(null)
     }
   }
 
@@ -321,6 +343,7 @@ function CheckInPageContent() {
               appointments={filteredAppointments}
               onViewDetails={handleViewDetails}
               onCheckIn={handleCheckIn}
+              onNoShow={handleNoShow}
               triageMode={triageMode}  // ✅ Changed from erMode
             />
           </div>
@@ -351,6 +374,13 @@ function CheckInPageContent() {
           onOpenChange={setIsTriageOpen}
           patientId={currentPatientId}
           onComplete={handleTriageComplete}
+        />
+
+        <NoShowModal
+          open={isNoShowOpen}
+          onOpenChange={setIsNoShowOpen}
+          appointment={selectedNoShow}
+          onConfirmNoShow={handleConfirmNoShow}
         />
       </DashboardLayout>
     </ProtectedRoute>

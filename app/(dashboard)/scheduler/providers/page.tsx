@@ -10,7 +10,7 @@ import { format, startOfToday } from "date-fns"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Combobox } from "../../../../components/ui/combo-box"
 import { Departments, Provider } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
 import { DailyView } from "./components/daily-view"
 import { WeeklyView } from "./components/weekly-view"
@@ -49,27 +49,22 @@ export default function ProviderSchedulePage() {
           </header>
 
           {/* Filter toolbar */}
-          <div className="bg-white/80 border border-border rounded-xl shadow-md p-4 flex flex-wrap gap-4 sticky top-0 z-20">
-            <Select value={department} onValueChange={setDepartment}>
-              <SelectTrigger className="w-[200px] bg-background text-sm border shadow-sm rounded-lg">
-                <SelectValue placeholder="Select Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All Departments</SelectItem>
-                {Departments.map((d) => (
-                  <SelectItem key={d.department} value={d.department}>
-                    {d.department}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="bg-white/80 border border-border rounded-xl shadow-md p-4 flex flex-wrap gap-4 sticky top-0 z-20 items-center">
+            <div className="w-[220px]"> {/* wider container for combo-box */}
+              <Combobox
+                options={[{ value: "All", label: "All Departments" }, ...Departments.map(d => ({ value: d.department, label: d.department }))]}
+                value={department}
+                onChange={setDepartment}
+                placeholder="Select Department"
+              />
+            </div>
 
             <Input
               type="text"
               placeholder="Search provider..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="px-4 py-2 rounded-lg border text-sm shadow-sm bg-background flex-1 min-w-[220px]"
+              className="flex-1 min-w-[220px] px-4 py-2 rounded-lg border text-sm shadow-sm bg-background"
             />
 
             <Popover>

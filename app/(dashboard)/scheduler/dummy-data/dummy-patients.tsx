@@ -10,7 +10,7 @@ export interface Patient {
 }
 
 // Mock Patients Data
-export const mockPatients: Patient[] = [
+export const PatientEntry: Patient[] = [
   { 
     id: "P001", 
     firstName: "John", 
