@@ -12,7 +12,7 @@ import { CancelBookingModal } from "./components/cancel-booking-modal"
 import { EditBookingModal } from "./components/edit-booking-modal"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Calendar, CalendarFold, CircleCheckBig, CircleX, Clock, RefreshCcw} from "lucide-react"
+import { Calendar, CalendarFold, CircleCheckBig, CircleX, Clock, RefreshCcw, SquarePen, Trash2} from "lucide-react"
 import { startOfToday } from "date-fns"
 
 export default function AppointmentsPage() {
@@ -93,7 +93,7 @@ export default function AppointmentsPage() {
     toast.success('Appointment confirmed!', {
       description: `${appointment.patientName}'s appointment has been confirmed.`,
       style: {
-        background: '#0891b2',
+        background: '#10b981',
         color: 'white',
         border: 'none',
       },
@@ -121,6 +121,7 @@ export default function AppointmentsPage() {
     
     toast.error('Appointment cancelled', {
       description: `${appointment.patientName}'s appointment has been cancelled.`,
+      icon: <Trash2 className="mr-2 h-4 w-4" />,
       style: {
         background: '#ef4444',
         color: 'white',
@@ -144,8 +145,9 @@ export default function AppointmentsPage() {
 
     toast.success('Appointment updated!', {
       description: `${updatedAppointment.patientName}'s appointment has been updated.`,
+      icon: <SquarePen className="mr-2 h-4 w-4" />,
       style: {
-        background: '#10b981',
+        background: '#3b82f6',
         color: 'white',
         border: 'none',
       },
