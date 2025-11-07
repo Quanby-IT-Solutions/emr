@@ -51,7 +51,6 @@ export function AppointmentList({
   triageMode = false 
 }: AppointmentListProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
-  const [noShowDialogOpen, setNoShowDialogOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null)
   
   // Pagination states
@@ -100,11 +99,6 @@ export function AppointmentList({
   const handleCancelClick = (appointmentId: string) => {
     setSelectedAppointment(appointmentId)
     setCancelDialogOpen(true)
-  }
-
-  const handleNoShowClick = (appointmentId: string) => {
-    setSelectedAppointment(appointmentId)
-    setNoShowDialogOpen(true)
   }
 
   const confirmCancel = () => {
@@ -376,30 +370,6 @@ export function AppointmentList({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* No-Show Dialog */}
-      {/* <AlertDialog open={noShowDialogOpen} onOpenChange={setNoShowDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <UserX className="h-5 w-5 text-orange-600" />
-              Mark as No-Show
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Mark this appointment as &quot;No-Show&quot;? This indicates the patient did not arrive
-              at their scheduled time. This may affect future appointment privileges.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmNoShow}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              Yes, Mark as No-Show
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
     </>
   )
 }
