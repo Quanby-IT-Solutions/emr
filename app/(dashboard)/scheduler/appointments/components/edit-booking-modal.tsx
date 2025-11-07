@@ -8,8 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppointmentEntry } from "../../dummy-data/dummy-appointments";
+import { Departments } from "../../dummy-data/dummy-providers";
+import { Combobox } from "@/components/ui/combo-box";
 
 interface EditBookingModalProps {
     open: boolean;
@@ -20,31 +22,81 @@ interface EditBookingModalProps {
 
 export function EditBookingModal({ open, onOpenChange, selectedAppointment, onConfirmUpdate }: EditBookingModalProps) {
     const [patient, setPatient] = useState<string>(selectedAppointment?.patientName || "");
-    const [ageSex, setAgeSex] = useState<string>(selectedAppointment?.ageSex || "");
     const [provider, setProvider] = useState<string>(selectedAppointment?.provider || "");
     const [department, setDepartment] = useState<string>(selectedAppointment?.department || "");  // Default to a valid department
     const [departmentLocation, setDepartmentLocation] = useState<string>(selectedAppointment?.departmentLocation || ""); 
     const [officeLocation, setOfficeLocation] = useState<string>(selectedAppointment?.officeLocation || ""); 
     const [date, setDate] = useState<Date | undefined>(selectedAppointment?.appointmentDate ? new Date(selectedAppointment.appointmentDate) : undefined);
     const [time, setTime] = useState<string>(selectedAppointment?.appointmentTime || "")
-    const [visitType, setVisitType] = useState<"New" | "Follow-up" | "Consultation">(selectedAppointment?.visitType || "Follow-up");
-    const [status, setStatus] = useState<"Confirmed" | "Pending" | "Cancelled">("Pending");
+    const [visitType, setVisitType] = useState<"Follow-up" | "New">(selectedAppointment?.visitType || "New");
+    const [status, setStatus] = useState<"Confirmed" | "Pending" | "Cancelled">(selectedAppointment?.bookingStatus || "Pending");
 
+    // Health Departments and Providers
+    const availableDepartments = useMemo(() => {
+        return Departments.map((dept) => dept.department);
+    }, []);
 
+    const availableProviders = useMemo(() => {
+        const departmentData = Departments.find((d: { department: string }) => d.department === department);
+        return departmentData?.providers.map((provider: { name: string }) => provider.name) || [];
+    }, [department]);
+
+    // Health Department and Provider change handlers
+    const handleDepartmentChange = (newDepartment: string) => {
+      if (!newDepartment) {
+        setDepartment(selectedAppointment?.department || "");
+        setDepartmentLocation(selectedAppointment?.departmentLocation || "");
+        setProvider(selectedAppointment?.provider || "");
+        setOfficeLocation(selectedAppointment?.officeLocation || "");
+        return
+      } 
+      
+      setDepartment(newDepartment);
+      const departmentData = Departments.find((d: { department: string }) => d.department === newDepartment);
+      setDepartmentLocation(departmentData ? departmentData.clinicLocation : "");
+      setProvider("");
+
+      // If current provider is not in new department, keep original provider
+      const providerData = departmentData?.providers.find((p: { name: string }) => p.name === selectedAppointment?.provider);
+      setProvider(providerData ? providerData.name : "");
+      setOfficeLocation(providerData ? providerData.officeLocation : "");
+      
+    };
+
+    const handleProviderChange = (newProvider: string) => {
+      if (!newProvider) {
+        setProvider(selectedAppointment?.provider || "");
+        setOfficeLocation(selectedAppointment?.officeLocation || "");
+        return
+      } 
+
+      
+      // Find the provider and fill in all related fields
+      for (const dept of Departments) {
+          const providerData = dept.providers.find((p: { name: string }) => p.name === newProvider);
+          if (providerData) {
+              setDepartment(dept.department);
+              setDepartmentLocation(dept.clinicLocation);
+              setProvider(providerData.name);
+              setOfficeLocation(providerData.officeLocation);
+              break;
+          }
+      }
+    };
 
     const handleUpdateData = () => {
         if (selectedAppointment && date) {
             onConfirmUpdate({
                 patientId: selectedAppointment.patientId,
                 patientName: patient,
-                ageSex,
-                provider,
-                appointmentDate: date.toISOString().split('T')[0],
+                ageSex: selectedAppointment.ageSex,
+                provider: provider,
+                appointmentDate: date.toLocaleDateString(),
                 appointmentTime: time,
-                department,
-                departmentLocation,
-                officeLocation,
-                visitType,
+                department: department,
+                departmentLocation: departmentLocation,
+                officeLocation: officeLocation,
+                visitType: visitType,
                 bookingStatus: status,
             });
         }  
@@ -77,7 +129,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-           <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+           <DialogContent className="min-w-xl max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Edit Appointment</DialogTitle>
               <DialogDescription>
@@ -89,14 +141,25 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
               {/* Patient Details */}
               <div className="grid gap-4 mt-4">
                 <Label className="font-semibold">Patient Details</Label>
-                <div className="grid gap-1">
-                  <Label htmlFor="patientName" className="text-muted-foreground">Patient Name</Label>
-                  <Input 
-                    id="patient" 
-                    name="patient" 
-                    value={patient}
-                    onChange={(e) => setPatient(e.target.value)}
-                  />
+                <div className="grid grid-cols-8 gap-1">
+                  <div className="grid md:col-span-6 gap-1 mr-3">
+                    <Label htmlFor="patientName" className="text-muted-foreground">Patient Name</Label>
+                    <Input 
+                      id="patient" 
+                      name="patient" 
+                      value={patient}
+                      onChange={(e) => setPatient(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid md:col-span-2 gap-1">
+                    <Label htmlFor="ageSex" className="text-muted-foreground">Age/Sex</Label>
+                    <Input 
+                      id="ageSex" 
+                      name="ageSex" 
+                      value={selectedAppointment?.ageSex || ""}
+                      readOnly 
+                    />
+                  </div>
                 </div>
                 {/* Contact Info */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -122,24 +185,48 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
 
                 {/* Health Provider Details */}    
                 <Label className="font-semibold">Health Provider Details</Label>            
-                <div className="grid gap-1">
-                  <Label htmlFor="provider" className="text-muted-foreground">Provider</Label>
-                  <Input 
-                    id="provider" 
-                    name="provider" 
-                    value={provider}
-                    onChange={(e) => setProvider(e.target.value)}
-                  />
-                </div>
+                
+                {/* Department Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div className="grid gap-1">
-                    <Label htmlFor="department" className="text-sm text-muted-foreground">Specialty/Department:</Label>
-                    <Input id="department" name="department" defaultValue="Cardiology" readOnly/>
+                    <Label htmlFor="department" className="text-sm text-muted-foreground">Department:</Label>
+                    <Combobox
+                      options={availableDepartments.map((name) => ({ label: name, value: name }))}
+                      value={department}  
+                      onChange={handleDepartmentChange}
+                      placeholder="Select department"
+                    />
                   </div>
                   <div className="grid gap-1">
-                    <Label htmlFor="location" className="text-sm text-muted-foreground">Location:</Label>
-                    <Input id="location" name="location" defaultValue="North Clinic" readOnly/>
+                    <Label htmlFor="deptLocation" className="text-sm text-muted-foreground">Department Location:</Label>
+                    <Input 
+                      id="deptLocation" 
+                      name="deptLocation" 
+                      value={departmentLocation}
+                      readOnly
+                    />
                   </div>                
+                </div>
+
+                {/* Provider Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  <div className="grid gap-1">
+                    <Label htmlFor="provider" className="text-muted-foreground">Provider</Label>
+                    <Combobox
+                      options={availableProviders.map((name) => ({ label: name, value: name }))}
+                      value={provider}
+                      onChange={handleProviderChange}
+                      placeholder="Select provider"
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <Label htmlFor="officeLocation" className="text-sm text-muted-foreground">Office Location:</Label>
+                    <Input 
+                      id="officeLocation" 
+                      name="officeLocation" 
+                      value={officeLocation}
+                      readOnly/>
+                  </div>   
                 </div>
                 
                 <Label><strong>Appointment Details</strong></Label>
@@ -158,11 +245,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                         <Calendar
                           mode="single"
                           selected={date}
-                          onSelect={(newDate) => {
-                            if (newDate) {
-                              setDate(newDate);
-                            }
-                          }}
+                          onSelect={(newDate) => setDate(newDate)}
                           className="rounded-md border"
                         />
                       </PopoverContent>
@@ -187,6 +270,22 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                   
                   {/* Appointment Status*/}
                   <div className="grid gap-1 ">
+                    <Label htmlFor="visitType" className="text-muted-foreground">Visit Type</Label>
+                    <Select
+                      name="visitType"  
+                      value={visitType}
+                      onValueChange={(newValue: "Follow-up" | "New") => setVisitType(newValue)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select visit type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Follow-up">Follow-up</SelectItem>
+                          <SelectItem value="New">New</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-1 ">
                     <Label htmlFor="status" className="text-muted-foreground">Booking Status</Label>
                     <Select
                       name="status"
@@ -205,6 +304,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                 </div>
               </div>
             </div>
+
 
             {/* Buttons */}
             <div className="mt-6 flex gap-2">

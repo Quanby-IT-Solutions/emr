@@ -74,7 +74,7 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
       header: "Visit Type",
       cell: ({ row }) => {
         const type = row.original.visitType
-        const variant = type === "New" ? "default" : type === "Follow-up" ? "secondary" : "outline"
+        const variant = type === "New" ? "default" : "secondary"
         return <Badge variant={variant}>{type}</Badge>
       },
     },

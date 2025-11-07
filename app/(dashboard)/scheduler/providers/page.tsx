@@ -74,7 +74,7 @@ export default function ProviderSchedulePage() {
                   {format(date, "MMM d, yyyy")}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={date}

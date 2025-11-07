@@ -15,6 +15,7 @@ import { ConfirmBookingModal } from "./components/modals/confirm-booking"
 import { CreateNewPatientModal } from "./components/modals/create-new-patient"
 import { GenerateBookingModal } from "./components/modals/generate-booking"
 import { Combobox } from "@/components/ui/combo-box"
+import { Input } from "@/components/ui/input"
 
 export default function ScheduleAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
@@ -267,7 +268,7 @@ export default function ScheduleAppointmentPage() {
                     </div>
                     <div className="space-y-1">
                       <Label>Department Location</Label>
-                      <input
+                      <Input
                         type="text"
                         value={selectedDeptLocation || ""}
                         readOnly
@@ -290,7 +291,7 @@ export default function ScheduleAppointmentPage() {
 
                     <div className="space-y-1">
                       <Label>Office Location</Label>
-                      <input
+                      <Input
                         type="text"
                         value={selectedOfficeLocation || ""}
                         readOnly

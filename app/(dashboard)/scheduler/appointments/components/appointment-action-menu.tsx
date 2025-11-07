@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -30,7 +31,10 @@ export function AppointmentActionsMenu({ appointment, onEdit, onConfirm, onCance
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => onEdit(appointment)} disabled={isCancelled}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Details
@@ -39,7 +43,7 @@ export function AppointmentActionsMenu({ appointment, onEdit, onConfirm, onCance
         {!isConfirmed && !isCancelled && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onConfirm(appointment)}>
+            <DropdownMenuItem onClick={() => onConfirm(appointment)} className="text-green-600 focus:text-green-600">
               <CheckCircle className="mr-2 h-4 w-4" />
               Confirm Appointment
             </DropdownMenuItem>

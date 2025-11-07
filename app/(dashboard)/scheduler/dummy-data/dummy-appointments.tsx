@@ -8,7 +8,7 @@ export interface AppointmentEntry {
   departmentLocation: string;
   provider: string;
   officeLocation: string;
-  visitType: "New" | "Follow-up" | "Consultation";
+  visitType: "Follow-up" | "New";
   bookingStatus: "Confirmed" | "Pending" | "Cancelled";
 }
 
@@ -49,7 +49,7 @@ export const dummyAppointments: AppointmentEntry[] = [
     departmentLocation: "Main Hospital Building - 2nd Floor",
     provider: "Liam Macintyre",
     officeLocation: "Room 204A",
-    visitType: "Consultation",
+    visitType: "New",
     bookingStatus: "Pending",
   },
   {
@@ -88,7 +88,7 @@ export const dummyAppointments: AppointmentEntry[] = [
     departmentLocation: "Main Hospital Building - 2nd Floor",
     provider: "David Kim",
     officeLocation: "Room 208A",
-    visitType: "Consultation",
+    visitType: "New",
     bookingStatus: "Confirmed",
   },
   {
@@ -127,7 +127,7 @@ export const dummyAppointments: AppointmentEntry[] = [
     departmentLocation: "Outpatient Clinic - Suite 14",
     provider: "Kurt Clark",
     officeLocation: "Room 102A",
-    visitType: "Consultation",
+    visitType: "New",
     bookingStatus: "Confirmed",
   },
   {
@@ -166,7 +166,7 @@ export const dummyAppointments: AppointmentEntry[] = [
     departmentLocation: "Outpatient Clinic - Suite 14",
     provider: "Sandra Ng",
     officeLocation: "Room 104B",
-    visitType: "Consultation",
+    visitType: "New",
     bookingStatus: "Pending",
   },
   {
@@ -205,7 +205,7 @@ export const dummyAppointments: AppointmentEntry[] = [
     departmentLocation: "Outpatient Clinic - Suite 14",
     provider: "Priya Singh",
     officeLocation: "Room 107C",
-    visitType: "Consultation",
+    visitType: "New",
     bookingStatus: "Confirmed",
   },
 ];

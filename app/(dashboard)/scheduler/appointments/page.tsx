@@ -11,6 +11,7 @@ import { AppointmentsTable } from "./components/appointments-table"
 import { CancelBookingModal } from "./components/cancel-booking-modal"
 import { EditBookingModal } from "./components/edit-booking-modal"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import { RefreshCcw } from "lucide-react"
 
 export default function AppointmentsPage() {
@@ -94,6 +95,7 @@ export default function AppointmentsPage() {
           : apt
       )
     )
+    
   }, [])
 
   // Confirm update from modal
@@ -183,7 +185,7 @@ export default function AppointmentsPage() {
         {/* Edit Booking Modal */}
         {selectedAppointment && (
           <EditBookingModal
-            key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
+            // key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
             selectedAppointment={selectedAppointment}
             open={openEdit}
             onOpenChange={setOpenEdit}
