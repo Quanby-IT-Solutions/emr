@@ -2,54 +2,59 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-
-interface Appointment {
-    id: number
-    patient: string
-    provider: string
-    date: Date
-    time: string
-    status: string
-}
+import { AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
 
 interface CancelBookingModalProps {
-    selectedAppointment: Appointment | null
+    selectedAppointment: AppointmentEntry | null
     open: boolean
     onOpenChange: (open: boolean) => void
-    onConfirmCancel: (appointmentID: number) => void
+    onConfirmCancel: (appointment: AppointmentEntry) => void
 }
 
 export function CancelBookingModal({ selectedAppointment, open, onOpenChange, onConfirmCancel }: CancelBookingModalProps) {
     
     const handleCancelBooking = () => {
-        if(selectedAppointment) onConfirmCancel(selectedAppointment.id);
-        onOpenChange(false);
+        if(selectedAppointment) {
+            onConfirmCancel(selectedAppointment)
+        }
+        onOpenChange(false)
+    }
+
+    // Format date for display
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        })
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Cancel Booking</DialogTitle>
+                    <DialogTitle>Cancel Appointment</DialogTitle>
                     <DialogDescription className="mt-4">
-                        Are you sure you want to <strong>cancel the appointment</strong> for <strong>{selectedAppointment?.patient}</strong> with <strong>{selectedAppointment?.provider}</strong> on <strong>{selectedAppointment?.date.toLocaleDateString()}</strong> at <strong>{selectedAppointment?.time}</strong>?
+                        Are you sure you want to <strong>cancel the appointment</strong> for{" "}
+                        <strong>{selectedAppointment?.patientName}</strong> (ID: {selectedAppointment?.patientId}) with{" "}
+                        <strong>Dr. {selectedAppointment?.provider}</strong> on{" "}
+                        <strong>{selectedAppointment && formatDate(selectedAppointment.appointmentDate)}</strong> at{" "}
+                        <strong>{selectedAppointment?.appointmentTime}</strong>?
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <div className="mt-2 flex gap-2">
-                    <Button variant="destructive" onClick={() => {
-                        handleCancelBooking();
-                    }}>              
-                        Confirm
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        onClick={() => {
-                        onOpenChange(false);
-                        }}
-                    >
-                        Cancel
-                    </Button>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => onOpenChange(false)}
+                        >
+                            Go Back
+                        </Button>
+                        <Button variant="destructive" onClick={handleCancelBooking}>              
+                            Confirm Cancel
+                        </Button>
                     </div>
                 </DialogFooter>
             </DialogContent>

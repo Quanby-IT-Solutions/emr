@@ -9,44 +9,43 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
+import { AppointmentEntry } from "../../dummy-data/dummy-appointments";
 
 interface EditBookingModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    selectedAppointment: {
-        id: number;
-        patient: string;
-        provider: string;
-        date: Date;
-        time: string;
-        status: string;
-    } | null;
-    onConfirmUpdate: (updatedAppointment: {
-        id: number;
-        patient: string;
-        provider: string;
-        date: Date;
-        time: string;
-        status: string;
-    }) => void;
+    selectedAppointment: AppointmentEntry | undefined;
+    onConfirmUpdate: (updatedAppointment: AppointmentEntry) => void;
 }
 
 export function EditBookingModal({ open, onOpenChange, selectedAppointment, onConfirmUpdate }: EditBookingModalProps) {
-    const [patient, setPatient] = useState<string>(selectedAppointment?.patient || "");
+    const [patient, setPatient] = useState<string>(selectedAppointment?.patientName || "");
+    const [ageSex, setAgeSex] = useState<string>(selectedAppointment?.ageSex || "");
     const [provider, setProvider] = useState<string>(selectedAppointment?.provider || "");
-    const [date, setDate] = useState<Date | undefined>(selectedAppointment?.date);
-    const [time, setTime] = useState<string>(selectedAppointment?.time || "");
-    const [status, setStatus] = useState<string>(selectedAppointment?.status || "");
+    const [department, setDepartment] = useState<string>(selectedAppointment?.department || "");  // Default to a valid department
+    const [departmentLocation, setDepartmentLocation] = useState<string>(selectedAppointment?.departmentLocation || ""); 
+    const [officeLocation, setOfficeLocation] = useState<string>(selectedAppointment?.officeLocation || ""); 
+    const [date, setDate] = useState<Date | undefined>(selectedAppointment?.appointmentDate ? new Date(selectedAppointment.appointmentDate) : undefined);
+    const [time, setTime] = useState<string>(selectedAppointment?.appointmentTime || "")
+    const [visitType, setVisitType] = useState<"New" | "Follow-up" | "Consultation">(selectedAppointment?.visitType || "Follow-up");
+    const [status, setStatus] = useState<"Confirmed" | "Pending" | "Cancelled">("Pending");
+
+
 
     const handleUpdateData = () => {
         if (selectedAppointment && date) {
             onConfirmUpdate({
-                id: selectedAppointment.id,
-                patient,
+                patientId: selectedAppointment.patientId,
+                patientName: patient,
+                ageSex,
                 provider,
-                date,
-                time,
-                status
+                appointmentDate: date.toISOString().split('T')[0],
+                appointmentTime: time,
+                department,
+                departmentLocation,
+                officeLocation,
+                visitType,
+                bookingStatus: status,
             });
         }  
         onOpenChange(false);
@@ -192,14 +191,14 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                     <Select
                       name="status"
                       value={status}
-                      onValueChange={setStatus}>
+                      onValueChange={(newValue: "Confirmed" | "Pending" | "Cancelled") => setStatus(newValue)}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="confirmed">Confirmed</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="Confirmed">Confirmed</SelectItem>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                          <SelectItem value="Cancelled">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
                   </div>
