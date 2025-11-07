@@ -89,6 +89,16 @@ export default function AppointmentsPage() {
           : apt
       )
     )
+
+    toast.success('Appointment confirmed!', {
+      description: `${appointment.patientName}'s appointment has been confirmed.`,
+      style: {
+        background: '#0891b2',
+        color: 'white',
+        border: 'none',
+      },
+      duration: 3000,
+    })
   }, [])
 
   // Handler for canceling appointment
@@ -109,6 +119,15 @@ export default function AppointmentsPage() {
       )
     )
     
+    toast.error('Appointment cancelled', {
+      description: `${appointment.patientName}'s appointment has been cancelled.`,
+      style: {
+        background: '#ef4444',
+        color: 'white',
+        border: 'none',
+      },
+      duration: 3000,
+    })
   }, [])
 
   // Confirm update from modal
@@ -122,6 +141,17 @@ export default function AppointmentsPage() {
           : apt
       )
     )
+
+    toast.success('Appointment updated!', {
+      description: `${updatedAppointment.patientName}'s appointment has been updated.`,
+      style: {
+        background: '#10b981',
+        color: 'white',
+        border: 'none',
+      },
+      className: 'custom-toast',
+      duration: 2000,
+    })
   }, [selectedAppointment])
 
   return (
