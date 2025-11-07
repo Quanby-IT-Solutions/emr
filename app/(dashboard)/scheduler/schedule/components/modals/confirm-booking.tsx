@@ -39,7 +39,7 @@ export function ConfirmBookingModal({
 }: ConfirmBookingModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Confirm Appointment</DialogTitle>
           <DialogDescription className="mb-4">

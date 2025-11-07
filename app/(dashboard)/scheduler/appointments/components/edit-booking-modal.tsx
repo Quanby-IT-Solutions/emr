@@ -129,7 +129,12 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-           <DialogContent className="min-w-xl max-h-[90vh] flex flex-col">
+           <DialogContent
+              className="max-w-3xl max-h-[90vh] overflow-y-auto"
+              onInteractOutside={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
             <DialogHeader>
               <DialogTitle>Edit Appointment</DialogTitle>
               <DialogDescription>

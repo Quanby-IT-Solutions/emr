@@ -31,7 +31,7 @@ export function GenerateBookingModal({
 }: GenerateBookingModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-lg max-h-[90vh] flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Appointment Booking Details</DialogTitle>
           <DialogDescription className="mb-4">

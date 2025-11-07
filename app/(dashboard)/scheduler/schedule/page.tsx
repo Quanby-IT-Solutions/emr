@@ -16,6 +16,8 @@ import { CreateNewPatientModal } from "./components/modals/create-new-patient"
 import { GenerateBookingModal } from "./components/modals/generate-booking"
 import { Combobox } from "@/components/ui/combo-box"
 import { Input } from "@/components/ui/input"
+import { CirclePlus } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 
 export default function ScheduleAppointmentPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
@@ -195,6 +197,7 @@ export default function ScheduleAppointmentPage() {
                   className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" 
                   onClick={handleCreateNewPatient}
                 >
+                  <CirclePlus className="h-4 w-4" />
                   Create New Patient
                 </Button>
               </CardHeader>
@@ -207,9 +210,86 @@ export default function ScheduleAppointmentPage() {
               </CardContent>
             </Card>
 
+            <div className="grid row-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Appointment Details</CardTitle>
+                  <CardDescription>Select department, provider, location, and purpose</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-1 ml-4 mr-4">
+                    <Separator className="mb-4" />
+                    <div className="grid gap-4 mb-2">
+                      <Label className="font-semibold">Health Provider Details</Label>
+                      <div className="space-y-1 m-1">
+                        <Label>Specialty/Department</Label>
+                          <Combobox 
+                            options={availableDepartments.map((d) => ({ value: d, label: d }))} 
+                            value={selectedDepartment} 
+                            onChange={handleDepartmentChange} 
+                            placeholder="Select department" 
+                          />
+                      </div>
+                      <div className="space-y-1 m-1">
+                        <Label>Department Location</Label>
+                          <Input
+                            type="text"
+                            value={selectedDeptLocation || ""}
+                            readOnly
+                            className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
+                            placeholder="Department Building"
+                          />
+                      </div>
+                    </div>
+                      
+                    <div className="grid gap-4">
+                      <div className="space-y-1 m-1">
+                        <Label>Physician</Label>
+                        <Combobox 
+                          options={availableProviders.map((p) => ({ value: p.name, label: p.name }))} 
+                          value={selectedProvider} 
+                          onChange={handleProviderChange} 
+                          placeholder="Select provider" 
+                        />
+                      </div>
+
+                      <div className="space-y-1 m-1">
+                        <Label>Office Location</Label>
+                        <Input
+                          type="text"
+                          value={selectedOfficeLocation || ""}
+                          readOnly
+                          className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
+                          placeholder="Office Room"
+                        />
+                      </div>
+                    </div>
+                  </div>                  
+                  
+                  
+                  <div className="grid gap-1 m-4">
+                    <Separator className="my-2" />
+                    <Label htmlFor="appointmentPurpose" className="font-semibold mt-3 mb-3">Purpose of Appointment</Label>
+                    <textarea 
+                      id="appointmentPurpose" 
+                      rows={15} 
+                      maxLength={600} 
+                      value={purpose} 
+                      onChange={(e) => setPurpose(e.target.value)} 
+                      className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full" 
+                      placeholder="Briefly describe the purpose" 
+                    />
+                    <p className="text-xs text-muted-foreground">Maximum 600 characters</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
             <Card>
               <CardHeader>
-                <CardTitle>Schedule</CardTitle>
+                <CardTitle>
+                  Schedule
+                </CardTitle>
                 <CardDescription>Select date and time</CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-[2fr_2fr] gap-4">
@@ -243,77 +323,6 @@ export default function ScheduleAppointmentPage() {
                       ))}
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 px-4 lg:px-6 mb-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Appointment Details</CardTitle>
-                <CardDescription>Select department, provider, location, and purpose</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-[2fr_2fr]">
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <Label>Specialty/Department</Label>
-                      <Combobox 
-                        options={availableDepartments.map((d) => ({ value: d, label: d }))} 
-                        value={selectedDepartment} 
-                        onChange={handleDepartmentChange} 
-                        placeholder="Select department" 
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label>Department Location</Label>
-                      <Input
-                        type="text"
-                        value={selectedDeptLocation || ""}
-                        readOnly
-                        className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
-                        placeholder="Department Building"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <Label>Provider</Label>
-                      <Combobox 
-                        options={availableProviders.map((p) => ({ value: p.name, label: p.name }))} 
-                        value={selectedProvider} 
-                        onChange={handleProviderChange} 
-                        placeholder="Select provider" 
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label>Office Location</Label>
-                      <Input
-                        type="text"
-                        value={selectedOfficeLocation || ""}
-                        readOnly
-                        className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
-                        placeholder="Office Room"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-1 ml-5">
-                  <Label htmlFor="appointmentPurpose">Purpose of Appointment</Label>
-                  <textarea 
-                    id="appointmentPurpose" 
-                    rows={6} 
-                    maxLength={600} 
-                    value={purpose} 
-                    onChange={(e) => setPurpose(e.target.value)} 
-                    className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full" 
-                    placeholder="Briefly describe the purpose" 
-                  />
-                  <p className="text-xs text-muted-foreground">Maximum 600 characters</p>
                 </div>
               </CardContent>
             </Card>

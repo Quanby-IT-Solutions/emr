@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { UserRole } from "@/lib/auth/roles"
 import { Button } from "@/components/ui/button"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, RefreshCcw } from "lucide-react"
 import { format, startOfToday } from "date-fns"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -96,6 +96,36 @@ export default function ProviderSchedulePage() {
             >
               Weekly
             </Button>
+
+            {/* Clear selection button */}
+            {(department !== "All" || search !== "" || viewMode !== "daily" || selectedProvider) ? (
+              <Button 
+                variant="outline" 
+                className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                onClick={() => {
+                  setDepartment("All")
+                  setSearch("")
+                  setSelectedProvider(null)
+                  setViewMode("daily")
+                }}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Clear Selection
+                </Button>
+              ) : (
+              <Button 
+                disabled
+                variant="outline" 
+                className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                onClick={() => {
+                  setDepartment("All")
+                  setSearch("")
+                  setSelectedProvider(null)
+                  setViewMode("daily")
+                }}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Clear Selection
+                </Button>
+           )}
           </div>
 
           {/* Daily view */}
