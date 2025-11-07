@@ -3,13 +3,15 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useState, useMemo } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useMemo, useCallback } from "react"
 import { dummyAppointments, AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
 import { AppointmentsFilters } from "./components/appointment-filters"
 import { AppointmentsTable } from "./components/appointments-table"
 import { CancelBookingModal } from "./components/cancel-booking-modal"
 import { EditBookingModal } from "./components/edit-booking-modal"
+import { Button } from "@/components/ui/button"
+import { RefreshCcw } from "lucide-react"
 
 export default function AppointmentsPage() {
   // State for appointments
@@ -19,6 +21,7 @@ export default function AppointmentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedDepartment, setSelectedDepartment] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   // State for modals
   const [openEdit, setOpenEdit] = useState(false)
@@ -47,18 +50,22 @@ export default function AppointmentsPage() {
       const matchesStatus =
         selectedStatus === "all" || apt.bookingStatus === selectedStatus
 
-      return matchesSearch && matchesDepartment && matchesStatus
+      // Date filter
+      const matchesDate = 
+        !selectedDate || new Date(apt.appointmentDate).toDateString() === selectedDate.toDateString()
+
+      return matchesSearch && matchesDepartment && matchesStatus && matchesDate
     })
-  }, [appointments, searchQuery, selectedDepartment, selectedStatus])
+  }, [appointments, searchQuery, selectedDepartment, selectedStatus, selectedDate])
 
   // Handler for editing appointment
-  const handleEditBooking = (appointment: AppointmentEntry) => {
+  const handleEditBooking = useCallback((appointment: AppointmentEntry) => {
     setSelectedAppointment(appointment)
     setOpenEdit(true)
-  }
+  }, [])
 
   // Handler for confirming appointment
-  const handleConfirmBooking = (appointment: AppointmentEntry) => {
+  const handleConfirmBooking = useCallback((appointment: AppointmentEntry) => {
     setAppointments((prev) =>
       prev.map((apt) =>
         apt.patientId === appointment.patientId &&
@@ -68,16 +75,16 @@ export default function AppointmentsPage() {
           : apt
       )
     )
-  }
+  }, [])
 
   // Handler for canceling appointment
-  const handleCancelBooking = (appointment: AppointmentEntry) => {
+  const handleCancelBooking = useCallback((appointment: AppointmentEntry) => {
     setSelectedAppointment(appointment)
     setOpenCancel(true)
-  }
+  }, [])
 
   // Confirm cancel from modal
-  const handleConfirmCancel = (appointment: AppointmentEntry) => {
+  const handleConfirmCancel = useCallback((appointment: AppointmentEntry) => {
     setAppointments((prev) =>
       prev.map((apt) =>
         apt.patientId === appointment.patientId &&
@@ -87,10 +94,10 @@ export default function AppointmentsPage() {
           : apt
       )
     )
-  }
+  }, [])
 
   // Confirm update from modal
-  const handleConfirmUpdate = (updatedAppointment: AppointmentEntry) => {
+  const handleConfirmUpdate = useCallback((updatedAppointment: AppointmentEntry) => {
     setAppointments((prev) =>
       prev.map((apt) =>
         apt.patientId === selectedAppointment?.patientId &&
@@ -100,7 +107,7 @@ export default function AppointmentsPage() {
           : apt
       )
     )
-  }
+  }, [selectedAppointment])
 
   return (
     <ProtectedRoute requiredRole={UserRole.SCHEDULER}>
@@ -117,8 +124,25 @@ export default function AppointmentsPage() {
           {/* Filters Section */}
           <div className="px-4 lg:px-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Filters</CardTitle>
+              <CardHeader className="grid md:grid-cols-6">
+                <div className="md:col-span-5">
+                  <CardTitle className="mb-1">Appointment Filters</CardTitle>
+                  <CardDescription>Search by Patient Name or ID, Department, Appointment Date or Status</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => {
+                    setSearchQuery("")
+                    setSelectedDepartment("all")
+                    setSelectedStatus("all")
+                    setSelectedDate(null)
+                  }}
+                >
+                  <RefreshCcw className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
               </CardHeader>
               <CardContent>
                 <AppointmentsFilters
@@ -128,6 +152,8 @@ export default function AppointmentsPage() {
                   onDepartmentChange={setSelectedDepartment}
                   selectedStatus={selectedStatus}
                   onStatusChange={setSelectedStatus}
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
                   departments={departments}
                 />
               </CardContent>
