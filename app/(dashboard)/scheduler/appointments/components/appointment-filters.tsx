@@ -17,6 +17,8 @@ interface AppointmentsFiltersProps {
   onDepartmentChange: (value: string) => void
   selectedStatus: string
   onStatusChange: (value: string) => void
+  selectedVisitType: string
+  onVisitTypeChange: (value: string) => void
   selectedDate: Date | null
   onDateChange: (date: Date | null) => void
   departments: string[]
@@ -31,6 +33,8 @@ export function AppointmentsFilters({
   onStatusChange,
   selectedDate,
   onDateChange,
+  selectedVisitType,
+  onVisitTypeChange,
   departments,
 }: AppointmentsFiltersProps) {
 
@@ -51,7 +55,7 @@ export function AppointmentsFilters({
       </div>
       
       {/* Search Bar */}
-      <div className="space-y-2 md:col-span-6">
+      <div className="space-y-2 md:col-span-4">
         <Label htmlFor="search">Search</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -77,6 +81,21 @@ export function AppointmentsFilters({
             <SelectItem value="Confirmed">Confirmed</SelectItem>
             <SelectItem value="Pending">Pending</SelectItem>
             <SelectItem value="Cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Visit Type Filter */}
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="visitType">Visit Type</Label>
+        <Select value={selectedVisitType} onValueChange={onVisitTypeChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="New">New</SelectItem>
+            <SelectItem value="Follow-up">Follow-up</SelectItem>
           </SelectContent>
         </Select>
       </div>

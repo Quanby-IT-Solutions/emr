@@ -24,6 +24,7 @@ export default function AppointmentsPage() {
   const [selectedDepartment, setSelectedDepartment] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedVisitType, setSelectedVisitType] = useState("all")
 
   // State for modals
   const [openEdit, setOpenEdit] = useState(false)
@@ -59,13 +60,17 @@ export default function AppointmentsPage() {
       const matchesStatus =
         selectedStatus === "all" || apt.bookingStatus === selectedStatus
 
+      // Visit type filter
+      const matchesVisitType =
+        selectedVisitType === "all" || apt.visitType === selectedVisitType
+
       // Date filter
       const matchesDate = 
         !selectedDate || new Date(apt.appointmentDate).toDateString() === selectedDate.toDateString()
 
-      return matchesSearch && matchesDepartment && matchesStatus && matchesDate
+      return matchesSearch && matchesDepartment && matchesStatus && matchesDate && matchesVisitType
     })
-  }, [appointments, searchQuery, selectedDepartment, selectedStatus, selectedDate])
+  }, [appointments, searchQuery, selectedDepartment, selectedStatus, selectedDate, selectedVisitType])
 
   // Handler for editing appointment
   const handleEditBooking = useCallback((appointment: AppointmentEntry) => {
@@ -226,7 +231,7 @@ export default function AppointmentsPage() {
                   <CardDescription>Search by Patient Name or ID, Department, Appointment Date or Status</CardDescription>
                 </div>
                 {/* Clear Filters Button */}
-                { searchQuery || selectedDepartment !== "all" || selectedStatus !== "all" || selectedDate ? (
+                { searchQuery || selectedDepartment !== "all" || selectedStatus !== "all" || selectedVisitType !== "all" ||selectedDate ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -236,6 +241,7 @@ export default function AppointmentsPage() {
                       setSelectedDepartment("all")
                       setSelectedStatus("all")
                       setSelectedDate(null)
+                      setSelectedVisitType("all")
                     }}
                   >
                     <RefreshCcw className="h-4 w-4 mr-2" />
@@ -252,6 +258,7 @@ export default function AppointmentsPage() {
                       setSelectedDepartment("all")
                       setSelectedStatus("all")
                       setSelectedDate(null)
+                      setSelectedVisitType("all")
                     }}
                   >
                     <RefreshCcw className="h-4 w-4 mr-2" />
@@ -268,8 +275,11 @@ export default function AppointmentsPage() {
                   onDepartmentChange={setSelectedDepartment}
                   selectedStatus={selectedStatus}
                   onStatusChange={setSelectedStatus}
+                  selectedVisitType={selectedVisitType}
+                  onVisitTypeChange={setSelectedVisitType}
                   selectedDate={selectedDate}
                   onDateChange={setSelectedDate}
+                  
                   departments={departments}
                 />
               </CardContent>
