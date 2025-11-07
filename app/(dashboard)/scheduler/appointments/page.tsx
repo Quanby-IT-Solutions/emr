@@ -3,91 +3,110 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { IconSearch } from "@tabler/icons-react"
-import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useMemo } from "react"
+import { dummyAppointments, AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
+import { AppointmentsFilters } from "./components/appointment-filters"
+import { AppointmentsTable } from "./components/appointments-table"
 import { CancelBookingModal } from "./components/cancel-booking-modal"
 import { EditBookingModal } from "./components/edit-booking-modal"
 
-interface Appointment {
-  id: number;
-  patient: string;
-  provider: string;
-  date: Date;
-  time: string;
-  status: string;
-}
-
-const mockAppointments = [
-  { id: 1, patient: "John Doe", provider: "Dr. Smith", date: "2025-10-28", time: "10:00 AM", status: "confirmed" },
-  { id: 2, patient: "Jane Smith", provider: "Dr. Johnson", date: "2025-10-28", time: "11:30 AM", status: "pending" },
-  { id: 3, patient: "Bob Wilson", provider: "Dr. Smith", date: "2025-10-29", time: "2:00 PM", status: "confirmed" },
-]
-
 export default function AppointmentsPage() {
+  // State for appointments
+  const [appointments, setAppointments] = useState<AppointmentEntry[]>(dummyAppointments)
   
-  const [openEdit, setOpenEdit] = useState(false);
-  const [openCancel, setOpenCancel] = useState(false);
-  const [appointments, setAppointments] = useState(mockAppointments.map(apt => ({
-    ...apt,
-    date: new Date(apt.date)
-  })));
-  const [selectedAppointment, setSelectedAppointment] = useState<{
-    id: number;
-    patient: string;
-    provider: string;
-    date: Date;
-    time: string;
-    status: string;
-  } | null>(null);
+  // State for filters
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedDepartment, setSelectedDepartment] = useState("all")
+  const [selectedStatus, setSelectedStatus] = useState("all")
 
-  // Edit Booking Appointment Modal Handler
-  const handleEditBooking = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setOpenEdit(true);
+  // State for modals
+  const [openEdit, setOpenEdit] = useState(false)
+  const [openCancel, setOpenCancel] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentEntry | null>(null)
+
+  // Get unique departments for filter
+  const departments = useMemo(() => {
+    return Array.from(new Set(appointments.map((apt) => apt.department)))
+  }, [appointments])
+
+  // Filtered appointments based on search and filters
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((apt) => {
+      // Search filter (patient name or patient ID)
+      const matchesSearch =
+        searchQuery === "" ||
+        apt.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        apt.patientId.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // Department filter
+      const matchesDepartment =
+        selectedDepartment === "all" || apt.department === selectedDepartment
+
+      // Status filter
+      const matchesStatus =
+        selectedStatus === "all" || apt.bookingStatus === selectedStatus
+
+      return matchesSearch && matchesDepartment && matchesStatus
+    })
+  }, [appointments, searchQuery, selectedDepartment, selectedStatus])
+
+  // Handler for editing appointment
+  const handleEditBooking = (appointment: AppointmentEntry) => {
+    setSelectedAppointment(appointment)
+    setOpenEdit(true)
   }
 
-  const handleCancelBooking = (appointment: Appointment) => {
-    setOpenCancel(true);
-    setSelectedAppointment(appointment);
+  // Handler for confirming appointment
+  const handleConfirmBooking = (appointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === appointment.patientId &&
+        apt.appointmentDate === appointment.appointmentDate &&
+        apt.appointmentTime === appointment.appointmentTime
+          ? { ...apt, bookingStatus: "Confirmed" }
+          : apt
+      )
+    )
   }
 
-    const handleConfirmCancel = (appointmentId: number) => {
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === appointmentId 
-            ? { ...apt, status: "cancelled" }
-            : apt
-        )
-      );
-    };
+  // Handler for canceling appointment
+  const handleCancelBooking = (appointment: AppointmentEntry) => {
+    setSelectedAppointment(appointment)
+    setOpenCancel(true)
+  }
 
-  const handleConfirmUpdate = (updatedAppointment: {
-    id: number;
-    patient: string;
-    provider: string;
-    date: Date;
-    time: string;
-    status: string;
-  }) => {
-    setAppointments(prev =>
-      prev.map(apt =>
-        apt.id === updatedAppointment.id
+  // Confirm cancel from modal
+  const handleConfirmCancel = (appointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === appointment.patientId &&
+        apt.appointmentDate === appointment.appointmentDate &&
+        apt.appointmentTime === appointment.appointmentTime
+          ? { ...apt, bookingStatus: "Cancelled" }
+          : apt
+      )
+    )
+  }
+
+  // Confirm update from modal
+  const handleConfirmUpdate = (updatedAppointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === selectedAppointment?.patientId &&
+        apt.appointmentDate === selectedAppointment?.appointmentDate &&
+        apt.appointmentTime === selectedAppointment?.appointmentTime
           ? updatedAppointment
           : apt
       )
-    );
-  };
+    )
+  }
 
   return (
     <ProtectedRoute requiredRole={UserRole.SCHEDULER}>
       <DashboardLayout role={UserRole.SCHEDULER}>
-        {/* Page Header */}
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          {/* Page Header */}
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Appointments</h1>
             <p className="text-muted-foreground">
@@ -95,74 +114,66 @@ export default function AppointmentsPage() {
             </p>
           </div>
 
+          {/* Filters Section */}
+          <div className="px-4 lg:px-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Filters</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AppointmentsFilters
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  selectedDepartment={selectedDepartment}
+                  onDepartmentChange={setSelectedDepartment}
+                  selectedStatus={selectedStatus}
+                  onStatusChange={setSelectedStatus}
+                  departments={departments}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Appointments Table */}
           <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1">
-                    <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search appointments..." className="pl-8" />
-                  </div>
-                  <Button>Filter</Button>
-                </div>
+                <CardTitle>
+                  Appointments ({filteredAppointments.length})
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>Provider</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {appointments.map((appointment) => (
-                      <TableRow key={appointment.id}>
-                        <TableCell className="font-medium">{appointment.patient}</TableCell>
-                        <TableCell>{appointment.provider}</TableCell>
-                        <TableCell>{appointment.date.toLocaleTimeString()}</TableCell>
-                        <TableCell>{appointment.time}</TableCell>
-                        <TableCell>
-                          <Badge variant={appointment.status === "confirmed" ? "default" : appointment.status === "cancelled" ? "destructive" : "secondary"}>
-                            {appointment.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleEditBooking({...appointment, date: new Date(appointment.date)})}>Edit</Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleCancelBooking({...appointment, date: new Date(appointment.date)})}>Cancel</Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <AppointmentsTable
+                  data={filteredAppointments}
+                  onEdit={handleEditBooking}
+                  onConfirm={handleConfirmBooking}
+                  onCancel={handleCancelBooking}
+                />
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* Edit Booking Modal */}
-        <EditBookingModal 
-          key={selectedAppointment?.id}
-          selectedAppointment={selectedAppointment} 
-          open={openEdit} 
-          onOpenChange={setOpenEdit} 
-          onConfirmUpdate={handleConfirmUpdate}
-        />
-        
-        {/* Cancel Booking Appointment Modal */}
-        <CancelBookingModal 
-          selectedAppointment={selectedAppointment} 
-          open={openCancel} 
-          onOpenChange={setOpenCancel} 
-          onConfirmCancel={handleConfirmCancel} 
-        />
+        {selectedAppointment && (
+          <EditBookingModal
+            key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
+            selectedAppointment={selectedAppointment}
+            open={openEdit}
+            onOpenChange={setOpenEdit}
+            onConfirmUpdate={handleConfirmUpdate}
+          />
+        )}
 
+        {/* Cancel Booking Modal */}
+        {selectedAppointment && (
+          <CancelBookingModal
+            selectedAppointment={selectedAppointment}
+            open={openCancel}
+            onOpenChange={setOpenCancel}
+            onConfirmCancel={handleConfirmCancel}
+          />
+        )}
       </DashboardLayout>
     </ProtectedRoute>
   )
