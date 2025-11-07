@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
 import { CreateOrderModal } from "./components/create"
 
 const dummyOrders = [
@@ -95,10 +96,10 @@ export default function OrdersPage() {
                     {dummyOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>{order.patient}</TableCell>
-                        <TableCell>{order.type}</TableCell>
+                        <TableCell><Badge variant="secondary">{order.type}</Badge></TableCell>
                         <TableCell>{order.item}</TableCell>
-                        <TableCell>{order.priority}</TableCell>
-                        <TableCell>{order.status}</TableCell>
+                        <TableCell><Badge variant="outline">{order.priority}</Badge></TableCell>
+                        <TableCell><Badge variant="default">{order.status}</Badge></TableCell>
                         <TableCell>{order.date}</TableCell>
                       </TableRow>
                     ))}

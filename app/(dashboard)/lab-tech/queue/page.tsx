@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { IconLoader, IconCheck } from "@tabler/icons-react"
 import { InProgressModal } from "./components/in-progress"
@@ -81,7 +82,7 @@ export default function QueuePage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Patient</TableHead>
-                      <TableHead>Type</TableHead>
+                      {/* <TableHead>Type</TableHead> */}
                       <TableHead>Item</TableHead>
                       <TableHead>Priority</TableHead>
                       <TableHead>Status</TableHead>
@@ -93,10 +94,10 @@ export default function QueuePage() {
                     {dummyOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>{order.patient}</TableCell>
-                        <TableCell>{order.type}</TableCell>
+                        {/* <TableCell><Badge variant="secondary">{order.type}</Badge></TableCell> */}
                         <TableCell>{order.item}</TableCell>
-                        <TableCell>{order.priority}</TableCell>
-                        <TableCell>{order.status}</TableCell>
+                        <TableCell><Badge variant="outline">{order.priority}</Badge></TableCell>
+                        <TableCell><Badge variant="default">{order.status}</Badge></TableCell>
                         <TableCell>{order.date}</TableCell>
                         <TableCell className="text-right">
                           {order.status === "Pending" && (
@@ -105,6 +106,7 @@ export default function QueuePage() {
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="border-2"
                                   onClick={() => openInProgress(order)}
                                   aria-label="Mark in progress"
                                 >
@@ -121,6 +123,7 @@ export default function QueuePage() {
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="border-2"
                                   onClick={() => openComplete(order)}
                                   aria-label="Mark complete"
                                 >
