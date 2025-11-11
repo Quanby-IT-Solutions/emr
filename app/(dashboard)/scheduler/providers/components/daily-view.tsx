@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { format, isSameDay, startOfToday } from "date-fns"
@@ -41,12 +41,15 @@ export function DailyView({ filteredData, date, onProviderClick }: DailyViewProp
   return (
     <div className="space-y-4">
       {filteredData.map(dept => {
-        const page = currentPage[dept.department] || 0
-        const totalPages = Math.ceil(dept.providers.length / PAGE_SIZE)
+        const totalPages = Math.ceil(dept.providers.length / PAGE_SIZE) || 1
+        const rawPage = currentPage[dept.department] || 0
+        const page = Math.min(rawPage, totalPages - 1)
+
         const paginatedProviders = dept.providers.slice(
           page * PAGE_SIZE,
           page * PAGE_SIZE + PAGE_SIZE
         )
+
 
         return (
           <Card key={dept.department} className="p-4 shadow-lg bg-card/95">
