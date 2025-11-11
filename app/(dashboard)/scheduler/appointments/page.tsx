@@ -3,66 +3,166 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useMemo, useCallback } from "react"
+import { dummyAppointments, AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
+import { AppointmentsFilters } from "./components/appointment-filters"
+import { AppointmentsTable } from "./components/appointments-table"
+import { CancelBookingModal } from "./components/cancel-booking-modal"
+import { EditBookingModal } from "./components/edit-booking-modal"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { IconSearch } from "@tabler/icons-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-
-interface Appointment {
-  id: number;
-  patient: string;
-  provider: string;
-  date: string;
-  time: string;
-  status: string;
-}
-
-const mockAppointments = [
-  { id: 1, patient: "John Doe", provider: "Dr. Smith", date: "2025-10-28", time: "10:00 AM", status: "confirmed" },
-  { id: 2, patient: "Jane Smith", provider: "Dr. Johnson", date: "2025-10-28", time: "11:30 AM", status: "pending" },
-  { id: 3, patient: "Bob Wilson", provider: "Dr. Smith", date: "2025-10-29", time: "2:00 PM", status: "confirmed" },
-]
+import { toast } from "sonner"
+import { Calendar, CalendarFold, CircleCheckBig, CircleX, Clock, RefreshCcw, SquarePen, Trash2} from "lucide-react"
 
 export default function AppointmentsPage() {
+  // State for appointments
+  const [appointments, setAppointments] = useState<AppointmentEntry[]>(dummyAppointments)
   
-  const [openEdit, setOpenEdit] = useState(false);
-  const [openCancel, setOpenCancel] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  // State for filters
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedDepartment, setSelectedDepartment] = useState("all")
+  const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedVisitType, setSelectedVisitType] = useState("all")
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  // State for modals
+  const [openEdit, setOpenEdit] = useState(false)
+  const [openCancel, setOpenCancel] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentEntry | null>(null)
 
-  // Edit Booking Appointment Modal Handler
-  const handleEditBooking = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setOpenEdit(true);
-  }
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0]
 
-  const handleCancelBooking = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setOpenCancel(true);
-  }
+  // Statistics
+  const totalAppointments = appointments.length
+  const totalAppointmentsToday = appointments.filter(apt => apt.appointmentDate === today).length
+  const totalPending = appointments.filter(apt => apt.bookingStatus === "Pending" && apt.appointmentDate === today).length
+  const totalConfirmed = appointments.filter(apt => apt.bookingStatus === "Confirmed" && apt.appointmentDate === today).length
+  const totalCancelled = appointments.filter(apt => apt.bookingStatus === "Cancelled" && apt.appointmentDate === today).length
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSelectedAppointment(prev => 
-      prev ? { ...prev, [name]: value } : null
-    );
-  };
+  // Get unique departments for filter
+  const departments = useMemo(() => {
+    return Array.from(new Set(appointments.map((apt) => apt.department)))
+  }, [appointments])
+
+  // Filtered appointments based on search and filters
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((apt) => {
+      // Search filter (patient name or patient ID)
+      const matchesSearch =
+        searchQuery === "" ||
+        apt.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        apt.patientId.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // Department filter
+      const matchesDepartment =
+        selectedDepartment === "all" || apt.department === selectedDepartment
+
+      // Status filter
+      const matchesStatus =
+        selectedStatus === "all" || apt.bookingStatus === selectedStatus
+
+      // Visit type filter
+      const matchesVisitType =
+        selectedVisitType === "all" || apt.visitType === selectedVisitType
+
+      // Date filter
+      const matchesDate = 
+        !selectedDate || new Date(apt.appointmentDate).toDateString() === selectedDate.toDateString()
+
+      return matchesSearch && matchesDepartment && matchesStatus && matchesDate && matchesVisitType
+    })
+  }, [appointments, searchQuery, selectedDepartment, selectedStatus, selectedDate, selectedVisitType])
+
+  // Handler for editing appointment
+  const handleEditBooking = useCallback((appointment: AppointmentEntry) => {
+    setSelectedAppointment(appointment)
+    setOpenEdit(true)
+  }, [])
+
+  // Handler for confirming appointment
+  const handleConfirmBooking = useCallback((appointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === appointment.patientId &&
+        apt.appointmentDate === appointment.appointmentDate &&
+        apt.appointmentTime === appointment.appointmentTime
+          ? { ...apt, bookingStatus: "Confirmed" }
+          : apt
+      )
+    )
+
+    toast.success('Appointment confirmed!', {
+      description: `${appointment.patientName}'s appointment has been confirmed.`,
+      style: {
+        background: '#10b981',
+        color: 'white',
+        border: 'none',
+      },
+      duration: 3000,
+    })
+  }, [])
+
+  // Handler for canceling appointment
+  const handleCancelBooking = useCallback((appointment: AppointmentEntry) => {
+    setSelectedAppointment(appointment)
+    setOpenCancel(true)
+  }, [])
+
+  // Confirm cancel from modal
+  const handleConfirmCancel = useCallback((appointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === appointment.patientId &&
+        apt.appointmentDate === appointment.appointmentDate &&
+        apt.appointmentTime === appointment.appointmentTime
+          ? { ...apt, bookingStatus: "Cancelled" }
+          : apt
+      )
+    )
+    
+    toast.error('Appointment cancelled', {
+      description: `${appointment.patientName}'s appointment has been cancelled.`,
+      icon: <Trash2 className="mr-2 h-4 w-4" />,
+      style: {
+        background: '#ef4444',
+        color: 'white',
+        border: 'none',
+      },
+      duration: 3000,
+    })
+  }, [])
+
+  // Confirm update from modal
+  const handleConfirmUpdate = useCallback((updatedAppointment: AppointmentEntry) => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.patientId === selectedAppointment?.patientId &&
+        apt.appointmentDate === selectedAppointment?.appointmentDate &&
+        apt.appointmentTime === selectedAppointment?.appointmentTime
+          ? updatedAppointment
+          : apt
+      )
+    )
+
+    toast.success('Appointment updated!', {
+      description: `${updatedAppointment.patientName}'s appointment has been updated.`,
+      icon: <SquarePen className="mr-2 h-4 w-4" />,
+      style: {
+        background: '#3b82f6',
+        color: 'white',
+        border: 'none',
+      },
+      className: 'custom-toast',
+      duration: 2000,
+    })
+  }, [selectedAppointment])
 
   return (
     <ProtectedRoute requiredRole={UserRole.SCHEDULER}>
       <DashboardLayout role={UserRole.SCHEDULER}>
-        {/* Page Header */}
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          {/* Page Header */}
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Appointments</h1>
             <p className="text-muted-foreground">
@@ -70,235 +170,196 @@ export default function AppointmentsPage() {
             </p>
           </div>
 
+          {/* Statistics Cards */}
+          <div className="px-4 lg:px-6">
+            <div className="grid gap-4 md:grid-cols-5">
+              {/* Total Appointments */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Scheduled
+                  </CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{totalAppointments}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Total appointments scheduled
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Total Appointments for Today */}
+              <Card className="border-purple-200 bg-purple-50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-purple-900">
+                    Scheduled
+                  </CardTitle>
+                  <CalendarFold className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold  text-purple-600">{totalAppointmentsToday}</div>
+                  <p className="text-xs  text-purple-700">
+                    Appointments today
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Total Pending */}
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-blue-900">
+                    Pending
+                  </CardTitle>
+                  <Clock className="h-4 w-4  text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold  text-blue-600">{totalPending}</div>
+                  <p className="text-xs  text-blue-700">
+                    Appointments today
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Total Confirmed */}
+              <Card className="border-green-200 bg-green-50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-green-800">
+                    Confirmed
+                  </CardTitle>
+                  <CircleCheckBig className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">{totalConfirmed}</div>
+                  <p className="text-xs text-green-700">
+                    Appointments today
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Total Cancelled */}
+              <Card className="border-red-200 bg-red-50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-red-900">
+                    Cancelled
+                  </CardTitle>
+                  <CircleX className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">{totalCancelled}</div>
+                  <p className="text-xs text-red-700">
+                    Appointments today
+                  </p>
+                </CardContent>
+              </Card>
+              
+            </div>
+          </div>
+
+          {/* Filters Section */}
+          <div className="px-4 lg:px-6">
+            <Card>
+              <CardHeader className="grid md:grid-cols-6">
+                <div className="md:col-span-5">
+                  <CardTitle className="mb-1">Appointment Filters</CardTitle>
+                  <CardDescription>Search by Patient Name or ID, Department, Appointment Date or Status</CardDescription>
+                </div>
+                {/* Clear Filters Button */}
+                { searchQuery || selectedDepartment !== "all" || selectedStatus !== "all" || selectedVisitType !== "all" ||selectedDate ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setSelectedDepartment("all")
+                      setSelectedStatus("all")
+                      setSelectedDate(null)
+                      setSelectedVisitType("all")
+                    }}
+                  >
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                ) : (
+                  <Button
+                    disabled
+                    variant="outline"
+                    size="sm"
+                    className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setSelectedDepartment("all")
+                      setSelectedStatus("all")
+                      setSelectedDate(null)
+                      setSelectedVisitType("all")
+                    }}
+                  >
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                )}
+                
+              </CardHeader>
+              <CardContent>
+                <AppointmentsFilters
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  selectedDepartment={selectedDepartment}
+                  onDepartmentChange={setSelectedDepartment}
+                  selectedStatus={selectedStatus}
+                  onStatusChange={setSelectedStatus}
+                  selectedVisitType={selectedVisitType}
+                  onVisitTypeChange={setSelectedVisitType}
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                  
+                  departments={departments}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Appointments Table */}
           <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className="relative flex-1">
-                    <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search appointments..." className="pl-8" />
-                  </div>
-                  <Button>Filter</Button>
-                </div>
+                <CardTitle>
+                  Appointments ({filteredAppointments.length})
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>Provider</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockAppointments.map((appointment) => (
-                      <TableRow key={appointment.id}>
-                        <TableCell className="font-medium">{appointment.patient}</TableCell>
-                        <TableCell>{appointment.provider}</TableCell>
-                        <TableCell>{appointment.date}</TableCell>
-                        <TableCell>{appointment.time}</TableCell>
-                        <TableCell>
-                          <Badge variant={appointment.status === "confirmed" ? "default" : "secondary"}>
-                            {appointment.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleEditBooking(appointment)}>Edit</Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleCancelBooking(appointment)}>Cancel</Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <AppointmentsTable
+                  data={filteredAppointments}
+                  onEdit={handleEditBooking}
+                  onConfirm={handleConfirmBooking}
+                  onCancel={handleCancelBooking}
+                />
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* Edit Booking Modal */}
-        <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-          <DialogContent className="max-w-lg max-h-[90vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Edit Appointment</DialogTitle>
-              <DialogDescription>
-                Modify the details of the selected appointment.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="flex-1 overflow-y-auto pr-1 space-y-5">
-              {/* Patient Details */}
-              <div className="grid gap-4 mt-4">
-                <Label className="font-semibold">Patient Details</Label>
-                <div className="grid gap-1">
-                  <Label htmlFor="patientName" className="text-muted-foreground">Patient Name</Label>
-                  <Input 
-                    id="patient" 
-                    name="patient" 
-                    value={selectedAppointment?.patient || ""}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="grid gap-1">
-                    <Label htmlFor="contact" className="text-sm text-muted-foreground">Mobile Number</Label>
-                    <Input
-                      id="contact"
-                      name="contact"
-                      placeholder="09XXXXXXXXX"
-                      inputMode="tel"
-                    />
-                  </div>
-                  <div className="grid gap-1">
-                    <Label htmlFor="telephone" className="text-sm text-muted-foreground">Telephone (optional)</Label>
-                    <Input
-                      id="telephone"
-                      name="telephone"
-                      placeholder="(02) XXXXXXX"
-                      inputMode="tel"
-                    />
-                  </div>
-                </div>
+        {selectedAppointment && (
+          <EditBookingModal
+            key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
+            selectedAppointment={selectedAppointment}
+            open={openEdit}
+            onOpenChange={setOpenEdit}
+            onConfirmUpdate={handleConfirmUpdate}
+          />
+        )}
 
-                {/* Health Provider Details */}    
-                <Label className="font-semibold">Health Provider Details</Label>            
-                <div className="grid gap-1">
-                  <Label htmlFor="provider" className="text-muted-foreground">Provider</Label>
-                  <Input 
-                    id="provider" 
-                    name="provider" 
-                    value={selectedAppointment?.provider || ""}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <div className="grid gap-1">
-                    <Label htmlFor="department" className="text-sm text-muted-foreground">Specialty/Department:</Label>
-                    <Input id="department" name="department" defaultValue="Cardiology" readOnly/>
-                  </div>
-                  <div className="grid gap-1">
-                    <Label htmlFor="location" className="text-sm text-muted-foreground">Location:</Label>
-                    <Input id="location" name="location" defaultValue="North Clinic" readOnly/>
-                  </div>                
-                </div>
-                
-                <Label><strong>Appointment Details</strong></Label>
-                <div className="grid md:grid-cols-[2fr_2fr] gap-3">
-                  {/* Appointment Date and Time*/}
-                  <div className="grid gap-1 ">
-                    <Label htmlFor="datetime" className="text-muted-foreground">Scheduled Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between">
-                          {date ? date.toDateString() : "Select date"}
-                          <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
-                        </Button>
-                      </PopoverTrigger> 
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          className="rounded-md border"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <Label htmlFor="time-picker" className="text-muted-foreground">Scheduled Time</Label>
-                    <Input
-                      type="time"
-                      id="time-picker"
-                      step="1"
-                      defaultValue={selectedAppointment?.time ?
-                        // Convert "hh:mm AM/PM" to "HH:MM:SS" 24h format
-                        (() => {
-                          const [time, period] = selectedAppointment.time.split(" ");
-                          const [hours, minutes] = time.split(":");
-                          const hours24 = period === "AM" ? Number(hours) : Number(hours) + 12;
-                          return `${hours24.toString().padStart(2, "0")}:${minutes}:00`;
-                        })() : ""}
-                      className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                    />
-                  </div>
-                  
-                  {/* Appointment Status*/}
-                  <div className="grid gap-1 ">
-                    <Label htmlFor="datetime" className="text-muted-foreground">Booking Status</Label>
-                    <Select
-                      name="status"
-                      defaultValue={selectedAppointment?.status || "pending"}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="confirmed">Confirmed</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="canceled">Canceled</SelectItem>
-                        </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          
-            <div className="mt-6 flex gap-2">
-              <Button onClick={() => { 
-                setOpenEdit(false); 
-                setSelectedAppointment(null);
-              }}>
-                Confirm
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setOpenEdit(false);
-                  setSelectedAppointment(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Cancel Booking Appointment Modal */}
-          <Dialog open={openCancel} onOpenChange={setOpenCancel}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cancel Appointment</DialogTitle>
-              <DialogDescription className="mt-4">
-                Are you sure you want to <strong>cancel the appointment</strong> for <strong>{selectedAppointment?.patient}</strong> with <strong>{selectedAppointment?.provider}</strong> on <strong>{selectedAppointment?.date}</strong> at <strong>{selectedAppointment?.time}</strong>?
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-2 flex gap-2">
-              <Button variant="destructive" onClick={() => {
-                setOpenCancel(false);
-                setSelectedAppointment(null);
-              }}>              
-                Confirm
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setOpenCancel(false);
-                  setSelectedAppointment(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-    
+        {/* Cancel Booking Modal */}
+        {selectedAppointment && (
+          <CancelBookingModal
+            selectedAppointment={selectedAppointment}
+            open={openCancel}
+            onOpenChange={setOpenCancel}
+            onConfirmCancel={handleConfirmCancel}
+          />
+        )}
       </DashboardLayout>
     </ProtectedRoute>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -20,15 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export type Patient = {
-  id: string
-  firstName: string
-  middleName: string
-  lastName: string
-  mobileNumber: string
-  birthday: string
-  age: number
-}
+import { Patient } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
 
 interface DataTableProps {
   data: Patient[]
@@ -58,6 +50,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     },
   ]
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -69,22 +62,50 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     },
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
-      const searchValue = filterValue.toLowerCase()
-      const patient = row.original
-      
-      return (
-        patient.id.toLowerCase().includes(searchValue) ||
-        patient.firstName.toLowerCase().includes(searchValue) ||
-        patient.middleName.toLowerCase().includes(searchValue) ||
-        patient.lastName.toLowerCase().includes(searchValue)
-      )
-    },
+    const searchValue = filterValue.toLowerCase().trim()
+    const patient = row.original
+
+    const fullName = [
+      patient.firstName,
+      patient.middleName,
+      patient.lastName
+    ]
+      .filter(Boolean) // remove undefined or empty strings
+      .join(" ")
+      .toLowerCase()
+
+    return (
+      patient.id.toLowerCase().includes(searchValue) ||
+      fullName.includes(searchValue)
+    )
+  },
     initialState: {
       pagination: {
         pageSize: 5,
       },
     },
   })
+
+  // When a new patient is selected, navigate to the page containing that patient
+  useEffect(() => {
+    if (!selectedPatientId) return
+
+    const timer = setTimeout(() => {
+      const rows = table.getFilteredRowModel().rows
+      const selectedRowIndex = rows.findIndex(
+        (row) => row.original.id === selectedPatientId
+      )
+
+      if (selectedRowIndex !== -1) {
+        const pageSize = table.getState().pagination.pageSize
+        const targetPage = Math.floor(selectedRowIndex / pageSize)
+        table.setPageIndex(targetPage)
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [selectedPatientId, table])
+
 
   const handleRowClick = (patient: Patient) => {
     if (selectedPatientId === patient.id) {
@@ -97,15 +118,16 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
 
   return (
     <div className="space-y-4">
+      <div>
+        <Input
+          placeholder="Search by name or ID..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          className="w-full"
+        />
+      </div>
+
       <div className="rounded-md border">
-        <div className="p-4 border-b">
-          <Input
-            placeholder="Search by name or ID..."
-            value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            className="w-full"
-          />
-        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -132,7 +154,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
                   onClick={() => handleRowClick(row.original)}
                   className={`cursor-pointer transition-colors duration-200 ease-linear ${
                     selectedPatientId === row.original.id
-                      ? '!bg-primary !text-primary-foreground hover:!bg-primary/90 hover:!text-primary-foreground'
+                      ? 'bg-primary! text-primary-foreground! hover:bg-primary/90! hover:text-primary-foreground!'
                       : ''
                   }`}
                 >
@@ -159,7 +181,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
           </TableBody>
         </Table>
         <div className="flex items-center justify-between px-4 py-3 border-t">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
@@ -176,7 +198,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
             >
               Previous
             </Button>
-            <div className="text-sm font-medium">
+            <div className="text-sm">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>
@@ -194,3 +216,5 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     </div>
   )
 }
+
+export type { Patient }
