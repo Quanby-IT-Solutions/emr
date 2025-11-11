@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Combobox } from "../../../../components/ui/combo-box"
-import { Departments, Provider } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
+import { Departments, Provider } from "@/app/(dashboard)/dummy-data/dummy-providers"
 import { DailyView } from "./components/daily-view"
 import { WeeklyView } from "./components/weekly-view"
 

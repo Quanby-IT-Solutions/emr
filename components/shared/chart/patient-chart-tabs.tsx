@@ -875,7 +875,7 @@ export function PatientChartTabs({ patientData, role, staffId }: PatientChartTab
               <div className="p-3 bg-red-50 border border-red-200 rounded">
                 <p className="font-semibold text-sm mb-2 flex items-center gap-2 text-red-900">
                   <IconAlertCircle className="h-4 w-4" />
-                  Doctor's Feedback:
+                  Doctor&apos;s Feedback:
                 </p>
                 {selectedNote.comments.map((comment: any) => (
                   <div key={comment.id} className="mb-2 last:mb-0">

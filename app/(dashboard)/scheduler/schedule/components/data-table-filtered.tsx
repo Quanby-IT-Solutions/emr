@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-import { Patient } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
+import { Patient } from "@/app/(dashboard)/dummy-data/dummy-patients"
 
 interface DataTableProps {
   data: Patient[]

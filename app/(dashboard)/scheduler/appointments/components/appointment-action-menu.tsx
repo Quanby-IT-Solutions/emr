@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
+import { AppointmentEntry } from "@/app/(dashboard)/dummy-data/dummy-appointments"
 
 interface AppointmentActionsMenuProps {
   appointment: AppointmentEntry

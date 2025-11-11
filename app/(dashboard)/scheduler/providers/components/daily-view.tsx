@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { format, isSameDay, startOfToday } from "date-fns"
-import { DepartmentList, Provider } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
+import { DepartmentList, Provider } from "@/app/(dashboard)/dummy-data/dummy-providers"
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react"
 
 interface DailyViewProps {

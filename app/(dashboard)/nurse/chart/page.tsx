@@ -8,179 +8,181 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { PatientChartTabs } from "@/components/shared/chart/patient-chart-tabs";
 import { IconUser, IconAlertCircle, IconHeart } from '@tabler/icons-react';
+import { nursePatientChart } from '../../dummy-data/dummy-nurse-patient';
 
 // Same mock data as clinician
-const mockPatientData: Record<string, any> = {
-  "1": {
-    patient: {
-      id: "1",
-      mrn: "MRN-001",
-      firstName: "John",
-      lastName: "Doe",
-      dateOfBirth: "1985-03-15",
-      gender: "Male",
-      contactPhone: "+1-555-0123",
-      email: "john.doe@email.com",
-      allergies: [
-        {
-          id: "a1",
-          substance: "Penicillin",
-          reaction: "Severe rash and hives",
-          severity: "SEVERE",
-          status: "ACTIVE"
-        },
-        {
-          id: "a2",
-          substance: "Peanuts",
-          reaction: "Anaphylaxis",
-          severity: "SEVERE",
-          status: "ACTIVE"
-        }
-      ],
-      encounters: [
-        {
-          id: "e1",
-          type: "INPATIENT",
-          status: "ACTIVE",
-          startDateTime: "2025-11-01T08:00:00",
-          attendingProvider: {
-            firstName: "Sarah",
-            lastName: "Johnson",
-            jobTitle: "Attending Physician"
-          },
-          currentLocation: {
-            unit: "Medical Ward",
-            roomNumber: "301",
-            bedNumber: "A"
-          },
-          _count: {
-            clinicalNotes: 5,
-            orders: 12
-          }
-        }
-      ],
-      patientHistories: [
-        {
-          id: "h1",
-          type: "MEDICAL_HISTORY",
-          entry: "Type 2 Diabetes Mellitus",
-          icd10Code: "E11.9",
-          status: "ACTIVE",
-          onsetDate: "2020-01-01"
-        }
-      ]
-    },
-    recentOrders: [
-      {
-        id: "o1",
-        orderType: "MEDICATION",
-        status: "VERIFIED",
-        priority: "ROUTINE",
-        createdAt: "2025-11-02T09:00:00",
-        placer: {
-          firstName: "Sarah",
-          lastName: "Johnson"
-        }
-      }
-    ]
-  },
-  "2": {
-    patient: {
-      id: "2",
-      mrn: "MRN-002",
-      firstName: "Jane",
-      lastName: "Smith",
-      dateOfBirth: "1992-07-22",
-      gender: "Female",
-      contactPhone: "+1-555-0456",
-      email: "jane.smith@email.com",
-      allergies: [
-        {
-          id: "a3",
-          substance: "Latex",
-          reaction: "Contact dermatitis",
-          severity: "MODERATE",
-          status: "ACTIVE"
-        }
-      ],
-      encounters: [
-        {
-          id: "e4",
-          type: "OUTPATIENT",
-          status: "PLANNED",
-          startDateTime: "2025-10-25T14:00:00",
-          attendingProvider: {
-            firstName: "David",
-            lastName: "Martinez",
-            jobTitle: "OB/GYN"
-          },
-          currentLocation: null,
-          _count: {
-            clinicalNotes: 0,
-            orders: 2
-          }
-        }
-      ],
-      patientHistories: [
-        {
-          id: "h5",
-          type: "MEDICAL_HISTORY",
-          entry: "Asthma",
-          icd10Code: "J45.909",
-          status: "ACTIVE",
-          onsetDate: "2005-05-01"
-        }
-      ]
-    },
-    recentOrders: []
-  },
-  "3": {
-    patient: {
-      id: "3",
-      mrn: "MRN-003",
-      firstName: "Bob",
-      lastName: "Wilson",
-      dateOfBirth: "1978-11-30",
-      gender: "Male",
-      contactPhone: "+1-555-0789",
-      email: "bob.wilson@email.com",
-      allergies: [],
-      encounters: [
-        {
-          id: "e6",
-          type: "EMERGENCY",
-          status: "DISCHARGED",
-          startDateTime: "2025-10-15T03:00:00",
-          attendingProvider: {
-            firstName: "Lisa",
-            lastName: "Park",
-            jobTitle: "Emergency Medicine"
-          },
-          currentLocation: null,
-          _count: {
-            clinicalNotes: 4,
-            orders: 10
-          }
-        }
-      ],
-      patientHistories: [
-        {
-          id: "h7",
-          type: "MEDICAL_HISTORY",
-          entry: "Chronic Kidney Disease Stage 3",
-          icd10Code: "N18.3",
-          status: "ACTIVE",
-          onsetDate: "2022-03-01"
-        }
-      ]
-    },
-    recentOrders: []
-  }
-};
+// const mockPatientData: Record<string, any> = {
+//   "1": {
+//     patient: {
+//       id: "1",
+//       mrn: "MRN-001",
+//       firstName: "John",
+//       lastName: "Doe",
+//       dateOfBirth: "1985-03-15",
+//       gender: "Male",
+//       contactPhone: "+1-555-0123",
+//       email: "john.doe@email.com",
+//       allergies: [
+//         {
+//           id: "a1",
+//           substance: "Penicillin",
+//           reaction: "Severe rash and hives",
+//           severity: "SEVERE",
+//           status: "ACTIVE"
+//         },
+//         {
+//           id: "a2",
+//           substance: "Peanuts",
+//           reaction: "Anaphylaxis",
+//           severity: "SEVERE",
+//           status: "ACTIVE"
+//         }
+//       ],
+//       encounters: [
+//         {
+//           id: "e1",
+//           type: "INPATIENT",
+//           status: "ACTIVE",
+//           startDateTime: "2025-11-01T08:00:00",
+//           attendingProvider: {
+//             firstName: "Sarah",
+//             lastName: "Johnson",
+//             jobTitle: "Attending Physician"
+//           },
+//           currentLocation: {
+//             unit: "Medical Ward",
+//             roomNumber: "301",
+//             bedNumber: "A"
+//           },
+//           _count: {
+//             clinicalNotes: 5,
+//             orders: 12
+//           }
+//         }
+//       ],
+//       patientHistories: [
+//         {
+//           id: "h1",
+//           type: "MEDICAL_HISTORY",
+//           entry: "Type 2 Diabetes Mellitus",
+//           icd10Code: "E11.9",
+//           status: "ACTIVE",
+//           onsetDate: "2020-01-01"
+//         }
+//       ]
+//     },
+//     recentOrders: [
+//       {
+//         id: "o1",
+//         orderType: "MEDICATION",
+//         status: "VERIFIED",
+//         priority: "ROUTINE",
+//         createdAt: "2025-11-02T09:00:00",
+//         placer: {
+//           firstName: "Sarah",
+//           lastName: "Johnson"
+//         }
+//       }
+//     ]
+//   },
+//   "2": {
+//     patient: {
+//       id: "2",
+//       mrn: "MRN-002",
+//       firstName: "Jane",
+//       lastName: "Smith",
+//       dateOfBirth: "1992-07-22",
+//       gender: "Female",
+//       contactPhone: "+1-555-0456",
+//       email: "jane.smith@email.com",
+//       allergies: [
+//         {
+//           id: "a3",
+//           substance: "Latex",
+//           reaction: "Contact dermatitis",
+//           severity: "MODERATE",
+//           status: "ACTIVE"
+//         }
+//       ],
+//       encounters: [
+//         {
+//           id: "e4",
+//           type: "OUTPATIENT",
+//           status: "PLANNED",
+//           startDateTime: "2025-10-25T14:00:00",
+//           attendingProvider: {
+//             firstName: "David",
+//             lastName: "Martinez",
+//             jobTitle: "OB/GYN"
+//           },
+//           currentLocation: null,
+//           _count: {
+//             clinicalNotes: 0,
+//             orders: 2
+//           }
+//         }
+//       ],
+//       patientHistories: [
+//         {
+//           id: "h5",
+//           type: "MEDICAL_HISTORY",
+//           entry: "Asthma",
+//           icd10Code: "J45.909",
+//           status: "ACTIVE",
+//           onsetDate: "2005-05-01"
+//         }
+//       ]
+//     },
+//     recentOrders: []
+//   },
+//   "3": {
+//     patient: {
+//       id: "3",
+//       mrn: "MRN-003",
+//       firstName: "Bob",
+//       lastName: "Wilson",
+//       dateOfBirth: "1978-11-30",
+//       gender: "Male",
+//       contactPhone: "+1-555-0789",
+//       email: "bob.wilson@email.com",
+//       allergies: [],
+//       encounters: [
+//         {
+//           id: "e6",
+//           type: "EMERGENCY",
+//           status: "DISCHARGED",
+//           startDateTime: "2025-10-15T03:00:00",
+//           attendingProvider: {
+//             firstName: "Lisa",
+//             lastName: "Park",
+//             jobTitle: "Emergency Medicine"
+//           },
+//           currentLocation: null,
+//           _count: {
+//             clinicalNotes: 4,
+//             orders: 10
+//           }
+//         }
+//       ],
+//       patientHistories: [
+//         {
+//           id: "h7",
+//           type: "MEDICAL_HISTORY",
+//           entry: "Chronic Kidney Disease Stage 3",
+//           icd10Code: "N18.3",
+//           status: "ACTIVE",
+//           onsetDate: "2022-03-01"
+//         }
+//       ]
+//     },
+//     recentOrders: []
+//   }
+// };
 
 export default function NurseChartPage() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
+  const mockPatientData = nursePatientChart;
   
   const data = patientId ? mockPatientData[patientId] : null;
 

@@ -31,9 +31,7 @@ export type WeeklyAvailability = {
   }
 }
 
-// -----------------------------------------------------------------------------
 // Departments and Providers
-// -----------------------------------------------------------------------------
 export const Departments: DepartmentList[] = [
   // ----------------- INTERNAL MEDICINE -----------------
   {
@@ -323,9 +321,7 @@ export const Departments: DepartmentList[] = [
   },
 ]
 
-// -----------------------------------------------------------------------------
 // Weekly Availability
-// -----------------------------------------------------------------------------
 export const mockWeeklyAvailability: WeeklyAvailability = {
   // ----------------- INTERNAL MEDICINE -----------------
   "Corey McDonald": {
