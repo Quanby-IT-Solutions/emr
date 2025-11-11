@@ -92,7 +92,8 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                 patientName: patient,
                 ageSex: selectedAppointment.ageSex,
                 provider: provider,
-                appointmentDate: date.toLocaleDateString(),
+                // appointmentDate: date.toISOString().split('T')[0],
+                appointmentDate: date.toLocaleDateString('en-CA'), // Format as YYYY-MM-DD
                 appointmentTime: time,
                 department: department,
                 departmentLocation: departmentLocation,
@@ -101,6 +102,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                 bookingStatus: status,
             });
         }  
+        console.log("Updated Appointment:", selectedAppointment);
         onOpenChange(false);
     }
 
