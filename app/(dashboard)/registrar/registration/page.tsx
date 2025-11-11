@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
@@ -22,7 +21,9 @@ import {
   UserPlus,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronsLeft,
+  ChevronsRight
 } from "lucide-react"
 import { format } from "date-fns"
 
@@ -34,12 +35,11 @@ export default function PatientRegistrationPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name")
   const [currentPage, setCurrentPage] = useState(1)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-
-  const itemsPerPage = 10
 
   // Filter and sort patients
   const filteredPatients = dummyRegistrations
@@ -113,7 +113,7 @@ export default function PatientRegistrationPage() {
   }
 
   return (
-    <ProtectedRoute requiredRole={UserRole.REGISTRAR}>
+    <ProtectedRoute>
       <DashboardLayout role={UserRole.REGISTRAR}>
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           {/* Header */}
@@ -163,7 +163,7 @@ export default function PatientRegistrationPage() {
                         </SelectContent>
                       </Select>
 
-                      {/* Sort By Row */}
+                      {/* Sort By */}
                       <div className="flex items-center gap-2 ml-2">
                         <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -180,27 +180,11 @@ export default function PatientRegistrationPage() {
                       </div>
                     </div>
                     
-                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          New Registration
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>New Patient Registration</DialogTitle>
-                          <DialogDescription>
-                            Complete the form below to register a new patient
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <RegistrationForm onClose={() => setIsModalOpen(false)} />
-                      </DialogContent>
-                    </Dialog>
+                    <Button onClick={() => setIsRegistrationOpen(true)}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      New Registration
+                    </Button>
                   </div>
-
-                  
                 </div>
               </CardContent>
             </Card>
@@ -210,77 +194,113 @@ export default function PatientRegistrationPage() {
           <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
-                <CardTitle>Patient Records</CardTitle>
-                <CardDescription>
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredPatients.length)} of {filteredPatients.length} patients • Sorted by {getSortLabel()}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Patient Records</CardTitle>
+                    <CardDescription>
+                      Showing {startIndex + 1}-{Math.min(endIndex, filteredPatients.length)} of {filteredPatients.length} patients • Sorted by {getSortLabel()}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Rows per page:</span>
+                    <Select
+                      value={itemsPerPage.toString()}
+                      onValueChange={(value) => {
+                        setItemsPerPage(Number(value))
+                        setCurrentPage(1)
+                      }}
+                    >
+                      <SelectTrigger className="w-[70px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient ID</TableHead>
-                      <TableHead>Full Name</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Contact Number</TableHead>
-                      <TableHead>Date Registered</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentPatients.length > 0 ? (
-                      currentPatients.map((patient) => (
-                        <TableRow key={patient.id}>
-                          <TableCell className="font-medium">{patient.id}</TableCell>
-                          <TableCell>
-                            {patient.lastName}, {patient.firstName} {patient.middleName}
-                          </TableCell>
-                          <TableCell>{patient.gender}</TableCell>
-                          <TableCell>{patient.age}</TableCell>
-                          <TableCell>{patient.contactNumber}</TableCell>
-                          <TableCell>{format(new Date(patient.dateRegistered), "PP")}</TableCell>
-                          <TableCell>{getStatusBadge(patient.status)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                title="View Details"
-                                onClick={() => handleViewPatient(patient)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                title="Edit Record"
-                                onClick={() => handleEditPatient(patient)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Patient ID</TableHead>
+                        <TableHead>Full Name</TableHead>
+                        <TableHead>Gender</TableHead>
+                        <TableHead>Age</TableHead>
+                        <TableHead>Contact Number</TableHead>
+                        <TableHead>Date Registered</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {currentPatients.length > 0 ? (
+                        currentPatients.map((patient) => (
+                          <TableRow key={patient.id}>
+                            <TableCell className="font-medium">{patient.id}</TableCell>
+                            <TableCell>
+                              {patient.lastName}, {patient.firstName} {patient.middleName}
+                            </TableCell>
+                            <TableCell>{patient.gender}</TableCell>
+                            <TableCell>{patient.age}</TableCell>
+                            <TableCell>{patient.contactNumber}</TableCell>
+                            <TableCell>{format(new Date(patient.dateRegistered), "PP")}</TableCell>
+                            <TableCell>{getStatusBadge(patient.status)}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  title="View Details"
+                                  onClick={() => handleViewPatient(patient)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  title="Edit Record"
+                                  onClick={() => handleEditPatient(patient)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                            No patients found matching your search criteria
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                          No patients found matching your search criteria
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
 
-                {/* Pagination */}
-                {totalPages > 0 && (
-                  <div className="flex items-center justify-between pt-4">
-                    <p className="text-sm text-muted-foreground">
+                {/* Pagination Controls */}
+                {filteredPatients.length > 0 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-muted-foreground">
                       Page {currentPage} of {totalPages}
-                    </p>
-                    <div className="flex gap-2">
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -288,16 +308,49 @@ export default function PatientRegistrationPage() {
                         disabled={currentPage === 1}
                       >
                         <ChevronLeft className="h-4 w-4" />
-                        Previous
                       </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(page => {
+                            return (
+                              page === 1 ||
+                              page === totalPages ||
+                              Math.abs(page - currentPage) <= 1
+                            )
+                          })
+                          .map((page, index, array) => (
+                            <div key={page} className="flex items-center">
+                              {index > 0 && array[index - 1] !== page - 1 && (
+                                <span className="px-2 text-muted-foreground">...</span>
+                              )}
+                              <Button
+                                variant={currentPage === page ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(page)}
+                                className="min-w-[40px]"
+                              >
+                                {page}
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
                       >
-                        Next
                         <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -308,6 +361,10 @@ export default function PatientRegistrationPage() {
         </div>
 
         {/* Modals */}
+        <RegistrationForm 
+          open={isRegistrationOpen}
+          onOpenChange={setIsRegistrationOpen}
+        />
         <ViewPatientModal 
           open={isViewModalOpen} 
           onOpenChange={setIsViewModalOpen}
