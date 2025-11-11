@@ -31,6 +31,7 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
     const [visitType, setVisitType] = useState<"Follow-up" | "New">(selectedAppointment?.visitType || "New");
     const [status, setStatus] = useState<"Confirmed" | "Pending" | "Cancelled">(selectedAppointment?.bookingStatus || "Pending");
 
+    
     // Health Departments and Providers
     const availableDepartments = useMemo(() => {
         return Departments.map((dept) => dept.department);

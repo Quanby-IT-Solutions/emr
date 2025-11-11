@@ -13,7 +13,6 @@ import { EditBookingModal } from "./components/edit-booking-modal"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Calendar, CalendarFold, CircleCheckBig, CircleX, Clock, RefreshCcw, SquarePen, Trash2} from "lucide-react"
-import { startOfToday } from "date-fns"
 
 export default function AppointmentsPage() {
   // State for appointments
@@ -31,12 +30,15 @@ export default function AppointmentsPage() {
   const [openCancel, setOpenCancel] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentEntry | null>(null)
 
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0]
+
   // Statistics
   const totalAppointments = appointments.length
-  const totalAppointmentsToday = appointments.filter(apt => apt.appointmentDate === startOfToday().toLocaleDateString()).length
-  const totalPending = appointments.filter(apt => apt.bookingStatus === "Pending" && apt.appointmentDate === startOfToday().toLocaleDateString()).length
-  const totalConfirmed = appointments.filter(apt => apt.bookingStatus === "Confirmed" && apt.appointmentDate === startOfToday().toLocaleDateString()).length
-  const totalCancelled = appointments.filter(apt => apt.bookingStatus === "Cancelled" && apt.appointmentDate === startOfToday().toLocaleDateString()).length
+  const totalAppointmentsToday = appointments.filter(apt => apt.appointmentDate === today).length
+  const totalPending = appointments.filter(apt => apt.bookingStatus === "Pending" && apt.appointmentDate === today).length
+  const totalConfirmed = appointments.filter(apt => apt.bookingStatus === "Confirmed" && apt.appointmentDate === today).length
+  const totalCancelled = appointments.filter(apt => apt.bookingStatus === "Cancelled" && apt.appointmentDate === today).length
 
   // Get unique departments for filter
   const departments = useMemo(() => {
@@ -341,7 +343,7 @@ export default function AppointmentsPage() {
         {/* Edit Booking Modal */}
         {selectedAppointment && (
           <EditBookingModal
-            // key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
+            key={`${selectedAppointment.patientId}-${selectedAppointment.appointmentDate}-${selectedAppointment.appointmentTime}`}
             selectedAppointment={selectedAppointment}
             open={openEdit}
             onOpenChange={setOpenEdit}

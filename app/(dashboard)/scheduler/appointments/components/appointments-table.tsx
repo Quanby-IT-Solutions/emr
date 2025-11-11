@@ -101,6 +101,11 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
         const date = new Date(row.original.appointmentDate)
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.appointmentDate).getTime()
+        const dateB = new Date(rowB.original.appointmentDate).getTime()
+        return dateA - dateB
+      },
     },
     {
       accessorKey: "appointmentTime",
