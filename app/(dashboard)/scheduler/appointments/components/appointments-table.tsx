@@ -7,6 +7,8 @@ import {
   getPaginationRowModel,
   useReactTable,
   ColumnDef,
+  SortingState,
+  getSortedRowModel,
 } from "@tanstack/react-table"
 import {
   Table,
@@ -21,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
 import { AppointmentActionsMenu } from "./appointment-action-menu"
 import { Badge } from "@/components/ui/badge"
+import { ArrowUpDown } from "lucide-react"
 
 interface AppointmentsTableProps {
   data: AppointmentEntry[]
@@ -35,23 +38,65 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     pageSize: 10,
   })
 
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const columns: ColumnDef<AppointmentEntry>[] = [
     {
       accessorKey: "patientId",
-      header: "Patient ID",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Patient ID
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       accessorKey: "patientName",
-      header: "Patient Name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Patient Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => <span className="font-medium">{row.original.patientName}</span>,
     },
     {
       accessorKey: "ageSex",
-      header: "Age/Sex",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Age/Sex
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       accessorKey: "appointmentDate",
-      header: "Date",
+      header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
       cell: ({ row }) => {
         const date = new Date(row.original.appointmentDate)
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -59,19 +104,59 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     },
     {
       accessorKey: "appointmentTime",
-      header: "Time",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Time
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       accessorKey: "department",
-      header: "Department",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Department
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       accessorKey: "provider",
-      header: "Physician",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Physician
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
     },
     {
       accessorKey: "visitType",
-      header: "Visit Type",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Visit Type
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         const type = row.original.visitType
         const variant = type === "New" ? "default" : "secondary"
@@ -80,7 +165,17 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     },
     {
       accessorKey: "bookingStatus",
-      header: "Status",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
       cell: ({ row }) => {
         const status = row.original.bookingStatus
         const variant = 
@@ -109,10 +204,13 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
     state: {
       pagination,
+      sorting,
     },
   })
 
