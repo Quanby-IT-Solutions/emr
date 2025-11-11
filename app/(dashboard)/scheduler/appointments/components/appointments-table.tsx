@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import {
   flexRender,
@@ -10,20 +8,13 @@ import {
   SortingState,
   getSortedRowModel,
 } from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
 import { AppointmentActionsMenu } from "./appointment-action-menu"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown } from "lucide-react"
+import { ChevronDownIcon, ChevronUpIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface AppointmentsTableProps {
   data: AppointmentEntry[]
@@ -37,69 +28,32 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     pageIndex: 0,
     pageSize: 10,
   })
-
   const [sorting, setSorting] = useState<SortingState>([])
 
   const columns: ColumnDef<AppointmentEntry>[] = [
     {
       accessorKey: "patientId",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Patient ID
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Patient ID",
     },
     {
       accessorKey: "patientName",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Patient Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Patient Name",
       cell: ({ row }) => <span className="font-medium">{row.original.patientName}</span>,
     },
     {
       accessorKey: "ageSex",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Age/Sex
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Age/Sex",
     },
     {
       accessorKey: "appointmentDate",
-      header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+      header: "Date",
       cell: ({ row }) => {
         const date = new Date(row.original.appointmentDate)
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
       },
       sortingFn: (rowA, rowB) => {
         const dateA = new Date(rowA.original.appointmentDate).getTime()
@@ -109,59 +63,19 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     },
     {
       accessorKey: "appointmentTime",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Time
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Time",
     },
     {
       accessorKey: "department",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Department
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Department",
     },
     {
       accessorKey: "provider",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Physician
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Physician",
     },
     {
       accessorKey: "visitType",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Visit Type
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Visit Type",
       cell: ({ row }) => {
         const type = row.original.visitType
         const variant = type === "New" ? "default" : "secondary"
@@ -170,23 +84,15 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
     },
     {
       accessorKey: "bookingStatus",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Status",
       cell: ({ row }) => {
         const status = row.original.bookingStatus
-        const variant = 
-          status === "Confirmed" ? "default" : 
-          status === "Cancelled" ? "destructive" : 
-          "secondary"
+        const variant =
+          status === "Confirmed"
+            ? "default"
+            : status === "Cancelled"
+            ? "destructive"
+            : "secondary"
         return <Badge variant={variant}>{status}</Badge>
       },
     },
@@ -227,38 +133,60 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+                  <TableHead
+                    key={header.id}
+                    aria-sort={
+                      header.column.getIsSorted() === "asc"
+                        ? "ascending"
+                        : header.column.getIsSorted() === "desc"
+                        ? "descending"
+                        : "none"
+                    }
+                  >
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={cn(
+                          header.column.getCanSort() &&
+                            "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
                         )}
+                        onClick={header.column.getToggleSortingHandler()}
+                        onKeyDown={(e) => {
+                          if (header.column.getCanSort() && (e.key === "Enter" || e.key === " ")) {
+                            e.preventDefault()
+                            header.column.getToggleSortingHandler()?.(e)
+                          }
+                        }}
+                        tabIndex={header.column.getCanSort() ? 0 : undefined}
+                      >
+                        <span className="truncate">
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </span>
+                        {{
+                          asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} />,
+                          desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} />,
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </div>
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No appointments found.
                 </TableCell>
               </TableRow>
@@ -267,7 +195,7 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
         </Table>
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Rows per page:</span>
@@ -290,25 +218,23 @@ export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: Appoint
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            className="btn-outline btn-sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             Previous
-          </Button>
+          </button>
           <span className="text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            className="btn-outline btn-sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
             Next
-          </Button>
+          </button>
         </div>
       </div>
     </div>
