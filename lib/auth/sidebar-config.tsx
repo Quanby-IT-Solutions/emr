@@ -141,6 +141,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconUsers,
     },
     {
+      title: "Triage Assessment",
+      url: "/nurse/triage",
+      icon: IconStethoscope,
+    },
+    {
       title: "Medication Administration",
       url: "/nurse/medications",
       icon: IconPill,
