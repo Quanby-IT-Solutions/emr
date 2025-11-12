@@ -41,25 +41,24 @@ import {
 } from "@/components/ui/pagination"
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
+import { Button } from "@/components/ui/button"
+import { useRouter } from 'next/navigation';
 
 interface TriageTableProps {
   data: TriageAssessment[]
-//   onEdit: (id: string) => void
-//   onConfirm: (id: string) => void
-//   onCancel: (id: string) => void
 }
 
-export function TriageTable({
-  data,
-//   onEdit,
-//   onConfirm,
-//   onCancel,
-}: TriageTableProps) {
+export function TriageTable({ data}: TriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
+  const router = useRouter();
+
+  const viewPatientChart = (patientId: string) => {
+    router.push(`/nurse/chart?patientId=${patientId}`);
+  };
 
   const columns: ColumnDef<TriageAssessment>[] = [
     {
@@ -89,14 +88,6 @@ export function TriageTable({
     {
         accessorKey: "patient.arrivalDetails.time",
         header: "Arrival Time",
-        cell: ({ row }) => {
-        const date = new Date(row.original.patient.arrivalDetails.date)
-        return date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-        })
-      },
     },
     {
         accessorKey: "patient.lastDateOfTriage",
@@ -117,25 +108,13 @@ export function TriageTable({
     {
       accessorKey: "patient.lastTimeOfTriage",
       header: "Last Triage Time",
-      cell: ({ row }) => {
-        const value = row.original.patient.lastDateOfTriage
-        if (value === null || value === undefined) {
-          return null
-        }
-        const date = new Date(value)
-        return date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-        })
-      },
     },
     {
       accessorKey: "patient.triageType",
       header: "Triage Type",
       cell: ({ row }) => {
         const type = row.original.patient.triageType
-        const variant = type === "OPD" ? "default" : "secondary"
+        const variant = type === "OPD" ? "default" : type === "WALK_IN" ? "default" : type === "EMERGENCY" ? "destructive" : "tertiary"
         return <Badge variant={variant}>{type}</Badge>
       },
     },
@@ -146,6 +125,14 @@ export function TriageTable({
         const category = row.original.patient.currentTriageCategory
         const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : category === "DEAD" ? "dimmed" : "default"
         return <Badge variant={variant}>{category}</Badge>
+        }
+    },
+    {
+        accessorKey: "viewChart",
+        header: "View Chart",
+        cell: ({ row }) => {
+        const patientId = row.original.patient.id
+        return <Button size="sm" variant="outline" onClick={() => viewPatientChart(patientId)}>View Chart</Button>
         }
     }
   ]

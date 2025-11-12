@@ -36,8 +36,23 @@ export function TriageFilters({
 }: TriageFiltersProps) {
 
   return (
-    <div className="grid gap-4 md:grid-cols-12">      
-            {/* Arrival Date Filter */}
+    <div className="grid gap-4 md:grid-cols-12">            
+      {/* Search Bar */}
+      <div className="space-y-2 md:col-span-4">
+        <Label htmlFor="search">Search</Label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="search"
+            placeholder="Patient name or ID..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9 "
+          />
+        </div>
+      </div>
+
+      {/* Arrival Date Filter */}
       <div className="space-y-2 md:col-span-2">
         <Label htmlFor="date">Arrival Date</Label>
         <Popover>
@@ -75,21 +90,6 @@ export function TriageFilters({
             />
           </PopoverContent>
         </Popover>
-      </div>
-      
-      {/* Search Bar */}
-      <div className="space-y-2 md:col-span-4">
-        <Label htmlFor="search">Search</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="search"
-            placeholder="Patient name or ID..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 "
-          />
-        </div>
       </div>
 
       {/* Triage Type Filter */}

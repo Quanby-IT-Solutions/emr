@@ -6,7 +6,7 @@ import { UserRole } from "@/lib/auth/roles"
 import { useMemo, useState } from "react"
 import { TriageAssessment, TriageEntry } from "../../dummy-data/dummy-triage"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Siren, ClockAlert, ClipboardPlus, Ghost, RefreshCcw, UserPlus, Stethoscope } from "lucide-react"
+import { Siren, ClockAlert, ClipboardPlus, Ghost, RefreshCcw, UserPlus, Stethoscope, ClipboardClock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TriageFilters } from "./components/triage-filters"
 import { TriageTable } from "./components/triage-table"
@@ -60,7 +60,12 @@ export default function TriagePage() {
                             <div className="flex items-center gap-4">
                                 <Button onClick={() => setTriageOpen(true)} className="bg-blue-600 hover:bg-blue-700">
                                 <UserPlus className="mr-2 h-4 w-4" />
-                                    Start Triage Assessment
+                                    New Triage Assessment
+                                </Button>
+
+                                <Button onClick={() => setTriageOpen(true)} className="bg-orange-500 hover:bg-orange-600">
+                                <ClipboardClock className="mr-2 h-4 w-4" />
+                                    Follow-up Assessment
                                 </Button>
                             </div>
                         </div>
