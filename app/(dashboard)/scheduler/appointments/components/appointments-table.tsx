@@ -292,7 +292,7 @@ export function AppointmentsTable({
       </div>
 
       {/* Right: Pagination controls */}
-      <Pagination className="w-fit ml-auto">
+      <Pagination className="flex w-full justify-end">
         <PaginationContent>
           {/* First */}
           <PaginationItem>

@@ -144,7 +144,7 @@ export function TriageTable({
         header: "Triage Category",
         cell: ({ row }) => {
         const category = row.original.patient.currentTriageCategory
-        const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "outline" : "default"
+        const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : category === "DEAD" ? "dimmed" : "default"
         return <Badge variant={variant}>{category}</Badge>
         }
     }
@@ -277,7 +277,7 @@ export function TriageTable({
       </div>
 
     {/* --- Pagination --- */}
-    <div className="flex w-full items-center justify-between gap-6">
+    <div className="flex w-full justify-between gap-6">
       {/* Left: Rows per page */}
       <div className="flex shrink-0 items-center gap-3">
         <span className="text-sm text-muted-foreground">Rows per page:</span>
@@ -298,7 +298,7 @@ export function TriageTable({
       </div>
 
       {/* Right: Pagination controls */}
-      <Pagination className="w-fit ml-auto">
+      <Pagination className="flex w-full justify-end">
         <PaginationContent>
           {/* First */}
           <PaginationItem>
@@ -404,7 +404,7 @@ export function TriageTable({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </div>
+      </div>
     </div>
   )
 }

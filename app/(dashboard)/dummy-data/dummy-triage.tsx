@@ -8,7 +8,7 @@ export interface TriageAssessment {
         triageType: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER";
         currentTriageCategory: "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD";
         lastDateOfTriage: Date | null;
-        lastTimeOfTriage: string | null;
+        lastTimeOfTriage: string;
         companion: {
             name: string;
             contact: number | null;
@@ -104,7 +104,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
       lastDateOfTriage: new Date(),
-      lastTimeOfTriage: "10:30 AM",
+      lastTimeOfTriage: "10:30",
       companion: {
         name: "Jane Doe",
         contact: 9876543222,
@@ -198,9 +198,9 @@ export const TriageEntry: TriageAssessment[] = [
       phoneNumber: 9123456780,
       address: "45 Oak Avenue, Rivertown",
       triageType: "OPD",
-      currentTriageCategory: "NON_URGENT",
+      currentTriageCategory: "DEAD",
       lastDateOfTriage: new Date(),
-      lastTimeOfTriage: "11:15 AM",
+      lastTimeOfTriage: "11:15",
       companion: {
         name: "Luis Gonzalez",
         contact: 9123456781,
@@ -296,7 +296,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "REFERRAL",
       currentTriageCategory: "URGENT",
       lastDateOfTriage: new Date(),
-      lastTimeOfTriage: "09:00 AM",
+      lastTimeOfTriage: "09:00",
       companion: {
         name: "Ngozi Adeyemi",
         contact: 9012345679,
@@ -392,7 +392,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "WALK_IN",
       currentTriageCategory: "NON_URGENT",
       lastDateOfTriage: new Date("2025-11-12"),
-      lastTimeOfTriage: "11:00 AM",
+      lastTimeOfTriage: "11:00",
       companion: {
         name: "Fatima Bello",
         contact: 9234567891,
@@ -488,7 +488,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "SCHEDULED",
       currentTriageCategory: "NON_URGENT",
       lastDateOfTriage: new Date("2025-11-12"),
-      lastTimeOfTriage: "07:30 AM",
+      lastTimeOfTriage: "07:30",
       companion: {
         name: "Karen Smith",
         contact: 9345678902,
