@@ -43,23 +43,17 @@ import {
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
 import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation';
 
 interface TriageTableProps {
   data: TriageAssessment[]
 }
 
-export function TriageTable({ data}: TriageTableProps) {
+export function ERTriageTable({ data}: TriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
-  const router = useRouter();
-
-  const viewPatientChart = (patientId: string) => {
-    router.push(`/nurse/chart?patientId=${patientId}`);
-  };
 
   const columns: ColumnDef<TriageAssessment>[] = [
     {
@@ -90,26 +84,26 @@ export function TriageTable({ data}: TriageTableProps) {
         accessorKey: "patient.arrivalDetails.time",
         header: "Arrival Time",
     },
-    // {
-    //     accessorKey: "patient.lastDateOfTriage",
-    //     header: "Last Triage Date",
-    //     cell: ({ row }) => {
-    //     const value = row.original.patient.lastDateOfTriage
-    //     if (value === null || value === undefined) {
-    //       return null
-    //     }
-    //     const date = new Date(value)
-    //     return date.toLocaleDateString("en-US", {
-    //       month: "short",
-    //       day: "numeric",
-    //       year: "numeric",
-    //     })
-    //   },
-    // },
-    // {
-    //   accessorKey: "patient.lastTimeOfTriage",
-    //   header: "Last Triage Time",
-    // },
+    {
+        accessorKey: "patient.lastDateOfTriage",
+        header: "Last Triage Date",
+        cell: ({ row }) => {
+        const value = row.original.patient.lastDateOfTriage
+        if (value === null || value === undefined) {
+          return null
+        }
+        const date = new Date(value)
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      },
+    },
+    {
+      accessorKey: "patient.lastTimeOfTriage",
+      header: "Last Triage Time",
+    },
     {
       accessorKey: "patient.triageType",
       header: "Triage Type",
@@ -129,12 +123,13 @@ export function TriageTable({ data}: TriageTableProps) {
         }
     },
     {
-        accessorKey: "patient.status",
-        header: "Status",
+        accessorKey: "followUp",
+        header: "Follow Up",
         cell: ({ row }) => {
-        const status = row.original.patient.status
-        const variant = status === "REFERRED TO SPECIALIST" ? "warning" : status === "FORWARD TO APT. QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
-        return <Badge variant={variant}>{status}</Badge>
+        const patientId = row.original.patient.id
+        return <Button size="sm" className="bg-orange-400 hover:bg-orange-500">
+          <ClipboardClock className="h-4 w-4" />
+          </Button>
         }
     }
   ]

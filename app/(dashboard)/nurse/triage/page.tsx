@@ -6,10 +6,13 @@ import { UserRole } from "@/lib/auth/roles"
 import { useMemo, useState } from "react"
 import { TriageAssessment, TriageEntry } from "../../dummy-data/dummy-triage"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Siren, ClockAlert, ClipboardPlus, Ghost, RefreshCcw, UserPlus, Stethoscope, ClipboardClock } from "lucide-react"
+import { Siren, ClockAlert, ClipboardPlus, Ghost, RefreshCcw, UserPlus, Stethoscope, ClipboardClock, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TriageFilters } from "./components/triage-filters"
 import { TriageTable } from "./components/triage-table"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { ERTriageTable } from "./components/er-triage-table"
 
 export default function TriagePage() {
     const [triageData, setTriageData] = useState<TriageAssessment[]>(TriageEntry)
@@ -19,13 +22,15 @@ export default function TriagePage() {
     const [selectedTriageCategory, setSelectedTriageCategory] = useState("all");
     const [selectedArrivalDate, setSelectedArrivalDate] = useState<Date | null>(null);
     const [selectedLastTriageDate, setSelectedLastTriageDate] = useState<Date | null>(null);
+
+    const [isERMode, setIsERMode] = useState(false);
     
     // Statistics - Preliminary data
     const currentDate = new Date().toISOString().split('T')[0];
     const currentPatients = triageData.filter((entry) => entry.patient.lastDateOfTriage?.toISOString().split('T')[0] === currentDate);
 
     // Statistics
-    const totalAssessments = currentPatients.length;
+    const totalAssessments = triageData.length;
     const totalEmergent = currentPatients.filter((p) => p.patient.currentTriageCategory === "EMERGENT").length;
     const totalUrgent = currentPatients.filter((p) => p.patient.currentTriageCategory === "URGENT").length;
     const totalNonUrgent = currentPatients.filter((p) => p.patient.currentTriageCategory === "NON_URGENT").length;
@@ -42,7 +47,17 @@ export default function TriagePage() {
             return searchMatch && triageTypeMatch && triageCategoryMatch && arrivalDateMatch && lastTriageDateMatch;
         })
     }, [triageData, searchQuery, selectedTriageType, selectedTriageCategory, selectedArrivalDate, selectedLastTriageDate]);
-    
+
+    const handleERCheck = (checked: boolean) => {
+        setIsERMode(checked);
+        if (checked) setSelectedTriageType("EMERGENCY")
+        else setSelectedTriageType("all");
+    };
+
+    const handleStatCardClick = () => {
+
+    }
+
     return (
         <ProtectedRoute requiredRole={UserRole.NURSE}>
             <DashboardLayout role={UserRole.NURSE}>
@@ -58,25 +73,37 @@ export default function TriagePage() {
 
                             {/* Open Triage Modal */}
                             <div className="flex items-center gap-4">
+                                {/* ER Mode Toggle */}
+                                <div className="flex items-center space-x-3 bg-white border rounded-lg p-3 shadow-sm">
+                                <Switch
+                                    id="er-mode"
+                                    checked={isERMode}
+                                    onCheckedChange={handleERCheck}
+                                    className="data-[state=checked]:bg-red-600"
+                                />
+                                <Label className="cursor-pointer font-semibold flex items-center gap-2">
+                                    <AlertCircle className={`h-4 w-4 ${isERMode ? 'text-red-600' : 'text-muted-foreground'}`} />
+                                    {isERMode ? (
+                                    <span className="text-red-600">ER Mode Active</span>
+                                    ) : (
+                                    <span>ER Mode</span>
+                                    )}
+                                </Label>
+                                </div>
+                                
                                 <Button onClick={() => setTriageOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-                                <UserPlus className="mr-2 h-4 w-4" />
+                                <UserPlus className="h-4 w-4" />
                                     New Triage Assessment
-                                </Button>
-
-                                <Button onClick={() => setTriageOpen(true)} className="bg-orange-500 hover:bg-orange-600">
-                                <ClipboardClock className="mr-2 h-4 w-4" />
-                                    Follow-up Assessment
                                 </Button>
                             </div>
                         </div>
-                        
                     </div>
                     
                     {/* Statistics Cards */}
                     <div className="px-4 lg:px-6">
                         <div className="grid gap-4 md:grid-cols-5">
                             {/* Total Assessments */}
-                            <Card className="border-blue-200 bg-blue-50">
+                            <Card className="border-blue-200 bg-blue-50" onClick={handleStatCardClick}>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-blue-900">
                                     Total Assessments
@@ -86,7 +113,7 @@ export default function TriagePage() {
                                 <CardContent>
                                 <div className="text-2xl font-bold text-blue-600">{totalAssessments}</div>
                                 <p className="text-xs text-blue-600">
-                                    assessments conducted today
+                                    assessments conducted
                                 </p>
                                 </CardContent>
                             </Card>
@@ -222,7 +249,21 @@ export default function TriagePage() {
                     
                     {/* Triage Table */}
                     <div className="px-4 lg:px-6">
-                        <Card>
+                        {isERMode ? (
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle>
+                                        ER Cases
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <ERTriageTable
+                                        data={filteredTriageData}
+                                    />
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle>
                                     Triage Cases
@@ -234,8 +275,8 @@ export default function TriagePage() {
                                 />
                             </CardContent>
                         </Card>
+                        )}  
                     </div>
-
                 </div>
             </DashboardLayout>
         </ProtectedRoute>
