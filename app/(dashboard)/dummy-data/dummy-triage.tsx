@@ -590,7 +590,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "EMERGENCY",
       currentTriageCategory: "URGENT",
       status: "REFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-15"),
       lastTimeOfTriage: "13:45",
       companion: {
         name: "David Chen",
@@ -598,7 +598,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Husband",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-15"),
         time: "13:20",
         modeOfTransport: "Ambulance",
         referredBy: "Emergency Services",
@@ -687,7 +687,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "WALK_IN",
       currentTriageCategory: "EMERGENT",
       status: "REFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-18"),
       lastTimeOfTriage: "14:30",
       companion: {
         name: "Sarah Thompson",
@@ -695,7 +695,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Wife",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-18"),
         time: "14:15",
         modeOfTransport: "Private Car",
         referredBy: "Self",
@@ -784,7 +784,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
       status: "REFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-19"),
       lastTimeOfTriage: "15:10",
       companion: {
         name: "Raj Patel",
@@ -792,7 +792,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Husband",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-19"),
         time: "15:00",
         modeOfTransport: "Ambulance",
         referredBy: "Emergency Services",
@@ -881,7 +881,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "WALK_IN",
       currentTriageCategory: "URGENT",
       status: "REFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-17"),
       lastTimeOfTriage: "16:20",
       companion: {
         name: "Marcus Brown",
@@ -889,7 +889,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Friend",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-17"),
         time: "16:05",
         modeOfTransport: "Private Car",
         referredBy: "Self",
@@ -978,7 +978,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "REFERRAL",
       currentTriageCategory: "NON_URGENT",
       status: "FOR DISCHARGE",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-18"),
       lastTimeOfTriage: "12:45",
       companion: {
         name: "Patricia O'Brien",
@@ -986,7 +986,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Daughter",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-16"),
         time: "12:30",
         modeOfTransport: "Wheelchair Van",
         referredBy: "Nursing Home",
@@ -1075,7 +1075,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
       status: "REFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-14"),
       lastTimeOfTriage: "17:40",
       companion: {
         name: "Layla Hassan",
@@ -1083,7 +1083,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Wife",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-14"),
         time: "17:25",
         modeOfTransport: "Ambulance",
         referredBy: "Emergency Services",
@@ -1172,7 +1172,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "WALK_IN",
       currentTriageCategory: "URGENT",
       status: "TRANSFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-13"),
       lastTimeOfTriage: "18:25",
       companion: {
         name: "Maria Rodriguez",
@@ -1180,7 +1180,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Mother",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-13"),
         time: "18:10",
         modeOfTransport: "Private Car",
         referredBy: "Self",
@@ -1269,7 +1269,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "REFERRAL",
       currentTriageCategory: "NON_URGENT",
       status: "IN QUEUE",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-20"),
       lastTimeOfTriage: "10:15",
       companion: {
         name: "None",
@@ -1277,7 +1277,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "None",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-20"),
         time: "10:00",
         modeOfTransport: "Private Car",
         referredBy: "Primary Care Physician",
@@ -1366,7 +1366,7 @@ export const TriageEntry: TriageAssessment[] = [
       triageType: "EMERGENCY",
       currentTriageCategory: "URGENT",
       status: "TRANSFERRED",
-      lastDateOfTriage: new Date("2025-11-12"),
+      lastDateOfTriage: new Date("2025-11-15"),
       lastTimeOfTriage: "19:50",
       companion: {
         name: "Hassan Osman",
@@ -1374,7 +1374,7 @@ export const TriageEntry: TriageAssessment[] = [
         relation: "Husband",
       },
       arrivalDetails: {
-        date: new Date("2025-11-12"),
+        date: new Date("2025-11-15"),
         time: "19:30",
         modeOfTransport: "Private Car",
         referredBy: "Self",

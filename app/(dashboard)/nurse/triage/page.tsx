@@ -45,14 +45,17 @@ export default function TriagePage() {
             const triageTypeMatch = selectedTriageType === "all" || entry.patient.triageType === selectedTriageType;
             const triageCategoryMatch = selectedTriageCategory === "all" || entry.patient.currentTriageCategory === selectedTriageCategory;
             const arrivalDateMatch =
-                !selectedArrivalDate?.toISOString().split("T")[0] ||
-                entry.patient.arrivalDetails.date.toISOString().split("T")[0] ===
-                    new Date(selectedArrivalDate).toISOString().split("T")[0];
+                !selectedArrivalDate?.toLocaleDateString().split("T")[0] ||
+                entry.patient.arrivalDetails.date.toLocaleDateString().split("T")[0] ===
+                    new Date(selectedArrivalDate).toLocaleDateString().split("T")[0];
+
+                    console.log(arrivalDateMatch)
+                    console.log(selectedArrivalDate?.toLocaleDateString())
 
             const lastTriageDateMatch =
-                !selectedLastTriageDate?.toISOString().split("T")[0] ||
-                entry.patient.lastDateOfTriage?.toISOString().split("T")[0] ===
-                    new Date(selectedLastTriageDate).toISOString().split("T")[0];
+                !selectedLastTriageDate?.toLocaleDateString().split("T")[0] ||
+                entry.patient.lastDateOfTriage?.toLocaleDateString().split("T")[0] ===
+                    new Date(selectedLastTriageDate).toLocaleDateString().split("T")[0];
 
             return searchMatch && triageTypeMatch && triageCategoryMatch && arrivalDateMatch && lastTriageDateMatch;
         });

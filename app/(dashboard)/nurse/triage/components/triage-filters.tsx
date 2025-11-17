@@ -62,7 +62,7 @@ export function TriageFilters({
               {selectedArrivalDate ? format(selectedArrivalDate, "MMM d, yyyy") : "Select date"}
             </button>
           </PopoverTrigger>
-          <PopoverContent align="start">
+          <PopoverContent className="w-auto p-0" align="start">
           <Calendar
               mode="single"
               selected={selectedArrivalDate || undefined}
@@ -82,7 +82,7 @@ export function TriageFilters({
               {selectedLastTriageDate ? format(selectedLastTriageDate, "MMM d, yyyy") : "Select date"}
             </button>
           </PopoverTrigger>
-          <PopoverContent>
+          <PopoverContent className="w-auto p-0" align="start">
           <Calendar
               mode="single"
               selected={selectedLastTriageDate || undefined}

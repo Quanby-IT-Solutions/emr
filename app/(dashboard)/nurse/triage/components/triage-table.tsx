@@ -90,26 +90,6 @@ export function TriageTable({ data}: TriageTableProps) {
         accessorKey: "patient.arrivalDetails.time",
         header: "Arrival Time",
     },
-    // {
-    //     accessorKey: "patient.lastDateOfTriage",
-    //     header: "Last Triage Date",
-    //     cell: ({ row }) => {
-    //     const value = row.original.patient.lastDateOfTriage
-    //     if (value === null || value === undefined) {
-    //       return null
-    //     }
-    //     const date = new Date(value)
-    //     return date.toLocaleDateString("en-US", {
-    //       month: "short",
-    //       day: "numeric",
-    //       year: "numeric",
-    //     })
-    //   },
-    // },
-    // {
-    //   accessorKey: "patient.lastTimeOfTriage",
-    //   header: "Last Triage Time",
-    // },
     {
       accessorKey: "patient.triageType",
       header: "Triage Type",

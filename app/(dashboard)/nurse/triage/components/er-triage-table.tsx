@@ -106,13 +106,13 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
       header: "Last Triage Time",
     },
     {
-        accessorKey: "patient.currentTriageCategory",
-        header: "Triage Category",
-        cell: ({ row }) => {
+      accessorKey: "patient.currentTriageCategory",
+      header: "Triage Category",
+      cell: ({ row }) => {
         const category = row.original.patient.currentTriageCategory
         const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : category === "DEAD" ? "dimmed" : "default"
         return <Badge variant={variant}>{category}</Badge>
-        }
+      }
     },
     {
         accessorKey: "followUp",
