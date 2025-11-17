@@ -223,8 +223,7 @@ function CheckInPageContent() {
                     <p className="font-bold text-orange-900">Triage Mode Enabled</p>
                     <p className="text-sm text-orange-700">All check-ins will include triage workflow</p>
                   </div>
-                </div>
-                
+                </div>  
               </div>
             )}
           </div>

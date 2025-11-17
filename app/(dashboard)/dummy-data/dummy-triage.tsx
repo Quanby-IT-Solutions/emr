@@ -7,7 +7,7 @@ export interface TriageAssessment {
         address: string;
         triageType: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER";
         currentTriageCategory: "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD";
-        status: "IN QUEUE" | "REFERRED" | "FOR DISCHARGE" | "TRANSFERRED" | "OTHER";
+        status: "IN APT. QUEUE" | "REFERRED" | "FOR DISCHARGE" | "TRANSFERRED" | "OTHER";
         lastDateOfTriage: Date | null;
         lastTimeOfTriage: string;
         companion: {
@@ -19,7 +19,7 @@ export interface TriageAssessment {
             date: Date;
             time: string;
             modeOfTransport: string;
-            referredBy: string;
+            referredBy: string | null;
         };
         medicalHistory: {
             allergies: string[];
@@ -201,7 +201,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "45 Oak Avenue, Rivertown",
       triageType: "OPD",
       currentTriageCategory: "NON_URGENT",
-      status: "IN QUEUE",
+      status: "IN APT. QUEUE",
       lastDateOfTriage: new Date("2025-11-10"),
       lastTimeOfTriage: "11:15",
       companion: {
@@ -395,7 +395,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "12 Sunrise Boulevard, Abuja",
       triageType: "WALK_IN",
       currentTriageCategory: "NON_URGENT",
-      status: "IN QUEUE",
+      status: "IN APT. QUEUE",
       lastDateOfTriage: new Date("2025-11-09"),
       lastTimeOfTriage: "11:00",
       companion: {
@@ -1268,7 +1268,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "654 Harbor View, Coastal Town",
       triageType: "REFERRAL",
       currentTriageCategory: "NON_URGENT",
-      status: "IN QUEUE",
+      status: "IN APT. QUEUE",
       lastDateOfTriage: new Date("2025-11-20"),
       lastTimeOfTriage: "10:15",
       companion: {

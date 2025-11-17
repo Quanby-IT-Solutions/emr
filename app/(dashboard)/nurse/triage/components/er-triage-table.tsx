@@ -118,7 +118,6 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
         accessorKey: "followUp",
         header: "Follow Up",
         cell: ({ row }) => {
-        const patientId = row.original.patient.id
         return <Button size="sm" onClick={() => onFollowUp(row.original)} className="bg-orange-400 hover:bg-orange-500">
           <ClipboardClock className="h-4 w-4" />
           </Button>

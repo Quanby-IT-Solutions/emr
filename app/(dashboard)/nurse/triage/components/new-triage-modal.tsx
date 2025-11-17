@@ -9,6 +9,7 @@ import { InitialAssessComp } from "@/components/shared/triage/initial-assess-com
 import { RapidAssessmentComp } from "@/components/shared/triage/rapid-assess-comp"
 import { VitalSignsComp } from "@/components/shared/triage/vital-signs-comp"
 import { TriageSummaryComp } from "@/components/shared/triage/triage-summary-comp"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface TriageWizardProps {
   open: boolean
@@ -169,7 +170,7 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader className="px-4 pt-6">
           <DialogTitle>{steps[step]}</DialogTitle>
         </DialogHeader>
@@ -263,10 +264,17 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
 
         {/* BUTTONS */}
         <div className="flex justify-end gap-2 border-t px-6 py-4">
-          <Button variant="outline" onClick={prev} disabled={step === 0}>Back</Button>
-          <Button onClick={next}>
-            {step === 4 ? "Complete" : "Next"}
-          </Button>
+          <Button variant="outline" onClick={prev} disabled={step === 0}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back</Button>
+          {step !== 4 && (
+            <Button onClick={next}>Next
+            <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          {step === 4 && (
+            <Button onClick={next}>Record Assessment</Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

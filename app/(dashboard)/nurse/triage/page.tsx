@@ -122,6 +122,18 @@ export default function TriagePage() {
                         </div>
                     </div>
 
+                    {isERMode && (
+                    <div className="ml-5 mr-5 p-4 bg-red-50 border-2 border-orange-200 rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                        <AlertCircle className="h-6 w-6 text-red-600 animate-pulse" />
+                        <div>
+                            <p className="font-bold text-red-900">ER Mode Enabled</p>
+                            <p className="text-sm text-red-700">You are currently viewing the Emergency Triage Queue</p>
+                        </div>
+                        </div>  
+                    </div>
+                    )}
+
                     {/* Statistics Cards */}
                     <div className="px-4 lg:px-6">
                         <div className="grid gap-4 md:grid-cols-4">
@@ -273,6 +285,7 @@ export default function TriagePage() {
 
                     <TriageWizard open={openNewTriage} onOpenChange={setOpenNewTriage} />
                     <FollowUpWizard open={openFollowUp} onOpenChange={setOpenFollowUp} />
+
                 </div>
             </DashboardLayout>
         </ProtectedRoute>

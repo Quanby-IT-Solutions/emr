@@ -3,7 +3,7 @@
 "use client"
 
 import { useState, useId } from "react"
-import { ChevronDownIcon, Clock, Ambulance, Bus, Car, Footprints, Hospital, Bike } from "lucide-react"
+import { ChevronDownIcon, Clock, Ambulance, Bus, Car, Footprints, Hospital, Bike, CalendarClock } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -94,29 +94,29 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
 
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <Label>First Name</Label>
+          <Label className="mb-1">First Name</Label>
           <Input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="Juan" />
         </div>
 
         <div>
-          <Label>Middle Name</Label>
+          <Label className="mb-1">Middle Name</Label>
           <Input value={form.middleName} onChange={e => setForm(f => ({ ...f, middleName: e.target.value }))} placeholder="Santos" />
         </div>
 
         <div>
-          <Label>Last Name</Label>
+          <Label className="mb-1">Last Name</Label>
           <Input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Dela Cruz" />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label>Age</Label>
+          <Label className="mb-1">Age</Label>
           <Input value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} placeholder="Age" />
         </div>
 
         <div>
-          <Label>Occupation</Label>
+          <Label className="mb-1">Occupation</Label>
           <Input value={form.occupation} onChange={e => setForm(f => ({ ...f, occupation: e.target.value }))} placeholder="Occupation" />
         </div>
       </div>
@@ -126,7 +126,7 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
       <div className="space-y-4">
         <Label className="text-base font-semibold">Arrival Details</Label>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-[auto_auto_0.5fr] gap-3">
           <div className="flex flex-col gap-2">
             <Label htmlFor="date-picker" className="text-sm text-muted-foreground">Arrival Date</Label>
             <Popover open={dateOpen} onOpenChange={setDateOpen}>
@@ -148,10 +148,9 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-sm text-muted-foreground">Quick Select</Label>
-            <Button type="button" variant="outline" onClick={handleSetToday} className="w-full">
-              <Clock className="h-4 w-4" />
-              Set to Now
+            <Label className="text-sm text-muted-foreground">Set to Now</Label>
+            <Button type="button" onClick={handleSetToday} className="w-full bg-blue-500 hover:bg-blue-600 text-white shadow-sm">
+              <CalendarClock className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -168,7 +167,7 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
                 <div
                   key={`${id}-${mode.value}`}
                   onClick={() => setForm(f => ({ ...f, arrivalMode: mode.value }))}
-                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors shadow-sm hover:shadow-md ${
+                  className={`flex items-center justify-between p-3 border rounded-sm cursor-pointer transition-colors shadow-sm hover:shadow-md ${
                     checked ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50 border-gray-200"
                   }`}
                 >
@@ -207,7 +206,7 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
             <div
               key={symptom.key}
               onClick={() => toggleSymptom(symptom.key)}
-              className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer transition-colors shadow-sm hover:shadow-md ${
+              className={`flex items-center space-x-3 p-3 border rounded-sm cursor-pointer transition-colors shadow-sm hover:shadow-md ${
                 form.symptoms[symptom.key as keyof typeof form.symptoms]
                   ? 'bg-blue-50 border-blue-200'
                   : 'hover:bg-gray-50 border-gray-200'
@@ -230,7 +229,7 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
 
         {/* Department --> to be editted */}
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Department</Label>
+          <Label className="text-sm text-muted-foreground mt-6 mb-2">Department</Label>
 
           <RadioGroup value={form.department} onValueChange={(value) => setForm(f => ({ ...f, department: value }))} className="grid grid-cols-2 gap-3">
             {departments.map((dept) => {
@@ -240,7 +239,7 @@ export function PatientInfoComp({ form, setForm }: PatientInfoCompProps) {
                 <div
                   key={`${id}-${dept.value}`}
                   onClick={() => setForm(f => ({ ...f, department: dept.value }))}
-                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors shadow-sm hover:shadow-md ${
+                  className={`flex items-center justify-between p-3 border rounded-sm cursor-pointer transition-colors shadow-sm hover:shadow-md ${
                     checked ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50 border-gray-200"
                   }`}
                 >

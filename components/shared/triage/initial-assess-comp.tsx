@@ -41,7 +41,7 @@ export function InitialAssessComp({ assessment, setAssessment }: InitialAssessCo
           >
             <Checkbox
               checked={assessment[item.key]}
-              onCheckedChange={() => {}} // Empty handler since parent div handles the click
+              onCheckedChange={() => {}}
             />
             <Label className="cursor-pointer flex-1 pointer-events-none">{item.label}</Label>
           </div>

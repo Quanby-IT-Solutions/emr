@@ -55,11 +55,6 @@ export function TriageTable({ data}: TriageTableProps) {
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
-  const router = useRouter();
-
-  const viewPatientChart = (patientId: string) => {
-    router.push(`/nurse/chart?patientId=${patientId}`);
-  };
 
   const columns: ColumnDef<TriageAssessment>[] = [
     {
@@ -113,7 +108,7 @@ export function TriageTable({ data}: TriageTableProps) {
         header: "Status",
         cell: ({ row }) => {
         const status = row.original.patient.status
-        const variant = status === "REFERRED" ? "warning" : status === "IN QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
+        const variant = status === "REFERRED" ? "warning" : status === "IN APT. QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
         return <Badge variant={variant}>{status}</Badge>
         }
     }

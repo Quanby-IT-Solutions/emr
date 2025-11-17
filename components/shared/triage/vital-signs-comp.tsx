@@ -26,7 +26,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
     <div className="space-y-6">
       {/* Blood Pressure */}
       <Card className="bg-blue-50">
-        <CardContent className="pt-6">
+        <CardContent className="pt-4">
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-3">
               <Heart className="h-5 w-5 text-red-600" />
@@ -65,7 +65,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
       {/* Heart Rate & Temperature */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="bg-green-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-green-600" />
@@ -85,7 +85,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
         </Card>
 
         <Card className="bg-orange-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Thermometer className="h-5 w-5 text-orange-600" />
@@ -109,7 +109,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
       {/* Oxygen Saturation & Respiration */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="bg-cyan-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Wind className="h-5 w-5 text-cyan-600" />
@@ -129,7 +129,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
         </Card>
 
         <Card className="bg-purple-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Wind className="h-5 w-5 text-purple-600" />
@@ -152,7 +152,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
       {/* Weight & Height */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="bg-amber-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Weight className="h-5 w-5 text-amber-600" />
@@ -172,7 +172,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
         </Card>
 
         <Card className="bg-indigo-50">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Ruler className="h-5 w-5 text-indigo-600" />
