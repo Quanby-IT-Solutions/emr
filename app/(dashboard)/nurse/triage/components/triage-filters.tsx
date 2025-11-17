@@ -20,6 +20,7 @@ interface TriageFiltersProps {
   onArrivalDateChange: (date: Date | null) => void
   selectedLastTriageDate: Date | null
   onLastTriageDateChange: (date: Date | null) => void
+  isERMode: boolean
 }
 
 export function TriageFilters({
@@ -32,19 +33,20 @@ export function TriageFilters({
   selectedArrivalDate,
   onArrivalDateChange,
   selectedLastTriageDate,
-  onLastTriageDateChange
+  onLastTriageDateChange,
+  isERMode,
 }: TriageFiltersProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-12">            
       {/* Search Bar */}
-      <div className="space-y-2 md:col-span-4">
+      <div className={`space-y-2 ${isERMode ? 'md:col-span-4' : 'md:col-span-6'}`}>
         <Label htmlFor="search">Search</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="search"
-            placeholder="Patient name or ID..."
+            placeholder="Patient name..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9 "
@@ -72,25 +74,27 @@ export function TriageFilters({
         </Popover>
       </div>
 
-      {/* Last Triage Date Filter */}
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="date">Last Triage Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center justify-center gap-2 border rounded-lg px-4 py-2 shadow-sm text-sm hover:bg-muted/50 w-full">
-              <CalendarIcon className="h-4 w-4" />
-              {selectedLastTriageDate ? format(selectedLastTriageDate, "MMM d, yyyy") : "Select date"}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-              mode="single"
-              selected={selectedLastTriageDate || undefined}
-              onSelect={(day) => onLastTriageDateChange(day || null)}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
+      {/* Last Triage Date Filter - Only show in ER mode */}
+      {isERMode && (
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="date">Last Triage Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex items-center justify-center gap-2 border rounded-lg px-4 py-2 shadow-sm text-sm hover:bg-muted/50 w-full">
+                <CalendarIcon className="h-4 w-4" />
+                {selectedLastTriageDate ? format(selectedLastTriageDate, "MMM d, yyyy") : "Select date"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+                mode="single"
+                selected={selectedLastTriageDate || undefined}
+                onSelect={(day) => onLastTriageDateChange(day || null)}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
       {/* Triage Type Filter */}
       <div className="space-y-2 md:col-span-2">

@@ -49,9 +49,6 @@ export default function TriagePage() {
                 entry.patient.arrivalDetails.date.toLocaleDateString().split("T")[0] ===
                     new Date(selectedArrivalDate).toLocaleDateString().split("T")[0];
 
-                    console.log(arrivalDateMatch)
-                    console.log(selectedArrivalDate?.toLocaleDateString())
-
             const lastTriageDateMatch =
                 !selectedLastTriageDate?.toLocaleDateString().split("T")[0] ||
                 entry.patient.lastDateOfTriage?.toLocaleDateString().split("T")[0] ===
@@ -59,14 +56,7 @@ export default function TriagePage() {
 
             return searchMatch && triageTypeMatch && triageCategoryMatch && arrivalDateMatch && lastTriageDateMatch;
         });
-    }, [
-        triageData,
-        searchQuery,
-        selectedTriageType,
-        selectedTriageCategory,
-        selectedArrivalDate,
-        selectedLastTriageDate,
-    ]);
+    }, [triageData, searchQuery, selectedTriageType, selectedTriageCategory, selectedArrivalDate, selectedLastTriageDate]);
 
     const handleERCheck = (checked: boolean) => {
         setIsERMode(checked);
@@ -204,79 +194,110 @@ export default function TriagePage() {
                         </div>
                     </div>
 
-                    {/* Filters */}
-                    <div className="px-4 lg:px-6">
-                        <Card>
-                            <CardHeader className="grid md:grid-cols-6">
-                                <div className="md:col-span-5">
-                                    <CardTitle className="mb-1">Triage Assessment Filters</CardTitle>
-                                    <CardDescription>
-                                        Search by Patient Name or ID, Triage Category, Type or Date
-                                    </CardDescription>
-                                </div>
-
-                                {searchQuery ||
-                                selectedTriageType !== "all" ||
-                                selectedTriageCategory !== "all" ||
-                                selectedArrivalDate ||
-                                selectedLastTriageDate ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
-                                        onClick={() => {
-                                            setSearchQuery("");
-                                            setSelectedTriageType("all");
-                                            setSelectedTriageCategory("all");
-                                            setSelectedArrivalDate(null);
-                                            setSelectedLastTriageDate(null);
-                                        }}
-                                    >
-                                        <RefreshCcw className="h-4 w-4 mr-2" />
-                                        Clear Filters
-                                    </Button>
-                                ) : (
-                                    <Button disabled variant="outline" size="sm">
-                                        <RefreshCcw className="h-4 w-4 mr-2" />
-                                        Clear Filters
-                                    </Button>
-                                )}
-                            </CardHeader>
-
-                            <CardContent className="pt-4">
-                                <TriageFilters
-                                    searchQuery={searchQuery}
-                                    onSearchChange={setSearchQuery}
-                                    selectedTriageType={selectedTriageType}
-                                    onTriageTypeChange={setSelectedTriageType}
-                                    selectedTriageCategory={selectedTriageCategory}
-                                    onTriageCategoryChange={setSelectedTriageCategory}
-                                    selectedArrivalDate={selectedArrivalDate}
-                                    onArrivalDateChange={setSelectedArrivalDate}
-                                    selectedLastTriageDate={selectedLastTriageDate}
-                                    onLastTriageDateChange={setSelectedLastTriageDate}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
-
                     {/* Triage Table */}
                     <div className="px-4 lg:px-6">
                         {isERMode ? (
                             <Card>
-                                <CardHeader>
-                                    <CardTitle>ER Cases</CardTitle>
+                                <CardHeader className="grid md:grid-cols-6">
+                                    <div className="md:col-span-5">
+                                        <CardTitle>Emergency Triage Cases</CardTitle>
+                                    </div>
+                                    {searchQuery ||
+                                    selectedTriageType !== "EMERGENCY" ||
+                                    selectedTriageCategory !== "all" ||
+                                    selectedArrivalDate ||
+                                    selectedLastTriageDate ? (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setSelectedTriageType("EMERGENCY");
+                                                setSelectedTriageCategory("all");
+                                                setSelectedArrivalDate(null);
+                                                setSelectedLastTriageDate(null);
+                                            }}
+                                        >
+                                            <RefreshCcw className="h-4 w-4 mr-2" />
+                                            Clear Filters
+                                        </Button>
+                                    ) : (
+                                        <Button disabled variant="outline" size="sm">
+                                            <RefreshCcw className="h-4 w-4 mr-2" />
+                                            Clear Filters
+                                        </Button>
+                                    )}
                                 </CardHeader>
                                 <CardContent>
+                                    <div className="mb-6">
+                                        <TriageFilters
+                                            searchQuery={searchQuery}
+                                            onSearchChange={setSearchQuery}
+                                            selectedTriageType={selectedTriageType}
+                                            onTriageTypeChange={setSelectedTriageType}
+                                            selectedTriageCategory={selectedTriageCategory}
+                                            onTriageCategoryChange={setSelectedTriageCategory}
+                                            selectedArrivalDate={selectedArrivalDate}
+                                            onArrivalDateChange={setSelectedArrivalDate}
+                                            selectedLastTriageDate={selectedLastTriageDate}
+                                            onLastTriageDateChange={setSelectedLastTriageDate}
+                                            isERMode={isERMode}
+                                        />                                        
+                                    </div>
                                     <ERTriageTable data={filteredTriageData} onFollowUp={handleFollowUp} />
                                 </CardContent>
                             </Card>
                         ) : (
                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Triage Cases</CardTitle>
+                                <CardHeader className="grid md:grid-cols-6">
+                                    <div className="md:col-span-5">
+                                        <CardTitle className="mb-1">Triage Cases</CardTitle>
+                                    </div>
+                                    {searchQuery ||
+                                    selectedTriageType !== "all" ||
+                                    selectedTriageCategory !== "all" ||
+                                    selectedArrivalDate ||
+                                    selectedLastTriageDate ? (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-primary bg-white text-primary hover:bg-primary hover:text-primary-foreground"
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                setSelectedTriageType("all");
+                                                setSelectedTriageCategory("all");
+                                                setSelectedArrivalDate(null);
+                                                setSelectedLastTriageDate(null);
+                                            }}
+                                        >
+                                            <RefreshCcw className="h-4 w-4 mr-2" />
+                                            Clear Filters
+                                        </Button>
+                                    ) : (
+                                        <Button disabled variant="outline" size="sm">
+                                            <RefreshCcw className="h-4 w-4 mr-2" />
+                                            Clear Filters
+                                        </Button>
+                                    )}
                                 </CardHeader>
                                 <CardContent>
+                                    <div className="mb-6">
+                                        <TriageFilters
+                                            searchQuery={searchQuery}
+                                            onSearchChange={setSearchQuery}
+                                            selectedTriageType={selectedTriageType}
+                                            onTriageTypeChange={setSelectedTriageType}
+                                            selectedTriageCategory={selectedTriageCategory}
+                                            onTriageCategoryChange={setSelectedTriageCategory}
+                                            selectedArrivalDate={selectedArrivalDate}
+                                            onArrivalDateChange={setSelectedArrivalDate}
+                                            selectedLastTriageDate={selectedLastTriageDate}
+                                            onLastTriageDateChange={setSelectedLastTriageDate}
+                                            isERMode={isERMode}
+                                        />                                        
+                                    </div>
+                                
                                     <TriageTable data={filteredTriageData} />
                                 </CardContent>
                             </Card>

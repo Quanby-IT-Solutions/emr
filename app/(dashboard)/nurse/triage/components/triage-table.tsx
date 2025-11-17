@@ -42,8 +42,6 @@ import {
 } from "@/components/ui/pagination"
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
-import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation';
 
 interface TriageTableProps {
   data: TriageAssessment[]
