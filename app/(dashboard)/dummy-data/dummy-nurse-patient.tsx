@@ -38,6 +38,15 @@ export interface NursePatientChart {
           lastName: string;
           jobTitle: string;
         };
+        currentLocation: {
+        unit: string;
+        roomNumber: string;
+        bedNumber: string;
+      };
+      _count: {
+        clinicalNotes: number;
+        orders: number;
+      };
       }[];
       patientHistories: {
         id: string;
@@ -51,26 +60,6 @@ export interface NursePatientChart {
         };
       }[];
     };
-    encounters: {
-      id: string;
-      type: string;
-      status: string;
-      startDateTime: string;
-      attendingProvider: {
-        firstName: string;
-        lastName: string;
-        jobTitle: string;
-      };
-      currentLocation: {
-        unit: string;
-        roomNumber: string;
-        bedNumber: string;
-      };
-      _count: {
-        clinicalNotes: number;
-        orders: number;
-      };
-    }[];
     recentOrders: {
       id: string;
       orderType: string;
@@ -84,6 +73,8 @@ export interface NursePatientChart {
     }[];
   };
 }
+
+
 
 export const nursePatientList: NursePatient[] = [
   { 

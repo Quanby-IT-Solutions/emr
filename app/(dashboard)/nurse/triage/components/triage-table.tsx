@@ -115,7 +115,7 @@ export function TriageTable({ data}: TriageTableProps) {
       header: "Triage Type",
       cell: ({ row }) => {
         const type = row.original.patient.triageType
-        const variant = type === "OPD" ? "default" : type === "WALK_IN" ? "default" : type === "EMERGENCY" ? "destructive" : "tertiary"
+        const variant = type === "EMERGENCY" ? "destructive" : "default"
         return <Badge variant={variant}>{type}</Badge>
       },
     },
@@ -124,16 +124,16 @@ export function TriageTable({ data}: TriageTableProps) {
         header: "Triage Category",
         cell: ({ row }) => {
         const category = row.original.patient.currentTriageCategory
-        const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : category === "DEAD" ? "dimmed" : "default"
+        const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : "dimmed"
         return <Badge variant={variant}>{category}</Badge>
-        }
+        }  
     },
     {
         accessorKey: "patient.status",
         header: "Status",
         cell: ({ row }) => {
         const status = row.original.patient.status
-        const variant = status === "REFERRED TO SPECIALIST" ? "warning" : status === "FORWARD TO APT. QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
+        const variant = status === "REFERRED" ? "warning" : status === "IN QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
         return <Badge variant={variant}>{status}</Badge>
         }
     }

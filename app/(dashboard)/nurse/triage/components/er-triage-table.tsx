@@ -44,11 +44,12 @@ import {
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
 import { Button } from "@/components/ui/button"
 
-interface TriageTableProps {
+interface ERTriageTableProps {
   data: TriageAssessment[]
+  onFollowUp: (assessment: TriageAssessment) => void
 }
 
-export function ERTriageTable({ data}: TriageTableProps) {
+export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -69,11 +70,11 @@ export function ERTriageTable({ data}: TriageTableProps) {
       header: "Age/Sex",
     },
     {
-        accessorKey: "patient.arrivalDetails.date",
-        header: "Arrival Date",
-        cell: ({ row }) => {
-        const date = new Date(row.original.patient.arrivalDetails.date)
-        return date.toLocaleDateString("en-US", {
+      accessorKey: "patient.arrivalDetails.date",
+       header: "Arrival Date",
+       cell: ({ row }) => {
+       const date = new Date(row.original.patient.arrivalDetails.date)
+       return date.toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
           year: "numeric",
@@ -105,15 +106,6 @@ export function ERTriageTable({ data}: TriageTableProps) {
       header: "Last Triage Time",
     },
     {
-      accessorKey: "patient.triageType",
-      header: "Triage Type",
-      cell: ({ row }) => {
-        const type = row.original.patient.triageType
-        const variant = type === "OPD" ? "default" : type === "WALK_IN" ? "default" : type === "EMERGENCY" ? "destructive" : "tertiary"
-        return <Badge variant={variant}>{type}</Badge>
-      },
-    },
-    {
         accessorKey: "patient.currentTriageCategory",
         header: "Triage Category",
         cell: ({ row }) => {
@@ -127,7 +119,7 @@ export function ERTriageTable({ data}: TriageTableProps) {
         header: "Follow Up",
         cell: ({ row }) => {
         const patientId = row.original.patient.id
-        return <Button size="sm" className="bg-orange-400 hover:bg-orange-500">
+        return <Button size="sm" onClick={() => onFollowUp(row.original)} className="bg-orange-400 hover:bg-orange-500">
           <ClipboardClock className="h-4 w-4" />
           </Button>
         }

@@ -1,0 +1,246 @@
+"use client"
+
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+
+import { InitialAssessComp } from "@/components/shared/triage/initial-assess-comp"
+import { RapidAssessmentComp } from "@/components/shared/triage/rapid-assess-comp"
+import { VitalSignsComp } from "@/components/shared/triage/vital-signs-comp"
+import { TriageSummaryComp } from "@/components/shared/triage/triage-summary-comp"
+
+interface ERTriageWizardProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+interface ERTriageForm {
+  firstName: string
+  middleName: string
+  lastName: string
+  age: string
+  occupation: string
+  complaint: string
+  symptoms: {
+    chestPain: boolean
+    difficultyBreathing: boolean
+    fever: boolean
+    weakness: boolean
+    lossOfConsciousness: boolean
+    bleeding: boolean
+    others: boolean
+  }
+  symptomsOther: string
+  bpSystolic: string
+  bpDiastolic: string
+  temperature: string
+  pulseRate: string
+  respirationRate: string
+  oxygenSaturation: string
+  weight: string
+  height: string
+  triagePriority: string
+  triageNotes: string
+  arrivalDate: Date | undefined
+  arrivalTime: string
+  arrivalMode: string
+  arrivalModeOther: string
+  department: string
+  departmentOther: string
+}
+
+interface RapidAssessment {
+  airway: { obs: string; intv: string }
+  breathing: { obs: string; intv: string }
+  circulation: { obs: string; intv: string }
+}
+
+interface InitialAssessment {
+  conscious: boolean
+  breathing: boolean
+  circulation: boolean
+  bleeding: boolean
+}
+
+const initialFormState: ERTriageForm = {
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  age: "",
+  occupation: "",
+  complaint: "",
+  symptoms: {
+    chestPain: false,
+    difficultyBreathing: false,
+    fever: false,
+    weakness: false,
+    lossOfConsciousness: false,
+    bleeding: false,
+    others: false,
+  },
+  symptomsOther: "",
+  bpSystolic: "",
+  bpDiastolic: "",
+  temperature: "",
+  pulseRate: "",
+  respirationRate: "",
+  oxygenSaturation: "",
+  weight: "",
+  height: "",
+  triagePriority: "",
+  triageNotes: "",
+  arrivalDate: undefined,
+  arrivalTime: "",
+  arrivalMode: "",
+  arrivalModeOther: "",
+  department: "",
+  departmentOther: "",
+}
+
+
+const initialRapidAssessment: RapidAssessment = {
+  airway: { obs: "", intv: "" },
+  breathing: { obs: "", intv: "" },
+  circulation: { obs: "", intv: "" },
+}
+
+const initialAssessmentState: InitialAssessment = {
+  conscious: false,
+  breathing: false,
+  circulation: false,
+  bleeding: false,
+}
+
+export function FollowUpWizard({ open, onOpenChange }: ERTriageWizardProps) {
+  const [step, setStep] = useState(0)
+  const [form, setForm] = useState<ERTriageForm>(initialFormState)
+  const [rapidAssessment, setRapidAssessment] = useState<RapidAssessment>(initialRapidAssessment)
+  const [initialAssessment, setInitialAssessment] = useState<InitialAssessment>(initialAssessmentState)
+
+  const handleRapidAssessmentChange = (section: string, field: string, value: string) => {
+    setRapidAssessment(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section as keyof RapidAssessment],
+        [field]: value
+      }
+    }))
+  }
+
+  const handleClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Reset state when closing
+      setStep(0)
+      setForm(initialFormState)
+      setRapidAssessment(initialRapidAssessment)
+      setInitialAssessment(initialAssessmentState)
+    }
+    onOpenChange(isOpen)
+  }
+
+  const next = () => {
+    // Special skipping logic
+    if (step === 1) {
+      const allNormal = Object.values(initialAssessment).every(Boolean)
+      if (allNormal) return setStep(3) // skip rapid assessment → go to vitals
+    }
+
+    // Complete button - close modal
+    if (step === 3) {
+      // TODO: Save the data here before closing
+      console.log('Form data:', { form, rapidAssessment, initialAssessment })
+      handleClose(false)
+      return
+    }
+
+    setStep(prev => prev + 1)
+  }
+
+  const prev = () => setStep(prev => Math.max(prev - 1, 0))
+
+  const steps = [
+    "Initial Check",
+    "Rapid Assessment",
+    "Vitals",
+    "Summary",
+  ]
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+        <DialogHeader className="px-4 pt-6">
+          <DialogTitle>{steps[step]}</DialogTitle>
+        </DialogHeader>
+
+        {/* PROGRESS BAR */}
+        <div className="space-y-2 px-4">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground font-medium">Step {step + 1} of {steps.length}</span>
+            <span className="text-blue-600 font-semibold">{steps[step]}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* STEP CONTENT */}
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          {step === 0 && <InitialAssessComp assessment={initialAssessment} setAssessment={setInitialAssessment} />}
+          {step === 1 && (
+            <RapidAssessmentComp
+              airway={rapidAssessment.airway}
+              breathing={rapidAssessment.breathing}
+              circulation={rapidAssessment.circulation}
+              onChange={handleRapidAssessmentChange}
+            />
+          )}
+          {step === 2 && (
+            <VitalSignsComp 
+              form={{
+                bpSystolic: form.bpSystolic,
+                bpDiastolic: form.bpDiastolic,
+                pulseRate: form.pulseRate,
+                temperature: form.temperature,
+                oxygenSaturation: form.oxygenSaturation,
+                respirationRate: form.respirationRate,
+                weight: form.weight,
+                height: form.height,
+              }} 
+              setForm={(update) => {
+                setForm(prev => {
+                  const newState = typeof update === 'function' ? update(prev) : update
+                  return { ...prev, ...newState }
+                })
+              }} 
+            />
+          )}
+          {step === 3 && (
+            <TriageSummaryComp 
+              form={{
+                triagePriority: form.triagePriority,
+                triageNotes: form.triageNotes,
+              }} 
+              setForm={(update) => {
+                setForm(prev => {
+                  const newState = typeof update === 'function' ? update(prev) : update
+                  return { ...prev, ...newState }
+                })
+              }} 
+            />
+          )}
+        </div>
+
+        {/* BUTTONS */}
+        <div className="flex justify-end gap-2 border-t px-6 py-4">
+          <Button variant="outline" onClick={prev} disabled={step === 0}>Back</Button>
+          <Button onClick={next}>
+            {step === 4 ? "Complete" : "Next"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

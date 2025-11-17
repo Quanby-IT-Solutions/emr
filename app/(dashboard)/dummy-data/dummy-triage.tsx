@@ -7,7 +7,7 @@ export interface TriageAssessment {
         address: string;
         triageType: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER";
         currentTriageCategory: "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD";
-        status: "FORWARD TO APT. QUEUE" | "REFERRED TO SPECIALIST" | "FOR DISCHARGE" | "TRANSFERRED TO OTHER DEPT" | "OTHER";
+        status: "IN QUEUE" | "REFERRED" | "FOR DISCHARGE" | "TRANSFERRED" | "OTHER";
         lastDateOfTriage: Date | null;
         lastTimeOfTriage: string;
         companion: {
@@ -104,7 +104,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "123 Maple Street, Springfield",
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
-      status: "TRANSFERRED TO OTHER DEPT",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "10:30",
       companion: {
@@ -201,7 +201,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "45 Oak Avenue, Rivertown",
       triageType: "OPD",
       currentTriageCategory: "NON_URGENT",
-      status: "FORWARD TO APT. QUEUE",
+      status: "IN QUEUE",
       lastDateOfTriage: new Date("2025-11-10"),
       lastTimeOfTriage: "11:15",
       companion: {
@@ -298,7 +298,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "78 Elm Street, Lagos",
       triageType: "REFERRAL",
       currentTriageCategory: "URGENT",
-      status: "TRANSFERRED TO OTHER DEPT",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-08"),
       lastTimeOfTriage: "09:00",
       companion: {
@@ -395,7 +395,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "12 Sunrise Boulevard, Abuja",
       triageType: "WALK_IN",
       currentTriageCategory: "NON_URGENT",
-      status: "FORWARD TO APT. QUEUE",
+      status: "IN QUEUE",
       lastDateOfTriage: new Date("2025-11-09"),
       lastTimeOfTriage: "11:00",
       companion: {
@@ -492,7 +492,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "89 Pine Lane, Newtown",
       triageType: "SCHEDULED",
       currentTriageCategory: "NON_URGENT",
-      status: "TRANSFERRED TO OTHER DEPT",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-07"),
       lastTimeOfTriage: "07:30",
       companion: {
@@ -589,7 +589,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "234 Willow Drive, Metro City",
       triageType: "EMERGENCY",
       currentTriageCategory: "URGENT",
-      status: "REFERRED TO SPECIALIST",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "13:45",
       companion: {
@@ -686,7 +686,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "567 Cedar Court, Lakeview",
       triageType: "WALK_IN",
       currentTriageCategory: "EMERGENT",
-      status: "REFERRED TO SPECIALIST",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "14:30",
       companion: {
@@ -783,7 +783,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "890 Rose Garden, Hillside",
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
-      status: "REFERRED TO SPECIALIST",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "15:10",
       companion: {
@@ -880,7 +880,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "123 University Avenue, College Town",
       triageType: "WALK_IN",
       currentTriageCategory: "URGENT",
-      status: "REFERRED TO SPECIALIST",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "16:20",
       companion: {
@@ -1074,7 +1074,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "789 Market Street, Downtown",
       triageType: "EMERGENCY",
       currentTriageCategory: "EMERGENT",
-      status: "REFERRED TO SPECIALIST",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "17:40",
       companion: {
@@ -1171,7 +1171,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "321 Playground Avenue, Suburbia",
       triageType: "WALK_IN",
       currentTriageCategory: "URGENT",
-      status: "TRANSFERRED TO OTHER DEPT",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "18:25",
       companion: {
@@ -1268,7 +1268,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "654 Harbor View, Coastal Town",
       triageType: "REFERRAL",
       currentTriageCategory: "NON_URGENT",
-      status: "FORWARD TO APT. QUEUE",
+      status: "IN QUEUE",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "10:15",
       companion: {
@@ -1365,7 +1365,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "987 Highland Road, Mountain View",
       triageType: "EMERGENCY",
       currentTriageCategory: "URGENT",
-      status: "TRANSFERRED TO OTHER DEPT",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-12"),
       lastTimeOfTriage: "19:50",
       companion: {
