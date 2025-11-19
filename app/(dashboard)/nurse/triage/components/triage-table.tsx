@@ -45,10 +45,11 @@ import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
 import { Button } from "@/components/ui/button"
 
 interface TriageTableProps {
-  data: TriageAssessment[]
+  data: TriageAssessment[],
+  onViewRecord: (assessment: TriageAssessment) => void
 }
 
-export function TriageTable({ data}: TriageTableProps) {
+export function TriageTable({ data, onViewRecord }: TriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -114,9 +115,15 @@ export function TriageTable({ data}: TriageTableProps) {
     },
     {
       accessorKey: "actions",
-      header: "Actions",
+      header: "View Records",
       cell: ({ row }) => {
-        return <Button variant="ghost"><Eye className="h-4 w-4" /></Button>
+        return (
+          <div className="flex items-center justify-center">
+            <Button variant="ghost" onClick={() => onViewRecord(row.original)}>
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
+        )
       },
     }
   ]

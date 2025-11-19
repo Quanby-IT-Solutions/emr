@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Wind, Heart, Activity, Stethoscope } from "lucide-react"
+import { Wind, Heart, Stethoscope } from "lucide-react"
 
 interface RapidAssessmentProps {
   airway: { obs: string; intv: string }

@@ -17,11 +17,13 @@ import { TriageWizard } from "@/app/(dashboard)/nurse/triage/components/new-tria
 import type { TriageWizardOutput } from "@/app/(dashboard)/nurse/triage/components/new-triage-modal"
 import { FollowUpWizard } from "./components/followup-triage-modal"
 import type { FollowUpWizardOutput } from "./components/followup-triage-modal"
+import ViewTriageRecord from "./components/view-triage-record"
 
 export default function TriagePage() {
     const [triageData, setTriageData] = useState<TriageAssessment[]>(TriageEntry)
     const [searchQuery, setSearchQuery] = useState("");
     const [openFollowUp, setOpenFollowUp] = useState(false);
+    const [openViewRecord, setOpenViewRecord] = useState(false);
     const [selectedTriageType, setSelectedTriageType] = useState("all");
     const [selectedTriageCategory, setSelectedTriageCategory] = useState("all");
     const [selectedArrivalDate, setSelectedArrivalDate] = useState<Date | null>(null);
@@ -40,8 +42,6 @@ export default function TriagePage() {
     // Filters
     const filteredTriageData = useMemo(() => {
     return triageData.filter((entry) => {
-        // const latestDetail = entry.patient.triageDetails.at(-1)
-
         const searchMatch =
         entry.patient.name.toLowerCase().includes(searchQuery.toLowerCase())
 
@@ -86,6 +86,11 @@ export default function TriagePage() {
     }
 
     const handleNewTriage = () => setOpenNewTriage(true);
+
+    const handleViewTriage = (patient: TriageAssessment) => {
+        setSelectedPatient(patient)
+        setOpenViewRecord(true)
+    }
 
     // Handle stat card filter
     const handleCardFilter = (category: string) => {
@@ -552,7 +557,7 @@ export default function TriagePage() {
                                         />                                        
                                     </div>
                                 
-                                    <TriageTable data={filteredTriageData} />
+                                    <TriageTable data={filteredTriageData} onViewRecord={handleViewTriage}/>
                                 </CardContent>
                             </Card>
                         )}
@@ -568,6 +573,12 @@ export default function TriagePage() {
                         open={openFollowUp} 
                         onOpenChange={setOpenFollowUp} 
                         onRecord={handleRecordFollowUp}
+                        selectedPatient={selectedPatient}
+                    />
+
+                    <ViewTriageRecord
+                        open={openViewRecord}
+                        onOpenChange={setOpenViewRecord}
                         selectedPatient={selectedPatient}
                     />
 
