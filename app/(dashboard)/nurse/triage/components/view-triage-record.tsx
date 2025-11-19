@@ -136,22 +136,22 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
               </div>
 
               <Card className="border-blue-200 bg-blue-50/30">
-                <CardContent className="pt-6 space-y-4">
+                <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-muted-foreground">Patient ID</Label>
-                      <p className="font-medium">{patient.id}</p>
+                      <p className="font-medium text-sm">{patient.id}</p>
                     </div>
                     <div>
                       <Label className="text-sm text-muted-foreground">Name</Label>
-                      <p className="font-medium">{patient.name}</p>
+                      <p className="font-medium text-sm">{patient.name}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-muted-foreground">Age/Sex</Label>
-                      <p className="font-medium">{patient.ageSex}</p>
+                      <p className="font-medium text-sm">{patient.ageSex}</p>
                     </div>
                     <div>
                       <Label className="text-sm text-muted-foreground">Current Status</Label>
@@ -164,7 +164,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-muted-foreground">Arrival Date</Label>
-                      <p className="font-medium">
+                      <p className="font-medium text-sm">
                         {new Date(patient.arrivalDetails.date).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -174,19 +174,20 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                     </div>
                     <div>
                       <Label className="text-sm text-muted-foreground">Arrival Time</Label>
-                      <p className="font-medium">{patient.arrivalDetails.time}</p>
+                      <p className="font-medium text-sm">{patient.arrivalDetails.time}</p>
                     </div>
                   </div>
-
+                
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm text-muted-foreground">Department</Label>
                     <p className="font-medium">{patient.arrivalDetails.department}</p>
                   </div>
-
                   <div>
                     <Label className="text-sm text-muted-foreground">Patient Status</Label>
                     <Badge variant="default">{patient.status}</Badge>
                   </div>
+                </div>
                 </CardContent>
               </Card>
 

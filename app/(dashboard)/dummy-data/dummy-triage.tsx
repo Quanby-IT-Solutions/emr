@@ -234,7 +234,7 @@ export const TriageEntry: TriageAssessment[] = [
       },
       triageDetails: [
         {
-          chiefComplaint: "Severe abdominal pain with vomiting for 6 hours",
+          chiefComplaint: "Severe ankle pain for 6 hours",
           symptoms: {
             chestPain: false,
             difficultyBreathing: false,
