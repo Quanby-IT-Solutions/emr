@@ -255,6 +255,13 @@ export function TriageWizard({ open, onOpenChange, onRecord }: TriageWizardProps
         }))
         return setStep(4) // Go directly to Triage Summary
       }
+      else {
+        setForm(f => ({
+          ...f,
+          triagePriority: "",
+          disposition: ""
+        }))
+      }
       // If "alive", continue to step 1 (Initial Assessment)
     }
 
