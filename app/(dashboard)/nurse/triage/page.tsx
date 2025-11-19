@@ -40,14 +40,14 @@ export default function TriagePage() {
     // Filters
     const filteredTriageData = useMemo(() => {
     return triageData.filter((entry) => {
-        const latestDetail = entry.patient.triageDetails.at(-1)
+        // const latestDetail = entry.patient.triageDetails.at(-1)
 
         const searchMatch =
         entry.patient.name.toLowerCase().includes(searchQuery.toLowerCase())
 
         const triageTypeMatch =
         selectedTriageType === "all" ||
-        latestDetail?.triageType === selectedTriageType
+        entry.patient.arrivalDetails.department === selectedTriageType
 
         const triageCategoryMatch =
         selectedTriageCategory === "all" ||
@@ -101,12 +101,12 @@ export default function TriagePage() {
         if (!newPatientId) {
             const existingIds = triageData.map(entry => entry.patient.id)
             const numericIds = existingIds
-            .filter(id => id.startsWith('PAT-2025-'))
-            .map(id => parseInt(id.replace('PAT-2025-', '')))
+            .filter(id => id.startsWith('PT-2025-'))
+            .map(id => parseInt(id.replace('PT-2025-', '')))
             .filter(num => !isNaN(num))
             
             const lastId = numericIds.length > 0 ? Math.max(...numericIds) : 0
-            newPatientId = `PAT-2025-${String(lastId + 1).padStart(3, '0')}`
+            newPatientId = `PT-2025-${String(lastId + 1).padStart(3, '0')}`
         }
 
         // Parse name
@@ -155,7 +155,7 @@ export default function TriagePage() {
                 modeOfTransport: f.arrivalMode ?? "",
                 modeOfTransportOther: f.arrivalModeOther ?? "",
                 transferredFrom: f.transferredFrom || null,
-                department: f.department || "",
+                department: (f.department as "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER") || "",
                 departmentOther: f.departmentOther || "",
                 referredBy: f.referredBy || null,
             },
@@ -208,7 +208,7 @@ export default function TriagePage() {
                     interventions: f.circulationInterventions ?? "",
                 },
                 triageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
-                triageType: "EMERGENCY",
+                // triageType: "EMERGENCY",
                 triageDisposition: f.disposition ?? "",
                 triageDispositionOther: f.dispositionOther ?? null,
                 triageNotes: f.triageNotes ?? "",
