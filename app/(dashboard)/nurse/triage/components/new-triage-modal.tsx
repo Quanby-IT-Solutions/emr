@@ -10,18 +10,50 @@ import { RapidAssessmentComp } from "@/components/shared/triage/rapid-assess-com
 import { VitalSignsComp } from "@/components/shared/triage/vital-signs-comp"
 import { TriageSummaryComp } from "@/components/shared/triage/triage-summary-comp"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { TriageEntry } from "@/app/(dashboard)/dummy-data/dummy-triage"
 
 interface TriageWizardProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onRecord: (record: TriageWizardOutput) => void
+}
+
+export interface TriageWizardOutput {
+  form: TriageForm
+  rapidAssessment: RapidAssessment
+  initialAssessment: InitialAssessment
 }
 
 interface TriageForm {
+  // Patient Demographics
+  patientId: string
+  patientName: string
   firstName: string
   middleName: string
   lastName: string
   age: string
+  sex: string
+  phoneNumber: string
+  address: string
   occupation: string
+  
+  // Companion Information
+  companionName: string
+  companionContact: string
+  companionRelation: string
+  
+  // Arrival Details
+  arrivalStatus: string
+  arrivalDate: Date | undefined
+  arrivalTime: string
+  arrivalMode: string
+  arrivalModeOther: string
+  transferredFrom: string
+  department: string
+  departmentOther: string
+  referredBy: string
+  
+  // Chief Complaint & Symptoms
   complaint: string
   symptoms: {
     chestPain: boolean
@@ -33,6 +65,8 @@ interface TriageForm {
     others: boolean
   }
   symptomsOther: string
+  
+  // Vital Signs
   bpSystolic: string
   bpDiastolic: string
   temperature: string
@@ -41,14 +75,36 @@ interface TriageForm {
   oxygenSaturation: string
   weight: string
   height: string
+  
+  // Pain Assessment
+  painScale: string
+  painLocation: string
+  painDuration: string
+  painCharacteristics: string
+  painAggravatingFactors: string
+  painRelievingFactors: string
+  
+  // Glasgow Coma Scale
+  gcsEyeOpening: string
+  gcsVerbalResponse: string
+  gcsMotorResponse: string
+  
+  // ABC Assessment
+  airwayAssessment: string
+  airwayNotes: string
+  airwayInterventions: string
+  breathingAssessment: string
+  breathingNotes: string
+  breathingInterventions: string
+  circulationAssessment: string
+  circulationNotes: string
+  circulationInterventions: string
+  
+  // Triage Decision
   triagePriority: string
   triageNotes: string
-  arrivalDate: Date | undefined
-  arrivalTime: string
-  arrivalMode: string
-  arrivalModeOther: string
-  department: string
-  departmentOther: string
+  disposition: string
+  dispositionOther: string
 }
 
 interface RapidAssessment {
@@ -65,11 +121,35 @@ interface InitialAssessment {
 }
 
 const initialFormState: TriageForm = {
+  // Patient Demographics
+  patientId: "",
+  patientName: "",
   firstName: "",
   middleName: "",
   lastName: "",
   age: "",
+  sex: "",
+  phoneNumber: "",
+  address: "",
   occupation: "",
+  
+  // Companion Information
+  companionName: "",
+  companionContact: "",
+  companionRelation: "",
+  
+  // Arrival Details
+  arrivalStatus: "alive",
+  arrivalDate: undefined,
+  arrivalTime: "",
+  arrivalMode: "",
+  arrivalModeOther: "",
+  transferredFrom: "",
+  department: "",
+  departmentOther: "",
+  referredBy: "",
+  
+  // Chief Complaint & Symptoms
   complaint: "",
   symptoms: {
     chestPain: false,
@@ -81,6 +161,8 @@ const initialFormState: TriageForm = {
     others: false,
   },
   symptomsOther: "",
+  
+  // Vital Signs
   bpSystolic: "",
   bpDiastolic: "",
   temperature: "",
@@ -89,16 +171,37 @@ const initialFormState: TriageForm = {
   oxygenSaturation: "",
   weight: "",
   height: "",
+  
+  // Pain Assessment
+  painScale: "",
+  painLocation: "",
+  painDuration: "",
+  painCharacteristics: "",
+  painAggravatingFactors: "",
+  painRelievingFactors: "",
+  
+  // Glasgow Coma Scale
+  gcsEyeOpening: "",
+  gcsVerbalResponse: "",
+  gcsMotorResponse: "",
+  
+  // ABC Assessment
+  airwayAssessment: "",
+  airwayNotes: "",
+  airwayInterventions: "",
+  breathingAssessment: "",
+  breathingNotes: "",
+  breathingInterventions: "",
+  circulationAssessment: "",
+  circulationNotes: "",
+  circulationInterventions: "",
+  
+  // Triage Decision
   triagePriority: "",
   triageNotes: "",
-  arrivalDate: undefined,
-  arrivalTime: "",
-  arrivalMode: "",
-  arrivalModeOther: "",
-  department: "",
-  departmentOther: "",
+  disposition: "",
+  dispositionOther: "",
 }
-
 
 const initialRapidAssessment: RapidAssessment = {
   airway: { obs: "", intv: "" },
@@ -113,7 +216,7 @@ const initialAssessmentState: InitialAssessment = {
   bleeding: false,
 }
 
-export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
+export function TriageWizard({ open, onOpenChange, onRecord }: TriageWizardProps) {
   const [step, setStep] = useState(0)
   const [form, setForm] = useState<TriageForm>(initialFormState)
   const [rapidAssessment, setRapidAssessment] = useState<RapidAssessment>(initialRapidAssessment)
@@ -141,7 +244,21 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
   }
 
   const next = () => {
-    // Special skipping logic
+    // Handle arrival status routing from step 0
+    if (step === 0) {
+      if (form.arrivalStatus === "dead-on-arrival") {
+        // Auto-select DEAD priority and Died disposition when moving to step 4
+        setForm(f => ({
+          ...f,
+          triagePriority: "DEAD",
+          disposition: "Died"
+        }))
+        return setStep(4) // Go directly to Triage Summary
+      }
+      // If "alive", continue to step 1 (Initial Assessment)
+    }
+
+    // Handle initial assessment routing from step 1
     if (step === 1) {
       const allNormal = Object.values(initialAssessment).every(Boolean)
       if (allNormal) return setStep(3) // skip rapid assessment → go to vitals
@@ -149,8 +266,14 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
 
     // Complete button - close modal
     if (step === 4) {
-      // TODO: Save the data here before closing
       console.log('Form data:', { form, rapidAssessment, initialAssessment })
+      const payload: TriageWizardOutput = {
+        form,
+        rapidAssessment,
+        initialAssessment,
+      }
+
+      onRecord(payload)
       handleClose(false)
       return
     }
@@ -158,15 +281,27 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
     setStep(prev => prev + 1)
   }
 
-  const prev = () => setStep(prev => Math.max(prev - 1, 0))
+  const prev = () => {
+    // Handle back button for special cases
+    if (step === 4 && form.arrivalStatus === "dead-on-arrival") {
+      return setStep(0) // Go back to Patient Info
+    }
+    setStep(prev => Math.max(prev - 1, 0))
+  }
 
   const steps = [
     "Patient Info",
-    "Initial Check",
+    "Initial Assessment",
     "Rapid Assessment",
-    "Vitals",
-    "Summary",
+    "Vital Signs",
+    "Triage Summary",
   ]
+
+  // Generate existing patients list from TriageEntry
+  const existingPatients = TriageEntry.map(entry => ({
+    id: entry.patient.id,
+    name: entry.patient.name
+  }))
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -193,31 +328,17 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {step === 0 && (
             <PatientInfoComp 
-                form={{
-                    firstName: form.firstName,
-                    middleName: form.middleName,
-                    lastName: form.lastName,
-                    age: form.age,
-                    occupation: form.occupation,
-                    complaint: form.complaint,
-                    symptoms: form.symptoms,
-                    symptomsOther: form.symptomsOther,
-                    arrivalDate: form.arrivalDate,
-                    arrivalTime: form.arrivalTime,
-                    arrivalMode: form.arrivalMode,
-                    arrivalModeOther: form.arrivalModeOther,
-                    department: form.department,
-                    departmentOther: form.departmentOther
-                }} 
-                setForm={(update) => {
-                    setForm(prev => {
-                    const newState = typeof update === 'function' ? update(prev) : update
-                    return { ...prev, ...newState }
-                    })
-                }} 
-                />
+              form={form}
+              setForm={setForm}
+              existingPatients={existingPatients}
+            />
           )}
-          {step === 1 && <InitialAssessComp assessment={initialAssessment} setAssessment={setInitialAssessment} />}
+          {step === 1 && (
+            <InitialAssessComp 
+              assessment={initialAssessment} 
+              setAssessment={setInitialAssessment} 
+            />
+          )}
           {step === 2 && (
             <RapidAssessmentComp
               airway={rapidAssessment.airway}
@@ -251,6 +372,8 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
               form={{
                 triagePriority: form.triagePriority,
                 triageNotes: form.triageNotes,
+                disposition: form.disposition,
+                dispositionOther: form.dispositionOther
               }} 
               setForm={(update) => {
                 setForm(prev => {
@@ -266,10 +389,12 @@ export function TriageWizard({ open, onOpenChange }: TriageWizardProps) {
         <div className="flex justify-end gap-2 border-t px-6 py-4">
           <Button variant="outline" onClick={prev} disabled={step === 0}>
             <ChevronLeft className="mr-2 h-4 w-4" />
-            Back</Button>
+            Back
+          </Button>
           {step !== 4 && (
-            <Button onClick={next}>Next
-            <ChevronRight className="ml-2 h-4 w-4" />
+            <Button onClick={next}>
+              Next
+              <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           )}
           {step === 4 && (

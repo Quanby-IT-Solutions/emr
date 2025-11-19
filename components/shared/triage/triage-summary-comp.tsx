@@ -2,70 +2,30 @@
 
 import { useId } from "react"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Siren, ClockAlert, ClipboardPlus, Skull } from "lucide-react"
+import { DISPOSITIONS, TRIAGE_LEVELS } from "@/app/(dashboard)/dummy-data/dummy-triage"
 
-interface TriageSummaryForm {
+// Define only the fields this component needs
+type TriageSummaryFields = {
   triagePriority: string
   triageNotes: string
+  disposition: string
+  dispositionOther: string
 }
 
-interface TriageSummaryCompProps {
-  form: TriageSummaryForm
-  setForm: React.Dispatch<React.SetStateAction<TriageSummaryForm>>
+interface TriageSummaryCompProps<T extends TriageSummaryFields> {
+  form: T
+  setForm: React.Dispatch<React.SetStateAction<T>>
 }
 
-export function TriageSummaryComp({ form, setForm }: TriageSummaryCompProps) {
+export function TriageSummaryComp<T extends TriageSummaryFields>({ form, setForm }: TriageSummaryCompProps<T>) {
   const id = useId()
-  
-  const triageLevels = [
-    { 
-      value: 'emergent', 
-      label: 'Emergent',
-      icon: Siren,
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-      textColor: 'text-red-900',
-      iconColor: 'text-red-600',
-      ringColor: 'has-data-[state=checked]:ring-red-500'
-    },
-    { 
-      value: 'urgent', 
-      label: 'Urgent',
-      icon: ClockAlert,
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-      textColor: 'text-yellow-900',
-      iconColor: 'text-yellow-600',
-      ringColor: 'has-data-[state=checked]:ring-yellow-500'
-    },
-    { 
-      value: 'non-urgent', 
-      label: 'Non-Urgent',
-      icon: ClipboardPlus,
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      textColor: 'text-green-900',
-      iconColor: 'text-green-600',
-      ringColor: 'has-data-[state=checked]:ring-green-500'
-    },
-    { 
-      value: 'dead', 
-      label: 'Dead',
-      icon: Skull,
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      textColor: 'text-slate-900',
-      iconColor: 'text-slate-600',
-      ringColor: 'has-data-[state=checked]:ring-slate-500'
-    }
-  ]
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Triage Summary & Notes</h3>
-
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium leading-none">Priority Level</legend>
         <RadioGroup 
@@ -73,8 +33,10 @@ export function TriageSummaryComp({ form, setForm }: TriageSummaryCompProps) {
           value={form.triagePriority}
           onValueChange={(value) => setForm(f => ({ ...f, triagePriority: value }))}
         >
-          {triageLevels.map(level => {
-            const Icon = level.icon
+          {TRIAGE_LEVELS.map(level => {
+            const IconComponent = level.icon === "Siren" ? Siren :
+                                 level.icon === "ClockAlert" ? ClockAlert :
+                                 level.icon === "ClipboardPlus" ? ClipboardPlus : Skull
             return (
               <label
                 key={`${id}-${level.value}`}
@@ -86,7 +48,7 @@ export function TriageSummaryComp({ form, setForm }: TriageSummaryCompProps) {
                   className="sr-only after:absolute after:inset-0"
                   aria-label={`triage-level-${level.value}`}
                 />
-                <Icon className={`h-6 w-6 ${level.iconColor}`} />
+                <IconComponent className={`h-6 w-6 ${level.iconColor}`} />
                 <p className={`text-sm font-semibold leading-none ${level.textColor}`}>
                   {level.label}
                 </p>
@@ -104,6 +66,38 @@ export function TriageSummaryComp({ form, setForm }: TriageSummaryCompProps) {
           onChange={e => setForm(f => ({ ...f, triageNotes: e.target.value }))}
           placeholder="Enter clinical observations, assessment details, and any additional notes..."
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Disposition</Label>
+      
+        <RadioGroup value={form.disposition} onValueChange={(value) => setForm(f => ({ ...f, disposition: value }))} className="grid grid-cols-2 gap-3">
+          {DISPOSITIONS.map((disposition) => {
+              const checked = form.disposition === disposition.value
+      
+              return (
+                <div
+                  key={`${id}-${disposition.value}`}
+                  onClick={() => setForm(f => ({ ...f, disposition: disposition.value }))}
+                  className={`flex items-center justify-between p-3 border rounded-sm cursor-pointer transition-colors shadow-sm hover:shadow-md ${
+                  checked ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50 border-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem id={`${id}-${disposition.value}`} value={disposition.value} className="pointer-events-none" />
+                    <Label htmlFor={`${id}-${disposition.value}`} className="cursor-pointer pointer-events-none text-sm">{disposition.label}</Label>
+                  </div>
+                </div>
+              )
+            })}
+        </RadioGroup>
+
+        {form.disposition === "Other" && (
+          <div className="space-y-2 mt-3">
+            <Label htmlFor="dispositionOther" className="text-sm text-muted-foreground">Please Specify:</Label>
+            <Input id="dispositionOther" value={form.dispositionOther} onChange={e => setForm(f => ({ ...f, dispositionOther: e.target.value }))} placeholder="Specify disposition" />
+          </div>
+        )}
       </div>
     </div>
   )

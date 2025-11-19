@@ -31,7 +31,6 @@ import {
   ChevronLastIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ClipboardClock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -87,7 +86,7 @@ export function TriageTable({ data}: TriageTableProps) {
       accessorKey: "patient.triageType",
       header: "Triage Type",
       cell: ({ row }) => {
-        const type = row.original.patient.triageType
+        const type = row.original.patient.triageDetails[0]?.triageType
         const variant = type === "EMERGENCY" ? "destructive" : "default"
         return <Badge variant={variant}>{type}</Badge>
       },

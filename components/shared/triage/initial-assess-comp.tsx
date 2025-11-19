@@ -32,11 +32,11 @@ export function InitialAssessComp({ assessment, setAssessment }: InitialAssessCo
           { key: "conscious" as const, label: "Patient is conscious and responsive" },
           { key: "breathing" as const, label: "Breathing is normal and adequate" },
           { key: "circulation" as const, label: "Circulation/pulse is stable" },
-          { key: "bleeding" as const, label: "No active severe bleeding" }
+          { key: "bleeding" as const, label: "No active severe bleeding" },
         ].map(item => (
           <div 
             key={item.key} 
-            className="flex items-center gap-3 p-3 border rounded-lg hover:bg-blue-50 cursor-pointer"
+            className="flex items-center gap-3 p-5 border rounded-sm hover:bg-blue-50 cursor-pointer shadow-sm"
             onClick={() => toggle(item.key)}
           >
             <Checkbox
