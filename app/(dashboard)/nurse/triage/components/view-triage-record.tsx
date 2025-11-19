@@ -98,7 +98,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-[95vw] lg:max-w-xl max-h-[95vh] flex flex-col overflow-hidden">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle className="text-2xl">View Triage Records</DialogTitle>
         </DialogHeader>
@@ -227,7 +227,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         setActiveTab("record-details")
                       }}
                     >
-                      <CardContent className="pt-4">
+                      <CardContent className="pt-1">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -260,7 +260,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
             <TabsContent value="record-details" className="mt-0">
               {selectedRecord ? (
                 <Tabs defaultValue="overview" className="flex-row gap-4">
-                  <TabsList className="h-full flex-col gap-2">
+                  <TabsList className="h-fit flex-col gap-2 sticky top-0 self-start">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
@@ -347,7 +347,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                       {/* Date/Time */}
                       <Card className="bg-gray-50">
-                        <CardContent className="pt-4">
+                        <CardContent className="pt-1">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -375,7 +375,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                       {/* Chief Complaint */}
                       <Card>
-                        <CardContent className="pt-4">
+                        <CardContent className="pt-1">
                           <Label className="text-sm text-muted-foreground">Chief Complaint</Label>
                           <p className="mt-1 font-medium">{selectedRecord.chiefComplaint}</p>
                         </CardContent>
@@ -396,7 +396,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                       <div className="grid md:grid-cols-2 gap-3">
                         <Card className="bg-red-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Heart className="h-4 w-4 text-red-600" />
                               <Label className="font-semibold text-sm">Blood Pressure</Label>
@@ -408,7 +408,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-green-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Activity className="h-4 w-4 text-green-600" />
                               <Label className="font-semibold text-sm">Heart Rate</Label>
@@ -420,7 +420,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-purple-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Wind className="h-4 w-4 text-purple-600" />
                               <Label className="font-semibold text-sm">Respiratory Rate</Label>
@@ -432,7 +432,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-cyan-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Wind className="h-4 w-4 text-cyan-600" />
                               <Label className="font-semibold text-sm">O₂ Saturation</Label>
@@ -444,7 +444,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-orange-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Thermometer className="h-4 w-4 text-orange-600" />
                               <Label className="font-semibold text-sm">Temperature</Label>
@@ -456,7 +456,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-amber-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Weight className="h-4 w-4 text-amber-600" />
                               <Label className="font-semibold text-sm">Weight</Label>
@@ -468,7 +468,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         </Card>
 
                         <Card className="bg-indigo-50">
-                          <CardContent className="pt-4">
+                          <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Ruler className="h-4 w-4 text-indigo-600" />
                               <Label className="font-semibold text-sm">Height</Label>
@@ -497,7 +497,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                         <div className="space-y-3">
                           {selectedRecord.airwayStatus && (
                             <Card className="bg-blue-50">
-                              <CardContent className="pt-4">
+                              <CardContent className="pt-1">
                                 <Label className="font-semibold text-sm text-blue-900">Airway</Label>
                                 <p className="text-sm mt-2">{selectedRecord.airwayStatus.assessment}</p>
                                 {selectedRecord.airwayStatus.interventions && (
@@ -512,7 +512,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                           {selectedRecord.breathingStatus && (
                             <Card className="bg-green-50">
-                              <CardContent className="pt-4">
+                              <CardContent className="pt-1">
                                 <Label className="font-semibold text-sm text-green-900">Breathing</Label>
                                 <p className="text-sm mt-2">{selectedRecord.breathingStatus.assessment}</p>
                                 {selectedRecord.breathingStatus.interventions && (
@@ -527,7 +527,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                           {selectedRecord.circulationStatus && (
                             <Card className="bg-red-50">
-                              <CardContent className="pt-4">
+                              <CardContent className="pt-1">
                                 <Label className="font-semibold text-sm text-red-900">Circulation</Label>
                                 <p className="text-sm mt-2">{selectedRecord.circulationStatus.assessment}</p>
                                 {selectedRecord.circulationStatus.interventions && (
@@ -552,7 +552,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                       {/* Triage Notes */}
                       <Card>
-                        <CardContent className="pt-4">
+                        <CardContent className="pt-1">
                           <Label className="text-sm text-muted-foreground">Triage Notes</Label>
                           <p className="mt-2 text-sm whitespace-pre-wrap">{selectedRecord.triageNotes || "No notes recorded"}</p>
                         </CardContent>
@@ -560,7 +560,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
 
                       {/* Disposition */}
                       <Card>
-                        <CardContent className="pt-4">
+                        <CardContent className="pt-1">
                           <Label className="text-sm text-muted-foreground">Disposition</Label>
                           <p className="mt-1 font-medium">{selectedRecord.triageDisposition}</p>
                         </CardContent>
