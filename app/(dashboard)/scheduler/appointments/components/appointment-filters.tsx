@@ -110,7 +110,7 @@ export function AppointmentsFilters({
               {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Select date"}
             </button>
           </PopoverTrigger>
-          <PopoverContent className="p-0" align="start">
+          <PopoverContent className="w-auto p-0">
           <Calendar
               mode="single"
               selected={selectedDate || undefined}

@@ -1,123 +1,165 @@
-"use client";
-
-import { useState, useEffect } from 'react';
-import { DashboardLayout } from "@/components/dashboard-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { UserRole } from "@/lib/auth/roles";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { IconSearch, IconBed, IconRefresh } from '@tabler/icons-react';
+"use client"
+import { useState, useEffect } from "react"
+import { DashboardLayout } from "@/components/dashboard-layout"
+import { ProtectedRoute } from "@/components/auth/protected-route"
+import { UserRole } from "@/lib/auth/roles"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { IconBed, IconSearch, IconUserPlus, IconCheck, IconRefresh, IconAlertCircle, IconMapPin } from "@tabler/icons-react"
 
 interface Bed {
-  id: string;
-  unit: string;
-  roomNumber: string | null;
-  bedNumber: string | null;
-  status: string;
-  department?: {
-    id: string;
-    name: string;
-  } | null;
-  encounters: Array<{
-    patient: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      mrn: string;
-    };
-  }>;
+  id: string
+  roomNumber: string
+  bedNumber: string
+  floor: string
+  bedType: string
+  status: string
+  notes: string | null
+  department: {
+    id: string
+    name: string
+    code: string
+  }
+  currentPatient: {
+    id: string
+    firstName: string
+    lastName: string
+    mrn: string
+  } | null
 }
 
-interface UnitOption {
-  unit: string;
-  availableCount: number;
+interface Department {
+  id: string
+  name: string
+  code: string
+  type: string
+  availableBeds: number
 }
 
-export default function BedManagementPage() {
-  const [beds, setBeds] = useState<Bed[]>([]);
-  const [units, setUnits] = useState<UnitOption[]>([]);
-  const [selectedUnit, setSelectedUnit] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('AVAILABLE');
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState<string>('');
-
-  // Fetch beds
-  const fetchBeds = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const params = new URLSearchParams();
-      if (selectedUnit !== 'all') params.set('unit', selectedUnit);
-      params.set('status', selectedStatus);
-
-      const response = await fetch(`/api/beds/search?${params.toString()}`);
-      
-      // Check if response is ok
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', errorText);
-        setError(`Failed to fetch beds: ${response.status}`);
-        return;
-      }
-
-      // Check if response has content
-      const text = await response.text();
-      if (!text) {
-        console.error('Empty response from API');
-        setError('Received empty response from server');
-        return;
-      }
-
-      const data = JSON.parse(text);
-      
-      if (data.error) {
-        console.error('Error:', data.error);
-        setError(data.error);
-        return;
-      }
-
-      setBeds(data.beds || []);
-      setUnits(data.units || []);
-    } catch (error) {
-      console.error('Failed to fetch beds:', error);
-      setError('Failed to connect to server');
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function BedsPage() {
+  const [beds, setBeds] = useState<Bed[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+  const [selectedBed, setSelectedBed] = useState<Bed | null>(null)
+  const [patientMRN, setPatientMRN] = useState("")
+  const [encounterID, setEncounterID] = useState("")
+  const [assignmentNotes, setAssignmentNotes] = useState("")
+  const [assigning, setAssigning] = useState(false)
+  const [error, setError] = useState<string>("")
+  const [success, setSuccess] = useState<string>("")
 
   useEffect(() => {
-    fetchBeds();
-  }, [selectedUnit, selectedStatus]);
+    fetchDepartments()
+    fetchBeds()
+  }, [])
 
-  // Filter beds by search term
-  const filteredBeds = beds.filter(bed => 
-    bed.bedNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bed.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    bed.unit.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchBeds()
+  }, [selectedDepartment, searchQuery])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'AVAILABLE': return 'bg-green-500 hover:bg-green-600';
-      case 'OCCUPIED': return 'bg-red-500 hover:bg-red-600';
-      case 'CLEANING': return 'bg-yellow-500 hover:bg-yellow-600';
-      case 'OUT_OF_SERVICE': return 'bg-gray-500 hover:bg-gray-600';
-      default: return 'bg-blue-500 hover:bg-blue-600';
+  const fetchDepartments = async () => {
+    try {
+      const res = await fetch('/api/departments/inpatient')
+      const data = await res.json()
+      if (data.success) {
+        setDepartments(data.data)
+      } else {
+        setError('Failed to load departments')
+      }
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+      setError('Failed to load departments')
     }
-  };
+  }
 
-  const formatBedLabel = (bed: Bed) => {
-    const parts = [];
-    if (bed.roomNumber) parts.push(`Room ${bed.roomNumber}`);
-    if (bed.bedNumber) parts.push(`Bed ${bed.bedNumber}`);
-    return parts.join(' - ') || 'N/A';
-  };
+  const fetchBeds = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const params = new URLSearchParams()
+      if (selectedDepartment !== 'all') params.append('departmentId', selectedDepartment)
+      if (searchQuery) params.append('search', searchQuery)
+
+      const res = await fetch(`/api/beds/available?${params.toString()}`)
+      const data = await res.json()
+      
+      if (data.success) {
+        setBeds(data.data)
+      } else {
+        setError('Failed to load beds')
+      }
+    } catch (error) {
+      console.error('Error fetching beds:', error)
+      setError('Failed to load beds')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAssignBed = async () => {
+    if (!selectedBed || !patientMRN || !encounterID) {
+      setError('Please fill in all required fields')
+      return
+    }
+
+    setAssigning(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const res = await fetch('/api/beds/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bedId: selectedBed.id,
+          patientId: patientMRN,
+          encounterId: encounterID,
+          assignedBy: 'current-registrar-id', // Get from auth context in production
+          notes: assignmentNotes
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setSuccess('Patient successfully assigned to bed')
+        setAssignDialogOpen(false)
+        setPatientMRN("")
+        setEncounterID("")
+        setAssignmentNotes("")
+        setSelectedBed(null)
+        fetchBeds() // Refresh bed list
+        fetchDepartments() // Refresh department counts
+      } else {
+        setError(data.error || 'Failed to assign bed')
+      }
+    } catch (error) {
+      console.error('Error assigning bed:', error)
+      setError('Failed to assign bed')
+    } finally {
+      setAssigning(false)
+    }
+  }
+
+  const getBadgeColor = (status: string) => {
+    switch (status) {
+      case 'AVAILABLE': return 'default'
+      case 'OCCUPIED': return 'destructive'
+      case 'CLEANING': return 'secondary'
+      case 'OUT_OF_SERVICE': return 'outline'
+      default: return 'default'
+    }
+  }
 
   return (
     <ProtectedRoute requiredRole={UserRole.REGISTRAR}>
@@ -126,162 +168,296 @@ export default function BedManagementPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Bed Management</h1>
             <p className="text-muted-foreground">
-              Search for available beds across inpatient units for patient admission and transfers
+              Search and assign available beds to patients
             </p>
           </div>
 
           <div className="px-4 lg:px-6 space-y-6">
-            {/* Error Display */}
+            {/* Success/Error Messages */}
             {error && (
               <Card className="border-red-500">
                 <CardContent className="pt-6">
-                  <p className="text-red-500 text-sm">{error}</p>
+                  <div className="flex items-center gap-2">
+                    <IconAlertCircle className="h-5 w-5 text-red-500" />
+                    <p className="text-red-500">{error}</p>
+                  </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Filters */}
+            {success && (
+              <Card className="border-green-500">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2">
+                    <IconCheck className="h-5 w-5 text-green-500" />
+                    <p className="text-green-500">{success}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Department Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {departments.slice(0, 4).map((dept) => (
+                <Card 
+                  key={dept.id} 
+                  className="cursor-pointer hover:bg-slate-50 transition-colors" 
+                  onClick={() => setSelectedDepartment(dept.id)}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">{dept.name}</p>
+                        <p className="text-2xl font-bold">{dept.availableBeds}</p>
+                        <p className="text-xs text-muted-foreground">Available Beds</p>
+                      </div>
+                      <IconBed className="h-8 w-8 text-primary opacity-50" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Search and Filters */}
             <Card>
               <CardHeader>
-                <CardTitle>Search Filters</CardTitle>
-                <CardDescription>Filter beds by unit, status, and room/bed number</CardDescription>
+                <CardTitle>Search Available Beds</CardTitle>
+                <CardDescription>
+                  Filter by department and search to find available beds
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* Unit Filter */}
-                  <div className="space-y-2">
-                    <Label>Inpatient Unit</Label>
-                    <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <Label>Department/Unit</Label>
+                    <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select unit" />
+                        <SelectValue placeholder="All Departments" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Units</SelectItem>
-                        {units.map(unit => (
-                          <SelectItem key={unit.unit} value={unit.unit}>
-                            {unit.unit} ({unit.availableCount} available)
+                        <SelectItem value="all">All Departments</SelectItem>
+                        {departments.map(dept => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name} ({dept.availableBeds} available)
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {/* Status Filter */}
-                  <div className="space-y-2">
-                    <Label>Bed Status</Label>
-                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="AVAILABLE">Available</SelectItem>
-                        <SelectItem value="OCCUPIED">Occupied</SelectItem>
-                        <SelectItem value="CLEANING">Cleaning</SelectItem>
-                        <SelectItem value="OUT_OF_SERVICE">Out of Service</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Search */}
-                  <div className="space-y-2">
-                    <Label>Search Room/Bed</Label>
+                  <div>
+                    <Label>Search</Label>
                     <div className="relative">
                       <IconSearch className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Room or bed number..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Room, bed number, or unit..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-8"
                       />
                     </div>
                   </div>
+                </div>
 
-                  {/* Refresh Button */}
-                  <div className="space-y-2">
-                    <Label className="opacity-0">Refresh</Label>
-                    <Button onClick={fetchBeds} disabled={loading} className="w-full">
-                      <IconRefresh className="mr-2 h-4 w-4" />
-                      {loading ? 'Searching...' : 'Refresh'}
-                    </Button>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {beds.length} available bed(s) found
+                  </p>
+                  <Button variant="outline" onClick={fetchBeds} disabled={loading}>
+                    <IconRefresh className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Results */}
+            {/* Beds Table */}
             <Card>
               <CardHeader>
-                <CardTitle>
-                  {filteredBeds.length} Bed{filteredBeds.length !== 1 ? 's' : ''} Found
+                <CardTitle className="flex items-center gap-2">
+                  <IconMapPin className="h-5 w-5" />
+                  Available Beds
                 </CardTitle>
-                <CardDescription>
-                  {selectedStatus === 'AVAILABLE' 
-                    ? 'Available beds ready for admission or transfer' 
-                    : `Beds with status: ${selectedStatus}`}
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <IconBed className="h-12 w-12 mx-auto mb-4 animate-pulse" />
-                    <p>Loading beds...</p>
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading beds...
                   </div>
-                ) : filteredBeds.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <IconBed className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">No beds found</p>
-                    <p className="text-sm">Try adjusting your search filters</p>
+                ) : beds.length === 0 ? (
+                  <div className="text-center py-8">
+                    <IconAlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No available beds found</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Try adjusting your filters or search criteria
+                    </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredBeds.map(bed => (
-                      <Card key={bed.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="pt-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-primary/10 rounded-lg">
-                                <IconBed className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-lg">
-                                  {formatBedLabel(bed)}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {bed.unit}
-                                </p>
-                                {bed.department && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {bed.department.name}
-                                  </p>
-                                )}
-                              </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Room</TableHead>
+                        <TableHead>Bed</TableHead>
+                        <TableHead>Unit/Floor</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {beds.map((bed) => (
+                        <TableRow key={bed.id} className="hover:bg-slate-50">
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <IconBed className="h-4 w-4" />
+                              <span className="font-mono text-sm">
+                                {bed.roomNumber}-{bed.bedNumber}
+                              </span>
                             </div>
-                            <Badge className={getStatusColor(bed.status)}>
+                          </TableCell>
+                          <TableCell className="font-medium">{bed.roomNumber}</TableCell>
+                          <TableCell>{bed.bedNumber}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{bed.floor}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-medium">{bed.department.name}</p>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getBadgeColor(bed.status) as any}>
                               {bed.status}
                             </Badge>
-                          </div>
-                          
-                          {bed.encounters?.[0]?.patient && (
-                            <div className="mt-4 pt-4 border-t">
-                              <p className="text-xs text-muted-foreground mb-1">Current Patient:</p>
-                              <p className="font-medium text-sm">
-                                {bed.encounters[0].patient.firstName} {bed.encounters[0].patient.lastName}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                MRN: {bed.encounters[0].patient.mrn}
-                              </p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBed(bed)
+                                setAssignDialogOpen(true)
+                              }}
+                            >
+                              <IconUserPlus className="h-4 w-4 mr-1" />
+                              Assign Patient
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
               </CardContent>
             </Card>
           </div>
         </div>
+
+        {/* Bed Assignment Dialog */}
+        <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Assign Patient to Bed</DialogTitle>
+              <DialogDescription>
+                Assign a patient to {selectedBed?.roomNumber} - {selectedBed?.bedNumber}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {/* Bed Details Card */}
+              {selectedBed && (
+                <Card className="bg-slate-50">
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Location</p>
+                        <p className="font-semibold">
+                          Room {selectedBed.roomNumber}, Bed {selectedBed.bedNumber}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Unit</p>
+                        <p className="font-semibold">{selectedBed.floor}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Department</p>
+                        <p className="font-semibold">{selectedBed.department.name}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Status</p>
+                        <Badge variant={getBadgeColor(selectedBed.status) as any}>
+                          {selectedBed.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Patient Information */}
+              <div>
+                <Label htmlFor="mrn">Patient MRN *</Label>
+                <Input
+                  id="mrn"
+                  placeholder="Enter patient MRN"
+                  value={patientMRN}
+                  onChange={(e) => setPatientMRN(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter the Medical Record Number of the patient
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="encounter">Encounter ID *</Label>
+                <Input
+                  id="encounter"
+                  placeholder="Enter encounter ID"
+                  value={encounterID}
+                  onChange={(e) => setEncounterID(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter the active encounter ID for this admission
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Assignment Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Add any special notes or instructions..."
+                  value={assignmentNotes}
+                  onChange={(e) => setAssignmentNotes(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              {/* Warning Box */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3 flex gap-2">
+                <IconAlertCircle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-yellow-900">
+                  <p className="font-semibold">Important:</p>
+                  <p>Make sure the patient information is correct before assigning. This action will mark the bed as occupied and create a transfer record.</p>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAssignBed} disabled={assigning}>
+                {assigning ? (
+                  "Assigning..."
+                ) : (
+                  <>
+                    <IconCheck className="h-4 w-4 mr-1" />
+                    Assign Bed
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DashboardLayout>
     </ProtectedRoute>
-  );
+  )
 }

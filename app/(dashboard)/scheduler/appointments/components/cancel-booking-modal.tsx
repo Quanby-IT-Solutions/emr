@@ -2,7 +2,7 @@
 
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { AppointmentEntry } from "@/app/(dashboard)/scheduler/dummy-data/dummy-appointments"
+import { AppointmentEntry } from "@/app/(dashboard)/dummy-data/dummy-appointments"
 import { XCircle } from "lucide-react"
 
 interface CancelBookingModalProps {

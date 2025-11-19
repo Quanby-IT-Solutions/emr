@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Patient } from "@/app/(dashboard)/scheduler/dummy-data/dummy-patients"
+import { Patient } from "@/app/(dashboard)/dummy-data/dummy-patients"
 
 interface ConfirmBookingModalProps {
   open: boolean

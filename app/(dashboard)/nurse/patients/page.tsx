@@ -11,50 +11,53 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { IconSearch, IconUser, IconAlertCircle } from '@tabler/icons-react';
 import { useState } from 'react';
+import { NursePatient, nursePatientList } from '../../dummy-data/dummy-nurse-patient';
 
-const mockPatients = [
-  { 
-    id: "1", 
-    name: "John Doe", 
-    mrn: "MRN-001",
-    room: "301A", 
-    condition: "Stable", 
-    lastVitals: "10 min ago",
-    allergyCount: 2,
-    encounterCount: 3
-  },
-  { 
-    id: "2", 
-    name: "Jane Smith", 
-    mrn: "MRN-002",
-    room: "302B", 
-    condition: "Critical", 
-    lastVitals: "5 min ago",
-    allergyCount: 1,
-    encounterCount: 2
-  },
-  { 
-    id: "3", 
-    name: "Bob Wilson", 
-    mrn: "MRN-003",
-    room: "303A", 
-    condition: "Stable", 
-    lastVitals: "1 hour ago",
-    allergyCount: 0,
-    encounterCount: 2
-  },
-];
+// const mockPatients = [
+//   { 
+//     id: "1", 
+//     name: "John Doe", 
+//     mrn: "MRN-001",
+//     room: "301A", 
+//     condition: "Stable", 
+//     lastVitals: "10 min ago",
+//     allergyCount: 2,
+//     encounterCount: 3
+//   },
+//   { 
+//     id: "2", 
+//     name: "Jane Smith", 
+//     mrn: "MRN-002",
+//     room: "302B", 
+//     condition: "Critical", 
+//     lastVitals: "5 min ago",
+//     allergyCount: 1,
+//     encounterCount: 2
+//   },
+//   { 
+//     id: "3", 
+//     name: "Bob Wilson", 
+//     mrn: "MRN-003",
+//     room: "303A", 
+//     condition: "Stable", 
+//     lastVitals: "1 hour ago",
+//     allergyCount: 0,
+//     encounterCount: 2
+//   },
+// ];
 
 export default function NursePatientsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [patientList, setPatientList] = useState<NursePatient[]>(nursePatientList);
 
   // Filter patients based on search
-  const filteredPatients = mockPatients.filter(patient => 
+  const filteredPatients = patientList.filter(patient => 
     patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     patient.mrn.toLowerCase().includes(searchQuery.toLowerCase()) ||
     patient.room.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
 
   const viewPatientChart = (patientId: string) => {
     router.push(`/nurse/chart?patientId=${patientId}`);

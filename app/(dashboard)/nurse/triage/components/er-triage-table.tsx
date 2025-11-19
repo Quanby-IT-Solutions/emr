@@ -23,8 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AppointmentEntry } from "@/app/(dashboard)/dummy-data/dummy-appointments"
-import { AppointmentActionsMenu } from "./appointment-action-menu"
 import { Badge } from "@/components/ui/badge"
 import {
   ChevronUpIcon,
@@ -33,6 +31,7 @@ import {
   ChevronLastIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClipboardClock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -42,107 +41,89 @@ import {
   PaginationLink,
 } from "@/components/ui/pagination"
 
-interface AppointmentsTableProps {
-  data: AppointmentEntry[]
-  onEdit: (appointment: AppointmentEntry) => void
-  onConfirm: (appointment: AppointmentEntry) => void
-  onCancel: (appointment: AppointmentEntry) => void
+import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
+import { Button } from "@/components/ui/button"
+
+interface ERTriageTableProps {
+  data: TriageAssessment[]
+  onFollowUp: (assessment: TriageAssessment) => void
 }
 
-export function AppointmentsTable({
-  data,
-  onEdit,
-  onConfirm,
-  onCancel,
-}: AppointmentsTableProps) {
+export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   })
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const columns: ColumnDef<AppointmentEntry>[] = [
+  const columns: ColumnDef<TriageAssessment>[] = [
     {
-      accessorKey: "patientId",
+      accessorKey: "patient.id",
       header: "Patient ID",
     },
     {
-      accessorKey: "patientName",
+      accessorKey: "patient.name",
       header: "Patient Name",
-      cell: ({ row }) => (
-        <span className="font-medium">{row.original.patientName}</span>
-      ),
     },
     {
-      accessorKey: "ageSex",
+      accessorKey: "patient.ageSex",
       header: "Age/Sex",
     },
     {
-      accessorKey: "appointmentDate",
-      header: "Date",
-      cell: ({ row }) => {
-        const date = new Date(row.original.appointmentDate)
+      accessorKey: "patient.arrivalDetails.date",
+       header: "Arrival Date",
+       cell: ({ row }) => {
+       const date = new Date(row.original.patient.arrivalDetails.date)
+       return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      },
+    },
+    {
+        accessorKey: "patient.arrivalDetails.time",
+        header: "Arrival Time",
+    },
+    {
+        accessorKey: "patient.lastDateOfTriage",
+        header: "Last Triage Date",
+        cell: ({ row }) => {
+        const value = row.original.patient.lastDateOfTriage
+        if (value === null || value === undefined) {
+          return null
+        }
+        const date = new Date(value)
         return date.toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
           year: "numeric",
         })
       },
-      sortingFn: (rowA, rowB) => {
-        const dateA = new Date(rowA.original.appointmentDate).getTime()
-        const dateB = new Date(rowB.original.appointmentDate).getTime()
-        return dateA - dateB
-      },
     },
     {
-      accessorKey: "appointmentTime",
-      header: "Time",
+      accessorKey: "patient.lastTimeOfTriage",
+      header: "Last Triage Time",
     },
     {
-      accessorKey: "department",
-      header: "Department",
-    },
-    {
-      accessorKey: "provider",
-      header: "Physician",
-    },
-    {
-      accessorKey: "visitType",
-      header: "Visit Type",
+      accessorKey: "patient.currentTriageCategory",
+      header: "Triage Category",
       cell: ({ row }) => {
-        const type = row.original.visitType
-        const variant = type === "New" ? "default" : "secondary"
-        return <Badge variant={variant}>{type}</Badge>
-      },
+        const category = row.original.patient.currentTriageCategory
+        const variant = category === "EMERGENT" ? "destructive" : category === "URGENT" ? "warning" : category === "DEAD" ? "dimmed" : "default"
+        return <Badge variant={variant}>{category}</Badge>
+      }
     },
     {
-      accessorKey: "bookingStatus",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.bookingStatus
-        const variant =
-          status === "Confirmed"
-            ? "default"
-            : status === "Cancelled"
-            ? "destructive"
-            : "secondary"
-        return <Badge variant={variant}>{status}</Badge>
-      },
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <AppointmentActionsMenu
-          appointment={row.original}
-          onEdit={onEdit}
-          onConfirm={onConfirm}
-          onCancel={onCancel}
-        />
-      ),
-    },
+        accessorKey: "followUp",
+        header: "Follow Up",
+        cell: ({ row }) => {
+        return <Button size="sm" onClick={() => onFollowUp(row.original)} className="bg-orange-400 hover:bg-orange-500">
+          <ClipboardClock className="h-4 w-4" />
+          </Button>
+        }
+    }
   ]
-
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
@@ -262,7 +243,7 @@ export function AppointmentsTable({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No appointments found.
+                  No triage assessments found.
                 </TableCell>
               </TableRow>
             )}
@@ -271,7 +252,7 @@ export function AppointmentsTable({
       </div>
 
     {/* --- Pagination --- */}
-    <div className="flex w-full items-center justify-between gap-6">
+    <div className="flex w-full justify-between gap-6">
       {/* Left: Rows per page */}
       <div className="flex shrink-0 items-center gap-3">
         <span className="text-sm text-muted-foreground">Rows per page:</span>
@@ -398,7 +379,7 @@ export function AppointmentsTable({
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </div>
+      </div>
     </div>
   )
 }

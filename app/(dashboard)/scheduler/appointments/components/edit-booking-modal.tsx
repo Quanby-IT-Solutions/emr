@@ -9,8 +9,8 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMemo, useState } from "react";
-import { AppointmentEntry } from "../../dummy-data/dummy-appointments";
-import { Departments } from "../../dummy-data/dummy-providers";
+import { AppointmentEntry } from "../../../dummy-data/dummy-appointments";
+import { Departments } from "../../../dummy-data/dummy-providers";
 import { Combobox } from "@/components/ui/combo-box";
 
 interface EditBookingModalProps {

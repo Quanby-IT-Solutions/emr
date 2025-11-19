@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Provider, mockWeeklyAvailability } from "@/app/(dashboard)/scheduler/dummy-data/dummy-providers"
+import { Provider, mockWeeklyAvailability } from "@/app/(dashboard)/dummy-data/dummy-providers"
 
 interface WeeklyViewProps {
   provider: Provider & { department: string }
