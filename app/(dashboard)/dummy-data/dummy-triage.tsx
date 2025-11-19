@@ -122,9 +122,9 @@ export interface TriageAssessment {
       modeOfTransport: string
       modeOfTransportOther: string
       transferredFrom: string | null
-      department: string
+      department: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER"
       departmentOther: string
-      referredBy: string | null // this is the doctor who referred the patient - only has data when the patient is referred
+      referredBy: string | null
     }
     triageDetails: {
       chiefComplaint: string
@@ -179,7 +179,7 @@ export interface TriageAssessment {
         interventions: string
       }
       triageCategory: "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD"
-      triageType: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER"
+      // triageType: "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER"
       triageDisposition: string
       triageDispositionOther: string | null
       triageNotes: string
@@ -213,7 +213,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "123 Barangay Poblacion, Nasugbu, Batangas",
       occupation: "Teacher",
       currentTriageCategory: "URGENT",
-      status: "IN APT. QUEUE",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-17"),
       lastTimeOfTriage: "14:30",
       companion: {
@@ -234,7 +234,7 @@ export const TriageEntry: TriageAssessment[] = [
       },
       triageDetails: [
         {
-          chiefComplaint: "Severe abdominal pain with vomiting for 6 hours",
+          chiefComplaint: "Severe ankle pain for 6 hours",
           symptoms: {
             chestPain: false,
             difficultyBreathing: false,
@@ -286,7 +286,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "WALK_IN",
+          // triageType: "WALK_IN",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "X-ray negative for fracture. Ankle sprain diagnosed. RICE protocol advised. Analgesics prescribed.",
@@ -315,7 +315,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "456 Brgy. Wawa, Nasugbu, Batangas",
       occupation: "Retired",
       currentTriageCategory: "EMERGENT",
-      status: "IN APT. QUEUE",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-19"),
       lastTimeOfTriage: "08:45",
       companion: {
@@ -388,7 +388,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "2 IV lines, cardiac monitor, 12-lead ECG done"
           },
           triageCategory: "EMERGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "Suspected STEMI. Cardiology notified. Aspirin 300mg given.",
@@ -417,7 +417,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "789 Brgy. Bilaran, Nasugbu, Batangas",
       occupation: "Nurse",
       currentTriageCategory: "NON_URGENT",
-      status: "FOR DISCHARGE",
+      status: "IN APT. QUEUE",
       lastDateOfTriage: new Date("2025-11-16"),
       lastTimeOfTriage: "10:20",
       companion: {
@@ -490,7 +490,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "OPD",
+          // triageType: "OPD",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "Upper respiratory tract infection. Prescribed antibiotics and rest.",
@@ -519,7 +519,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "234 Brgy. Calayo, Nasugbu, Batangas",
       occupation: "Construction Worker",
       currentTriageCategory: "URGENT",
-      status: "IN APT. QUEUE",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-18"),
       lastTimeOfTriage: "16:10",
       companion: {
@@ -592,7 +592,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "Pressure dressing applied, IV access"
           },
           triageCategory: "URGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "15cm laceration requiring sutures. Tetanus prophylaxis given. Wound cleaned and sutured.",
@@ -694,7 +694,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "SCHEDULED",
+          // triageType: "SCHEDULED",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "BP slightly elevated. Medication adjusted. Advised lifestyle modifications.",
@@ -723,7 +723,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "890 Brgy. Papaya, Nasugbu, Batangas",
       occupation: "Student",
       currentTriageCategory: "EMERGENT",
-      status: "IN APT. QUEUE",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-15"),
       lastTimeOfTriage: "22:30",
       companion: {
@@ -796,7 +796,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access, bleeding controlled"
           },
           triageCategory: "EMERGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "GCS 13. Head CT ordered. Possible concussion. Trauma team activated.",
@@ -898,7 +898,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "CPR performed for 45 minutes, multiple epinephrine doses"
           },
           triageCategory: "DEAD",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Died",
           triageDispositionOther: null,
           triageNotes: "Resuscitation efforts ceased at 04:15. Time of death declared. Family notified.",
@@ -927,7 +927,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "678 Brgy. Aga, Nasugbu, Batangas",
       occupation: "Student",
       currentTriageCategory: "URGENT",
-      status: "IN APT. QUEUE",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-17"),
       lastTimeOfTriage: "19:20",
       companion: {
@@ -1000,7 +1000,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access for fluids and medications"
           },
           triageCategory: "URGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "Suspected pneumonia. Chest X-ray ordered. Pediatrics consulted. Antipyretics and antibiotics started.",
@@ -1102,7 +1102,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "Ankle sprain. X-ray ordered. Antipyretics and antibiotics started.",
@@ -1131,7 +1131,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "234 Brgy. Catandaan, Nasugbu, Batangas",
       occupation: "Fisherman",
       currentTriageCategory: "URGENT",
-      status: "IN APT. QUEUE",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-16"),
       lastTimeOfTriage: "06:15",
       companion: {
@@ -1204,7 +1204,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access established"
           },
           triageCategory: "URGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "Suspected pulmonary embolism or pneumothorax. Chest X-ray and CT angiography ordered. Pulmonology consulted.",
@@ -1306,7 +1306,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "OPD",
+          // triageType: "OPD",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "UTI confirmed. Urinalysis done. Antibiotics prescribed. Advised increased fluid intake.",
@@ -1335,7 +1335,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "890 Brgy. Bulihan, Nasugbu, Batangas",
       occupation: "Electrician",
       currentTriageCategory: "EMERGENT",
-      status: "IN APT. QUEUE",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-14"),
       lastTimeOfTriage: "17:40",
       companion: {
@@ -1408,7 +1408,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "Two large bore IVs, fluid resuscitation initiated, cardiac monitoring"
           },
           triageCategory: "EMERGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "High voltage electrical injury. Burn unit consulted. ECG shows sinus tachycardia. Fluid resuscitation per Parkland formula started.",
@@ -1510,7 +1510,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "None"
           },
           triageCategory: "NON_URGENT",
-          triageType: "WALK_IN",
+          // triageType: "WALK_IN",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "Mild allergic reaction. Antihistamine administered. Advised to avoid seafood. EpiPen prescription given.",
@@ -1612,7 +1612,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access, antibiotics initiated"
           },
           triageCategory: "URGENT",
-          triageType: "REFERRAL",
+          // triageType: "REFERRAL",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "Diabetic foot infection Grade 3. Wound culture sent. IV antibiotics started. Surgery consult for possible debridement.",
@@ -1641,7 +1641,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "789 Brgy. Banilad, Nasugbu, Batangas",
       occupation: "Secretary",
       currentTriageCategory: "EMERGENT",
-      status: "IN APT. QUEUE",
+      status: "REFERRED",
       lastDateOfTriage: new Date("2025-11-18"),
       lastTimeOfTriage: "20:15",
       companion: {
@@ -1714,7 +1714,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access, anti-hypertensives given"
           },
           triageCategory: "EMERGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Admit",
           triageDispositionOther: null,
           triageNotes: "Suspected subarachnoid hemorrhage. Neurology emergency. CT brain ordered STAT. NPO. Seizure precautions.",
@@ -1816,7 +1816,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "Wound cleaned"
           },
           triageCategory: "NON_URGENT",
-          triageType: "WALK_IN",
+          // triageType: "WALK_IN",
           triageDisposition: "Discharge",
           triageDispositionOther: null,
           triageNotes: "Superficial abrasions. Wound cleaned and dressed. Tetanus status up to date. Home care instructions given to mother.",
@@ -1845,7 +1845,7 @@ export const TriageEntry: TriageAssessment[] = [
       address: "654 Brgy. Natipuan, Nasugbu, Batangas",
       occupation: "Business Owner",
       currentTriageCategory: "URGENT",
-      status: "IN APT. QUEUE",
+      status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-19"),
       lastTimeOfTriage: "15:30",
       companion: {
@@ -1918,7 +1918,7 @@ export const TriageEntry: TriageAssessment[] = [
             interventions: "IV access, epinephrine 0.3mg IM given, IV fluids running"
           },
           triageCategory: "URGENT",
-          triageType: "EMERGENCY",
+          // triageType: "EMERGENCY",
           triageDisposition: "Under_obs",
           triageDispositionOther: null,
           triageNotes: "Anaphylaxis to unknown allergen. Epinephrine given with good response. IV steroids and antihistamines administered. Observation for 4-6 hours.",

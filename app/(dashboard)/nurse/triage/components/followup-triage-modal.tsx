@@ -144,6 +144,7 @@ export function FollowUpWizard({ open, onOpenChange, onRecord, selectedPatient }
   const [rapidAssessment, setRapidAssessment] = useState<RapidAssessment>(initialRapidAssessment)
   const [initialAssessment, setInitialAssessment] = useState<InitialAssessment>(initialAssessmentState)
 
+
   const handleRapidAssessmentChange = (section: string, field: string, value: string) => {
     setRapidAssessment(prev => ({
       ...prev,

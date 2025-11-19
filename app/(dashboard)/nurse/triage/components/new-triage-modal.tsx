@@ -314,7 +314,7 @@ export function TriageWizard({ open, onOpenChange, onRecord }: TriageWizardProps
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader className="px-4 pt-6">
-          <DialogTitle>{steps[step]}</DialogTitle>
+          <DialogTitle>Triage Assessment - {steps[step]}</DialogTitle>
         </DialogHeader>
 
         {/* PROGRESS BAR */}
