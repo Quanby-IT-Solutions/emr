@@ -19,6 +19,17 @@ import { FollowUpWizard } from "./components/followup-triage-modal"
 import type { FollowUpWizardOutput } from "./components/followup-triage-modal"
 import ViewTriageRecord from "./components/view-triage-record"
 
+// Helper function to get current time in 24-hour format
+const getCurrentTime24Hour = () => {
+    const now = new Date()
+    return now.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false 
+    })
+}
+
 export default function TriagePage() {
     const [triageData, setTriageData] = useState<TriageAssessment[]>(TriageEntry)
     const [searchQuery, setSearchQuery] = useState("");
@@ -99,6 +110,7 @@ export default function TriagePage() {
 
     const handleRecordTriage = (data: TriageWizardOutput) => {
         const f = data.form
+        const rapidAssess = data.rapidAssessment
 
         // Generate new patient ID
         let newPatientId = f.patientId
@@ -131,6 +143,8 @@ export default function TriagePage() {
             }
         }
 
+        const currentTime = getCurrentTime24Hour()
+
         const newRecord: TriageAssessment = {
             patient: {
             id: newPatientId,
@@ -147,7 +161,7 @@ export default function TriagePage() {
             currentTriageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
             status: "IN APT. QUEUE",
             lastDateOfTriage: f.arrivalDate ?? null,
-            lastTimeOfTriage: f.arrivalTime ?? new Date().toLocaleTimeString(),
+            lastTimeOfTriage: f.arrivalTime ?? currentTime,
             companion: {
                 name: f.companionName ?? "",
                 contact: f.companionContact ? Number(f.companionContact) : null,
@@ -156,7 +170,7 @@ export default function TriagePage() {
             arrivalDetails: {
                 arrivalStatus: (f.arrivalStatus as "alive" | "dead-on-arrival") ?? "alive",
                 date: f.arrivalDate ?? new Date(),
-                time: f.arrivalTime ?? new Date().toLocaleTimeString(),
+                time: f.arrivalTime ?? currentTime,
                 modeOfTransport: f.arrivalMode ?? "",
                 modeOfTransportOther: f.arrivalModeOther ?? "",
                 transferredFrom: f.transferredFrom || null,
@@ -197,23 +211,23 @@ export default function TriagePage() {
                     (Number(f.gcsVerbalResponse) || 0) +
                     (Number(f.gcsMotorResponse) || 0),
                 },
+                // Use rapidAssessment data for ABC assessment
                 airwayStatus: {
-                    assessment: f.airwayAssessment ?? "",
-                    airwayNotes: f.airwayNotes ?? "",
-                    interventions: f.airwayInterventions ?? "",
+                    assessment: rapidAssess.airway.obs ?? "",
+                    airwayNotes: rapidAssess.airway.obs ?? "",
+                    interventions: rapidAssess.airway.intv ?? "",
                 },
                 breathingStatus: {
-                    assessment: f.breathingAssessment ?? "",
-                    breathingNotes: f.breathingNotes ?? "",
-                    interventions: f.breathingInterventions ?? "",
+                    assessment: rapidAssess.breathing.obs ?? "",
+                    breathingNotes: rapidAssess.breathing.obs ?? "",
+                    interventions: rapidAssess.breathing.intv ?? "",
                 },
                 circulationStatus: {
-                    assessment: f.circulationAssessment ?? "",
-                    circulationNotes: f.circulationNotes ?? "",
-                    interventions: f.circulationInterventions ?? "",
+                    assessment: rapidAssess.circulation.obs ?? "",
+                    circulationNotes: rapidAssess.circulation.obs ?? "",
+                    interventions: rapidAssess.circulation.intv ?? "",
                 },
                 triageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
-                // triageType: "EMERGENCY",
                 triageDisposition: f.disposition ?? "",
                 triageDispositionOther: f.dispositionOther ?? null,
                 triageNotes: f.triageNotes ?? "",
@@ -223,7 +237,7 @@ export default function TriagePage() {
                     lastName: "User",
                 },
                 dateOfTriage: new Date(),
-                timeOfTriage: new Date().toLocaleTimeString(),
+                timeOfTriage: currentTime,
                 },
             ],
             },
@@ -234,6 +248,12 @@ export default function TriagePage() {
 
     const handleRecordFollowUp = (data: FollowUpWizardOutput) => {
         const f = data.form
+        const rapidAssess = data.rapidAssessment
+
+        const currentTime = getCurrentTime24Hour()
+
+        // Get the patient's original department/origin
+        const originalDepartment = selectedPatient?.patient.arrivalDetails.department
 
         // Create new triage detail entry
         const newTriageDetail = {
@@ -276,23 +296,25 @@ export default function TriagePage() {
                 (Number(f.gcsVerbalResponse) || 0) +
                 (Number(f.gcsMotorResponse) || 0),
             },
+            // Use rapidAssessment data for ABC assessment
             airwayStatus: {
-            assessment: f.airwayAssessment ?? "",
-            airwayNotes: f.airwayNotes ?? "",
-            interventions: f.airwayInterventions ?? "",
+            assessment: rapidAssess.airway.obs ?? "",
+            airwayNotes: rapidAssess.airway.obs ?? "",
+            interventions: rapidAssess.airway.intv ?? "",
             },
             breathingStatus: {
-            assessment: f.breathingAssessment ?? "",
-            breathingNotes: f.breathingNotes ?? "",
-            interventions: f.breathingInterventions ?? "",
+            assessment: rapidAssess.breathing.obs ?? "",
+            breathingNotes: rapidAssess.breathing.obs ?? "",
+            interventions: rapidAssess.breathing.intv ?? "",
             },
             circulationStatus: {
-            assessment: f.circulationAssessment ?? "",
-            circulationNotes: f.circulationNotes ?? "",
-            interventions: f.circulationInterventions ?? "",
+            assessment: rapidAssess.circulation.obs ?? "",
+            circulationNotes: rapidAssess.circulation.obs ?? "",
+            interventions: rapidAssess.circulation.intv ?? "",
             },
             triageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
-            triageType: "EMERGENCY" as const,
+            // Keep the original department/origin as triageType
+            triageType: originalDepartment as "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER" | undefined,
             triageDisposition: f.disposition ?? "",
             triageDispositionOther: f.dispositionOther ?? null,
             triageNotes: f.triageNotes ?? "",
@@ -302,7 +324,7 @@ export default function TriagePage() {
             lastName: "User",
             },
             dateOfTriage: new Date(),
-            timeOfTriage: new Date().toLocaleTimeString(),
+            timeOfTriage: currentTime,
         }
 
         // Update the triage data
@@ -316,7 +338,7 @@ export default function TriagePage() {
                 currentTriageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || entry.patient.currentTriageCategory,
                 // Update last triage date and time
                 lastDateOfTriage: new Date(),
-                lastTimeOfTriage: new Date().toLocaleTimeString(),
+                lastTimeOfTriage: currentTime,
                 // Add new triage detail to the array
                 triageDetails: [...entry.patient.triageDetails, newTriageDetail]
                 }
@@ -374,7 +396,7 @@ export default function TriagePage() {
                         <AlertCircle className="h-6 w-6 text-red-600 animate-pulse" />
                         <div>
                             <p className="font-bold text-red-900">ER Mode Enabled</p>
-                            <p className="text-sm text-red-700">You are currently viewing the Emergency Triage Queue</p>
+                            <p className="text-sm text-red-700">You are currently viewing the Emergency Triage Queue. Only patients in the Emergency Department will be shown.</p>
                         </div>
                         </div>  
                     </div>

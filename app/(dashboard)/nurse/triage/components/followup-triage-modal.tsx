@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -52,17 +52,6 @@ interface FollowUpTriageForm {
   gcsVerbalResponse: string
   gcsMotorResponse: string
   
-  // ABC Assessment
-  airwayAssessment: string
-  airwayNotes: string
-  airwayInterventions: string
-  breathingAssessment: string
-  breathingNotes: string
-  breathingInterventions: string
-  circulationAssessment: string
-  circulationNotes: string
-  circulationInterventions: string
-  
   // Triage Decision
   triagePriority: string
   triageNotes: string
@@ -107,17 +96,6 @@ const initialFormState: FollowUpTriageForm = {
   gcsVerbalResponse: "",
   gcsMotorResponse: "",
   
-  // ABC Assessment
-  airwayAssessment: "",
-  airwayNotes: "",
-  airwayInterventions: "",
-  breathingAssessment: "",
-  breathingNotes: "",
-  breathingInterventions: "",
-  circulationAssessment: "",
-  circulationNotes: "",
-  circulationInterventions: "",
-  
   // Triage Decision
   triagePriority: "",
   triageNotes: "",
@@ -140,10 +118,28 @@ const initialAssessmentState: InitialAssessment = {
 
 export function FollowUpWizard({ open, onOpenChange, onRecord, selectedPatient }: FollowUpWizardProps) {
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState<FollowUpTriageForm>(initialFormState)
   const [rapidAssessment, setRapidAssessment] = useState<RapidAssessment>(initialRapidAssessment)
   const [initialAssessment, setInitialAssessment] = useState<InitialAssessment>(initialAssessmentState)
 
+  // Initialize form with patient data using useMemo - recalculates when selectedPatient changes
+  const initializedForm = useMemo(() => {
+    if (selectedPatient && selectedPatient.patient.triageDetails.length > 0) {
+      const firstRecord = selectedPatient.patient.triageDetails[0]
+      return {
+        ...initialFormState,
+        weight: firstRecord.vitalSigns.weight.toString(),
+        height: firstRecord.vitalSigns.height.toString()
+      }
+    }
+    return initialFormState
+  }, [selectedPatient])
+
+  const [form, setForm] = useState<FollowUpTriageForm>(initializedForm)
+
+  // Update form when initializedForm changes (when modal opens with new patient)
+  if (open && form.weight === "" && form.height === "" && initializedForm.weight !== "") {
+    setForm(initializedForm)
+  }
 
   const handleRapidAssessmentChange = (section: string, field: string, value: string) => {
     setRapidAssessment(prev => ({

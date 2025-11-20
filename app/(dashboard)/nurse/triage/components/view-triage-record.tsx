@@ -41,6 +41,7 @@ interface TriageRecord {
   }
   triageNotes: string
   triageDisposition: string
+  triageDispositionOther?: string | null
   airwayStatus?: { assessment: string; interventions: string }
   breathingStatus?: { assessment: string; interventions: string }
   circulationStatus?: { assessment: string; interventions: string }
@@ -64,6 +65,22 @@ interface ViewTriageRecordProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   selectedPatient: { patient: Patient } | null
+}
+
+// Helper function to get full disposition text
+const getDispositionText = (disposition: string, dispositionOther?: string | null): string => {
+  const dispositionMap: { [key: string]: string } = {
+    "Admit": "Admit",
+    "Discharge": "Discharge",
+    "Died": "Died",
+    "Absconded": "Absconded",
+    "THOC": "Transfer to Hospital of Choice",
+    "DAMA": "Discharge against medical advice",
+    "Under_obs": "Under observation",
+    "Other": dispositionOther ? `(Other) ${dispositionOther}` : "Other"
+  }
+  
+  return dispositionMap[disposition] || disposition
 }
 
 export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }: ViewTriageRecordProps) {
@@ -181,7 +198,7 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm text-muted-foreground">Department</Label>
-                    <p className="font-medium">{patient.arrivalDetails.department}</p>
+                    <p className="font-medium text-sm">{patient.arrivalDetails.department}</p>
                   </div>
                   <div>
                     <Label className="text-sm text-muted-foreground">Patient Status</Label>
@@ -444,23 +461,11 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                           </CardContent>
                         </Card>
 
-                        <Card className="bg-orange-50">
-                          <CardContent className="pt-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Thermometer className="h-4 w-4 text-orange-600" />
-                              <Label className="font-semibold text-sm">Temperature</Label>
-                            </div>
-                            <p className="text-lg font-bold text-orange-600">
-                              {selectedRecord.vitalSigns.temperature}°C
-                            </p>
-                          </CardContent>
-                        </Card>
-
                         <Card className="bg-amber-50">
                           <CardContent className="pt-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Weight className="h-4 w-4 text-amber-600" />
-                              <Label className="font-semibold text-sm">Weight</Label>
+                              <Label className="font-semibold text-sm">Weight</Label>       
                             </div>
                             <p className="text-lg font-bold text-amber-600">
                               {selectedRecord.vitalSigns.weight} kg
@@ -476,6 +481,18 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                             </div>
                             <p className="text-lg font-bold text-indigo-600">
                               {selectedRecord.vitalSigns.height} cm
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="bg-orange-50">
+                          <CardContent className="pt-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Thermometer className="h-4 w-4 text-orange-600" />
+                              <Label className="font-semibold text-sm">Temperature</Label>
+                            </div>
+                            <p className="text-lg font-bold text-orange-600">
+                              {selectedRecord.vitalSigns.temperature}°C
                             </p>
                           </CardContent>
                         </Card>
@@ -563,7 +580,9 @@ export default function ViewTriageRecord({ open, onOpenChange, selectedPatient }
                       <Card>
                         <CardContent className="pt-1">
                           <Label className="text-sm text-muted-foreground">Disposition</Label>
-                          <p className="mt-1 font-medium">{selectedRecord.triageDisposition}</p>
+                          <p className="mt-2 font-medium text-sm">
+                            {getDispositionText(selectedRecord.triageDisposition, selectedRecord.triageDispositionOther)}
+                          </p>
                         </CardContent>
                       </Card>
                     </TabsContent>
