@@ -134,7 +134,7 @@ export function VitalSignsComp({ form, setForm }: VitalSignsCompProps) {
               <div className="flex items-center gap-2">
                 <Wind className="h-5 w-5 text-purple-600" />
                 <Label htmlFor="respirationRate" className="font-semibold">
-                  Respiration Rate
+                  Respiration Rate (breaths/min)
                 </Label>
               </div>
               <Input
