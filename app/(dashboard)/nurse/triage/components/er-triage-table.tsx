@@ -25,13 +25,14 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ChevronUp,
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
+  ChevronLeft,
+  ChevronRight,
   ClipboardClock,
+  Eye,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -40,6 +41,12 @@ import {
   PaginationItem,
   PaginationLink,
 } from "@/components/ui/pagination"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
 import { Button } from "@/components/ui/button"
@@ -47,9 +54,10 @@ import { Button } from "@/components/ui/button"
 interface ERTriageTableProps {
   data: TriageAssessment[]
   onFollowUp: (assessment: TriageAssessment) => void
+  onViewRecord: (assessment: TriageAssessment) => void
 }
 
-export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
+export function ERTriageTable({ data, onFollowUp, onViewRecord }: ERTriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -115,12 +123,43 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
       }
     },
     {
-        accessorKey: "followUp",
-        header: "Follow Up",
+        accessorKey: "actions",
+        header: "Actions",
         cell: ({ row }) => {
-        return <Button size="sm" onClick={() => onFollowUp(row.original)} className="bg-orange-400 hover:bg-orange-500">
-          <ClipboardClock className="h-4 w-4" />
-          </Button>
+        return (
+          <TooltipProvider>
+            <div className="flex items-center justify-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    onClick={() => onFollowUp(row.original)} 
+                    className="bg-orange-400 hover:bg-orange-500"
+                  >
+                    <ClipboardClock className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Follow up Triage</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => onViewRecord(row.original)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View Triage Records</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+        )
         }
     }
   ]
@@ -209,13 +248,13 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
                         </span>
                         {{
                           asc: (
-                            <ChevronUpIcon
+                            <ChevronUp
                               className="shrink-0 opacity-60"
                               size={16}
                             />
                           ),
                           desc: (
-                            <ChevronDownIcon
+                            <ChevronDown
                               className="shrink-0 opacity-60"
                               size={16}
                             />
@@ -291,7 +330,7 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
                 table.setPageIndex(0);
               }}
             >
-              <ChevronFirstIcon className="h-4 w-4" />
+              <ChevronsLeft className="h-4 w-4" />
             </PaginationLink>
           </PaginationItem>
 
@@ -311,7 +350,7 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
                 table.previousPage();
               }}
             >
-              <ChevronLeftIcon className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </PaginationLink>
           </PaginationItem>
 
@@ -354,7 +393,7 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
                 table.nextPage();
               }}
             >
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" />
             </PaginationLink>
           </PaginationItem>
 
@@ -374,7 +413,7 @@ export function ERTriageTable({ data, onFollowUp }: ERTriageTableProps) {
                 table.setPageIndex(table.getPageCount() - 1);
               }}
             >
-              <ChevronLastIcon className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4" />
             </PaginationLink>
           </PaginationItem>
         </PaginationContent>

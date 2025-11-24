@@ -1,52 +1,22 @@
 import { useState } from "react"
-import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-  ColumnDef,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, ColumnDef, SortingState, getSortedRowModel } from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react"
+import { ChevronUpIcon, ChevronDownIcon, ChevronFirstIcon, ChevronLastIcon, ChevronLeftIcon, ChevronRightIcon, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "@/components/ui/pagination"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface TriageTableProps {
-  data: TriageAssessment[]
+  data: TriageAssessment[],
+  onViewRecord: (assessment: TriageAssessment) => void
 }
 
-export function TriageTable({ data}: TriageTableProps) {
+export function TriageTable({ data, onViewRecord }: TriageTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -83,11 +53,12 @@ export function TriageTable({ data}: TriageTableProps) {
         header: "Arrival Time",
     },
     {
-      accessorKey: "patient.triageType",
+      accessorKey: "patient.arrivalDetails.department",
       header: "Triage Type",
       cell: ({ row }) => {
-        const type = row.original.patient.triageDetails[0]?.triageType
+        const type = row.original.patient.arrivalDetails.department
         const variant = type === "EMERGENCY" ? "destructive" : "default"
+        // console.log(row.original.patient.triageDetails[0].triageType)
         return <Badge variant={variant}>{type}</Badge>
       },
     },
@@ -108,6 +79,31 @@ export function TriageTable({ data}: TriageTableProps) {
         const variant = status === "REFERRED" ? "warning" : status === "IN APT. QUEUE" ? "default" : status === "FOR DISCHARGE" ? "dimmed" : "tertiary"
         return <Badge variant={variant}>{status}</Badge>
         }
+    },
+    {
+      accessorKey: "actions",
+      header: "View Records",
+      cell: ({ row }) => {
+        return (
+          <TooltipProvider>
+            <div className="flex items-center justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => onViewRecord(row.original)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View Triage Records</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+        )
+      },
     }
   ]
   // eslint-disable-next-line react-hooks/incompatible-library

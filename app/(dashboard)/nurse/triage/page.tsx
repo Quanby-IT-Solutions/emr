@@ -16,15 +16,30 @@ import { ERTriageTable } from "./components/er-triage-table"
 import { TriageWizard } from "@/app/(dashboard)/nurse/triage/components/new-triage-modal"
 import type { TriageWizardOutput } from "@/app/(dashboard)/nurse/triage/components/new-triage-modal"
 import { FollowUpWizard } from "./components/followup-triage-modal"
+import type { FollowUpWizardOutput } from "./components/followup-triage-modal"
+import ViewTriageRecord from "./components/view-triage-record"
+
+// Helper function to get current time in 24-hour format
+const getCurrentTime24Hour = () => {
+    const now = new Date()
+    return now.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false 
+    })
+}
 
 export default function TriagePage() {
     const [triageData, setTriageData] = useState<TriageAssessment[]>(TriageEntry)
     const [searchQuery, setSearchQuery] = useState("");
     const [openFollowUp, setOpenFollowUp] = useState(false);
+    const [openViewRecord, setOpenViewRecord] = useState(false);
     const [selectedTriageType, setSelectedTriageType] = useState("all");
     const [selectedTriageCategory, setSelectedTriageCategory] = useState("all");
     const [selectedArrivalDate, setSelectedArrivalDate] = useState<Date | null>(null);
     const [selectedLastTriageDate, setSelectedLastTriageDate] = useState<Date | null>(null);
+    const [selectedPatient, setSelectedPatient] = useState<TriageAssessment | null>(null)
 
     const [isERMode, setIsERMode] = useState(false);
     const [openNewTriage, setOpenNewTriage] = useState(false);
@@ -38,14 +53,12 @@ export default function TriagePage() {
     // Filters
     const filteredTriageData = useMemo(() => {
     return triageData.filter((entry) => {
-        const latestDetail = entry.patient.triageDetails.at(-1)
-
         const searchMatch =
         entry.patient.name.toLowerCase().includes(searchQuery.toLowerCase())
 
         const triageTypeMatch =
         selectedTriageType === "all" ||
-        latestDetail?.triageType === selectedTriageType
+        entry.patient.arrivalDetails.department === selectedTriageType
 
         const triageCategoryMatch =
         selectedTriageCategory === "all" ||
@@ -69,14 +82,7 @@ export default function TriagePage() {
         lastTriageDateMatch
         )
     })
-    }, [
-    triageData,
-    searchQuery,
-    selectedTriageType,
-    selectedTriageCategory,
-    selectedArrivalDate,
-    selectedLastTriageDate,
-    ])
+    }, [triageData, searchQuery, selectedTriageType, selectedTriageCategory, selectedArrivalDate, selectedLastTriageDate])
 
 
     const handleERCheck = (checked: boolean) => {
@@ -85,9 +91,17 @@ export default function TriagePage() {
         else setSelectedTriageType("all");
     };
 
-    const handleFollowUp = () => setOpenFollowUp(true);
+    const handleFollowUp = (patient: TriageAssessment) => {
+        setSelectedPatient(patient)
+        setOpenFollowUp(true)
+    }
 
     const handleNewTriage = () => setOpenNewTriage(true);
+
+    const handleViewTriage = (patient: TriageAssessment) => {
+        setSelectedPatient(patient)
+        setOpenViewRecord(true)
+    }
 
     // Handle stat card filter
     const handleCardFilter = (category: string) => {
@@ -95,141 +109,247 @@ export default function TriagePage() {
     };
 
     const handleRecordTriage = (data: TriageWizardOutput) => {
-    const f = data.form
+        const f = data.form
+        const rapidAssess = data.rapidAssessment
 
-    // Generate new patient ID
-    let newPatientId = f.patientId
-    
-    if (!newPatientId) {
-        const existingIds = triageData.map(entry => entry.patient.id)
-        const numericIds = existingIds
-        .filter(id => id.startsWith('PAT-2025-'))
-        .map(id => parseInt(id.replace('PAT-2025-', '')))
-        .filter(num => !isNaN(num))
+        // Generate new patient ID
+        let newPatientId = f.patientId
         
-        const lastId = numericIds.length > 0 ? Math.max(...numericIds) : 0
-        newPatientId = `PAT-2025-${String(lastId + 1).padStart(3, '0')}`
-    }
-
-    // Parse name
-    let firstName = f.firstName
-    let middleName = f.middleName
-    let lastName = f.lastName
-    
-    if (!firstName && !lastName && f.patientName) {
-        const parts = f.patientName.split(',')
-        if (parts.length === 2) {
-        lastName = parts[0].trim()
-        const namesPart = parts[1].trim().split(' ')
-        firstName = namesPart[0] || ''
-        middleName = namesPart.slice(1).join(' ') || ''
-        } else {
-        firstName = f.patientName
+        if (!newPatientId) {
+            const existingIds = triageData.map(entry => entry.patient.id)
+            const numericIds = existingIds
+            .filter(id => id.startsWith('PT-2025-'))
+            .map(id => parseInt(id.replace('PT-2025-', '')))
+            .filter(num => !isNaN(num))
+            
+            const lastId = numericIds.length > 0 ? Math.max(...numericIds) : 0
+            newPatientId = `PT-2025-${String(lastId + 1).padStart(3, '0')}`
         }
+
+        // Parse name
+        let firstName = f.firstName
+        let middleName = f.middleName
+        let lastName = f.lastName
+        
+        if (!firstName && !lastName && f.patientName) {
+            const parts = f.patientName.split(',')
+            if (parts.length === 2) {
+            lastName = parts[0].trim()
+            const namesPart = parts[1].trim().split(' ')
+            firstName = namesPart[0] || ''
+            middleName = namesPart.slice(1).join(' ') || ''
+            } else {
+            firstName = f.patientName
+            }
+        }
+
+        const currentTime = getCurrentTime24Hour()
+
+        const newRecord: TriageAssessment = {
+            patient: {
+            id: newPatientId,
+            name: f.patientName || `${lastName}, ${firstName} ${middleName}`.trim(),
+            firstName: firstName,
+            middleName: middleName ?? "",
+            lastName: lastName,
+            ageSex: `${f.age}/${f.sex}`,
+            age: f.age,
+            sex: f.sex,
+            phoneNumber: Number(f.phoneNumber) || 0,
+            address: f.address ?? "",
+            occupation: f.occupation ?? "",
+            currentTriageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
+            status: "IN APT. QUEUE",
+            lastDateOfTriage: f.arrivalDate ?? null,
+            lastTimeOfTriage: f.arrivalTime ?? currentTime,
+            companion: {
+                name: f.companionName ?? "",
+                contact: f.companionContact ? Number(f.companionContact) : null,
+                relation: f.companionRelation ?? "",
+            },
+            arrivalDetails: {
+                arrivalStatus: (f.arrivalStatus as "alive" | "dead-on-arrival") ?? "alive",
+                date: f.arrivalDate ?? new Date(),
+                time: f.arrivalTime ?? currentTime,
+                modeOfTransport: f.arrivalMode ?? "",
+                modeOfTransportOther: f.arrivalModeOther ?? "",
+                transferredFrom: f.transferredFrom || null,
+                department: (f.department as "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER") || "",
+                departmentOther: f.departmentOther || "",
+                referredBy: f.referredBy || null,
+            },
+            triageDetails: [
+                {
+                chiefComplaint: f.complaint ?? "",
+                symptoms: f.symptoms,
+                symptomsOther: f.symptomsOther ?? "",
+                vitalSigns: {
+                    bloodPressure: `${f.bpSystolic ?? ""}/${f.bpDiastolic ?? ""}`,
+                    bpSystolic: f.bpSystolic ?? "",
+                    bpDiastolic: f.bpDiastolic ?? "",
+                    heartRate: Number(f.pulseRate) || 0,
+                    respiratoryRate: Number(f.respirationRate) || 0,
+                    temperature: Number(f.temperature) || 0,
+                    oxygenSaturation: Number(f.oxygenSaturation) || 0,
+                    weight: Number(f.weight) || 0,
+                    height: Number(f.height) || 0,
+                },
+                painAssessment: {
+                    scale: Number(f.painScale) || 0,
+                    location: f.painLocation ?? "",
+                    duration: f.painDuration ?? "",
+                    characteristics: f.painCharacteristics ?? "",
+                    aggravatingFactors: f.painAggravatingFactors ?? "",
+                    relievingFactors: f.painRelievingFactors ?? "",
+                },
+                glasgowComaScale: {
+                    eyeOpening: Number(f.gcsEyeOpening) || 0,
+                    verbalResponse: Number(f.gcsVerbalResponse) || 0,
+                    motorResponse: Number(f.gcsMotorResponse) || 0,
+                    totalScore:
+                    (Number(f.gcsEyeOpening) || 0) +
+                    (Number(f.gcsVerbalResponse) || 0) +
+                    (Number(f.gcsMotorResponse) || 0),
+                },
+                // Use rapidAssessment data for ABC assessment
+                airwayStatus: {
+                    assessment: rapidAssess.airway.obs ?? "",
+                    airwayNotes: rapidAssess.airway.obs ?? "",
+                    interventions: rapidAssess.airway.intv ?? "",
+                },
+                breathingStatus: {
+                    assessment: rapidAssess.breathing.obs ?? "",
+                    breathingNotes: rapidAssess.breathing.obs ?? "",
+                    interventions: rapidAssess.breathing.intv ?? "",
+                },
+                circulationStatus: {
+                    assessment: rapidAssess.circulation.obs ?? "",
+                    circulationNotes: rapidAssess.circulation.obs ?? "",
+                    interventions: rapidAssess.circulation.intv ?? "",
+                },
+                triageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
+                triageDisposition: f.disposition ?? "",
+                triageDispositionOther: f.dispositionOther ?? null,
+                triageNotes: f.triageNotes ?? "",
+                triageOfficer: {
+                    nurseId: "N-001",
+                    firstName: "System",
+                    lastName: "User",
+                },
+                dateOfTriage: new Date(),
+                timeOfTriage: currentTime,
+                },
+            ],
+            },
+        }
+
+        setTriageData(prev => [newRecord, ...prev])
     }
 
-    const newRecord: TriageAssessment = {
-        patient: {
-        id: newPatientId,
-        name: f.patientName || `${lastName}, ${firstName} ${middleName}`.trim(),
-        firstName: firstName,
-        middleName: middleName ?? "",
-        lastName: lastName,
-        ageSex: `${f.age}/${f.sex}`,
-        age: f.age,
-        sex: f.sex,
-        phoneNumber: Number(f.phoneNumber) || 0,
-        address: f.address ?? "",
-        occupation: f.occupation ?? "",
-        currentTriageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
-        status: "IN APT. QUEUE",
-        lastDateOfTriage: f.arrivalDate ?? null,
-        lastTimeOfTriage: f.arrivalTime ?? new Date().toLocaleTimeString(),
-        companion: {
-            name: f.companionName ?? "",
-            contact: f.companionContact ? Number(f.companionContact) : null,
-            relation: f.companionRelation ?? "",
-        },
-        arrivalDetails: {
-            arrivalStatus: (f.arrivalStatus as "alive" | "dead-on-arrival") ?? "alive",
-            date: f.arrivalDate ?? new Date(),
-            time: f.arrivalTime ?? new Date().toLocaleTimeString(),
-            modeOfTransport: f.arrivalMode ?? "",
-            modeOfTransportOther: f.arrivalModeOther ?? "",
-            transferredFrom: f.transferredFrom || null,
-            department: f.department || "",
-            departmentOther: f.departmentOther || "",
-            referredBy: f.referredBy || null,
-        },
-        triageDetails: [
-            {
-            chiefComplaint: f.complaint ?? "",
-            symptoms: f.symptoms,
-            symptomsOther: f.symptomsOther ?? "",
+    const handleRecordFollowUp = (data: FollowUpWizardOutput) => {
+        const f = data.form
+        const rapidAssess = data.rapidAssessment
+
+        const currentTime = getCurrentTime24Hour()
+
+        // Get the patient's original department/origin
+        const originalDepartment = selectedPatient?.patient.arrivalDetails.department
+
+        // Create new triage detail entry
+        const newTriageDetail = {
+            chiefComplaint: selectedPatient?.patient.triageDetails[selectedPatient.patient.triageDetails.length - 1]?.chiefComplaint || "",
+            symptoms: selectedPatient?.patient.triageDetails[selectedPatient.patient.triageDetails.length - 1]?.symptoms || {
+            chestPain: false,
+            difficultyBreathing: false,
+            fever: false,
+            weakness: false,
+            lossOfConsciousness: false,
+            bleeding: false,
+            others: false
+            },
+            symptomsOther: selectedPatient?.patient.triageDetails[selectedPatient.patient.triageDetails.length - 1]?.symptomsOther || "",
             vitalSigns: {
-                bloodPressure: `${f.bpSystolic ?? ""}/${f.bpDiastolic ?? ""}`,
-                bpSystolic: f.bpSystolic ?? "",
-                bpDiastolic: f.bpDiastolic ?? "",
-                heartRate: Number(f.pulseRate) || 0,
-                respiratoryRate: Number(f.respirationRate) || 0,
-                temperature: Number(f.temperature) || 0,
-                oxygenSaturation: Number(f.oxygenSaturation) || 0,
-                weight: Number(f.weight) || 0,
-                height: Number(f.height) || 0,
+            bloodPressure: `${f.bpSystolic ?? ""}/${f.bpDiastolic ?? ""}`,
+            bpSystolic: f.bpSystolic ?? "",
+            bpDiastolic: f.bpDiastolic ?? "",
+            heartRate: Number(f.pulseRate) || 0,
+            respiratoryRate: Number(f.respirationRate) || 0,
+            temperature: Number(f.temperature) || 0,
+            oxygenSaturation: Number(f.oxygenSaturation) || 0,
+            weight: Number(f.weight) || 0,
+            height: Number(f.height) || 0,
             },
             painAssessment: {
-                scale: Number(f.painScale) || 0,
-                location: f.painLocation ?? "",
-                duration: f.painDuration ?? "",
-                characteristics: f.painCharacteristics ?? "",
-                aggravatingFactors: f.painAggravatingFactors ?? "",
-                relievingFactors: f.painRelievingFactors ?? "",
+            scale: Number(f.painScale) || 0,
+            location: f.painLocation ?? "",
+            duration: f.painDuration ?? "",
+            characteristics: f.painCharacteristics ?? "",
+            aggravatingFactors: f.painAggravatingFactors ?? "",
+            relievingFactors: f.painRelievingFactors ?? "",
             },
             glasgowComaScale: {
-                eyeOpening: Number(f.gcsEyeOpening) || 0,
-                verbalResponse: Number(f.gcsVerbalResponse) || 0,
-                motorResponse: Number(f.gcsMotorResponse) || 0,
-                totalScore:
+            eyeOpening: Number(f.gcsEyeOpening) || 0,
+            verbalResponse: Number(f.gcsVerbalResponse) || 0,
+            motorResponse: Number(f.gcsMotorResponse) || 0,
+            totalScore:
                 (Number(f.gcsEyeOpening) || 0) +
                 (Number(f.gcsVerbalResponse) || 0) +
                 (Number(f.gcsMotorResponse) || 0),
             },
+            // Use rapidAssessment data for ABC assessment
             airwayStatus: {
-                assessment: f.airwayAssessment ?? "",
-                airwayNotes: f.airwayNotes ?? "",
-                interventions: f.airwayInterventions ?? "",
+            assessment: rapidAssess.airway.obs ?? "",
+            airwayNotes: rapidAssess.airway.obs ?? "",
+            interventions: rapidAssess.airway.intv ?? "",
             },
             breathingStatus: {
-                assessment: f.breathingAssessment ?? "",
-                breathingNotes: f.breathingNotes ?? "",
-                interventions: f.breathingInterventions ?? "",
+            assessment: rapidAssess.breathing.obs ?? "",
+            breathingNotes: rapidAssess.breathing.obs ?? "",
+            interventions: rapidAssess.breathing.intv ?? "",
             },
             circulationStatus: {
-                assessment: f.circulationAssessment ?? "",
-                circulationNotes: f.circulationNotes ?? "",
-                interventions: f.circulationInterventions ?? "",
+            assessment: rapidAssess.circulation.obs ?? "",
+            circulationNotes: rapidAssess.circulation.obs ?? "",
+            interventions: rapidAssess.circulation.intv ?? "",
             },
             triageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || "NON_URGENT",
-            triageType: "EMERGENCY",
+            // Keep the original department/origin as triageType
+            triageType: originalDepartment as "EMERGENCY" | "OPD" | "WALK_IN" | "REFERRAL" | "SCHEDULED" | "OTHER" | undefined,
             triageDisposition: f.disposition ?? "",
             triageDispositionOther: f.dispositionOther ?? null,
             triageNotes: f.triageNotes ?? "",
             triageOfficer: {
-                nurseId: "N-001",
-                firstName: "System",
-                lastName: "User",
+            nurseId: "N-001",
+            firstName: "System",
+            lastName: "User",
             },
             dateOfTriage: new Date(),
-            timeOfTriage: new Date().toLocaleTimeString(),
-            },
-        ],
-        },
+            timeOfTriage: currentTime,
+        }
+
+        // Update the triage data
+        setTriageData(prev => prev.map(entry => {
+            if (entry.patient.id === data.patientId) {
+            return {
+                ...entry,
+                patient: {
+                ...entry.patient,
+                // Update current triage category based on new assessment
+                currentTriageCategory: (f.triagePriority as "EMERGENT" | "URGENT" | "NON_URGENT" | "DEAD") || entry.patient.currentTriageCategory,
+                // Update last triage date and time
+                lastDateOfTriage: new Date(),
+                lastTimeOfTriage: currentTime,
+                // Add new triage detail to the array
+                triageDetails: [...entry.patient.triageDetails, newTriageDetail]
+                }
+            }
+            }
+            return entry
+        }))
+
+        // Clear selected patient
+        setSelectedPatient(null)
     }
-
-    setTriageData(prev => [newRecord, ...prev])
-    }
-
-
 
     return (
         <ProtectedRoute requiredRole={UserRole.NURSE}>
@@ -271,12 +391,12 @@ export default function TriagePage() {
                     </div>
 
                     {isERMode && (
-                    <div className="ml-5 mr-5 p-4 bg-red-50 border-2 border-orange-200 rounded-lg flex items-center justify-between">
+                    <div className="ml-5 mr-5 p-4 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-between">
                         <div className="flex items-center gap-3">
                         <AlertCircle className="h-6 w-6 text-red-600 animate-pulse" />
                         <div>
                             <p className="font-bold text-red-900">ER Mode Enabled</p>
-                            <p className="text-sm text-red-700">You are currently viewing the Emergency Triage Queue</p>
+                            <p className="text-sm text-red-700">You are currently viewing the Emergency Triage Queue. Only patients in the Emergency Department will be shown.</p>
                         </div>
                         </div>  
                     </div>
@@ -403,7 +523,11 @@ export default function TriagePage() {
                                             isERMode={isERMode}
                                         />                                        
                                     </div>
-                                    <ERTriageTable data={filteredTriageData} onFollowUp={handleFollowUp} />
+                                    <ERTriageTable 
+                                        data={filteredTriageData} 
+                                        onFollowUp={handleFollowUp} 
+                                        onViewRecord={handleViewTriage}
+                                    />
                                 </CardContent>
                             </Card>
                         ) : (
@@ -456,7 +580,7 @@ export default function TriagePage() {
                                         />                                        
                                     </div>
                                 
-                                    <TriageTable data={filteredTriageData} />
+                                    <TriageTable data={filteredTriageData} onViewRecord={handleViewTriage}/>
                                 </CardContent>
                             </Card>
                         )}
@@ -468,7 +592,18 @@ export default function TriagePage() {
                         onRecord={handleRecordTriage}
                     />
 
-                    {/* <FollowUpWizard open={openFollowUp} onOpenChange={setOpenFollowUp} onRecord={handleRecordTriage}/> */}
+                    <FollowUpWizard 
+                        open={openFollowUp} 
+                        onOpenChange={setOpenFollowUp} 
+                        onRecord={handleRecordFollowUp}
+                        selectedPatient={selectedPatient}
+                    />
+
+                    <ViewTriageRecord
+                        open={openViewRecord}
+                        onOpenChange={setOpenViewRecord}
+                        selectedPatient={selectedPatient}
+                    />
 
                 </div>
             </DashboardLayout>
