@@ -526,6 +526,7 @@ export default function TriagePage() {
                                     <ERTriageTable 
                                         data={filteredTriageData} 
                                         onFollowUp={handleFollowUp} 
+                                        onViewRecord={handleViewTriage}
                                     />
                                 </CardContent>
                             </Card>
