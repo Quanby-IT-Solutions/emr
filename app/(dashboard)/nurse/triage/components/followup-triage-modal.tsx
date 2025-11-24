@@ -210,7 +210,7 @@ export function FollowUpWizard({ open, onOpenChange, onRecord, selectedPatient }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="max-w-[95vw] lg:max-w-xl max-h-[95vh] flex flex-col overflow-hidden" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader className="px-4 pt-6">
           <DialogTitle>Follow-Up Triage Assessment - {steps[step]}</DialogTitle>
         </DialogHeader>
