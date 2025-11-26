@@ -4,18 +4,23 @@ import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
 
-const mockMedications = [
-  { id: 1, patient: "John Doe", medication: "Aspirin 81mg", time: "10:00 AM", status: "pending" },
-  { id: 2, patient: "Jane Smith", medication: "Metformin 500mg", time: "10:00 AM", status: "pending" },
-  { id: 3, patient: "Bob Wilson", medication: "Lisinopril 10mg", time: "10:30 AM", status: "verified" },
-]
+import MedicationTable from "./components/medication-table"
+import PendingMedicationTable from "./components/pending-medication-table"
+import { MedicationStepper } from "./components/medication-stepper"
+import { useState } from "react"
+import { MedicationProfileEntries, MedicationProfile } from "../../dummy-data/dummy-medication-admin"
+
 
 export default function MedicationsPage() {
+  const [medicationsData, setMedicationsData] = useState<MedicationProfile[]>(MedicationProfileEntries)
+  const [activeStep, setActiveStep] = useState<"pending" | "administered">("pending")
+
+  // Calculate pending medications count (those with pending orders)
+  const pendingCount = medicationsData.filter(profile => 
+    profile.patient.medicationOrders.length > 0
+  ).length
+
   return (
     <ProtectedRoute requiredRole={UserRole.NURSE}>
       <DashboardLayout role={UserRole.NURSE}>
@@ -27,43 +32,35 @@ export default function MedicationsPage() {
             </p>
           </div>
 
+          {/* Stepper Section */}
+          <div className="px-4 lg:px-6">
+            <MedicationStepper 
+              activeStep={activeStep}
+              onStepChange={setActiveStep}
+              pendingCount={pendingCount}
+            />
+          </div>
+
+          {/* Table Section */}
           <div className="px-4 lg:px-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Pending Medications</CardTitle>
+              <CardHeader className="grid md:grid-cols-6">
+                <div className="md:col-span-5">
+                  <CardTitle className="mb-1">
+                    {activeStep === "pending" 
+                      ? "Pending Medications" 
+                      : "Medication Administration Records"}
+                  </CardTitle>
+                </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>Medication</TableHead>
-                      <TableHead>Scheduled Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Administer</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockMedications.map((med) => (
-                      <TableRow key={med.id}>
-                        <TableCell className="font-medium">{med.patient}</TableCell>
-                        <TableCell>{med.medication}</TableCell>
-                        <TableCell>{med.time}</TableCell>
-                        <TableCell>
-                          <Badge variant={med.status === "verified" ? "default" : "secondary"}>
-                            {med.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Checkbox />
-                            <Button variant="ghost" size="sm">Record</Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="mb-6">
+                  {activeStep === "pending" ? (
+                    <PendingMedicationTable data={medicationsData} />
+                  ) : (
+                    <MedicationTable data={medicationsData} />
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
