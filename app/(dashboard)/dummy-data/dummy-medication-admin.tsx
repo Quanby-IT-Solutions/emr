@@ -18,6 +18,7 @@ export interface MedicationProfile {
      currentRoom: string
      chiefComplaint: string
      diagnosis: string
+     allergies: string
      lastAdministeredMedication: string
      lastTimeAdministered: string
      dosageGiven: string
@@ -62,7 +63,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Lipitor",
         medicationClassification: "HMG-CoA Reductase Inhibitor (Statin)",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "40mg",
         routeOfAdministration: "oral"
     },
     {
@@ -71,7 +72,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Glucophage",
         medicationClassification: "Biguanide Antidiabetic",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "1000mg",
         routeOfAdministration: "oral"
     },
     {
@@ -80,7 +81,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Prinivil",
         medicationClassification: "ACE Inhibitor",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "10mg",
         routeOfAdministration: "oral"
     },
     {
@@ -89,7 +90,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Norvasc",
         medicationClassification: "Calcium Channel Blocker",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "10mg",
         routeOfAdministration: "oral"
     },
     {
@@ -98,7 +99,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Synthroid",
         medicationClassification: "Thyroid Hormone",
         dosageForm: "tablet",
-        dosageUnit: "mcg",
+        dosageUnit: "75mcg",
         routeOfAdministration: "oral"
     },
     {
@@ -107,7 +108,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Prilosec",
         medicationClassification: "Proton Pump Inhibitor",
         dosageForm: "capsule",
-        dosageUnit: "mg",
+        dosageUnit: "40mg",
         routeOfAdministration: "oral"
     },
     {
@@ -116,7 +117,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Ventolin",
         medicationClassification: "Beta-2 Agonist Bronchodilator",
         dosageForm: "aerosol",
-        dosageUnit: "mcg",
+        dosageUnit: "90mcg",
         routeOfAdministration: "inhalation"
     },
     {
@@ -125,7 +126,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Zoloft",
         medicationClassification: "Selective Serotonin Reuptake Inhibitor (SSRI)",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "50mg",
         routeOfAdministration: "oral"
     },
     {
@@ -134,7 +135,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Neurontin",
         medicationClassification: "Anticonvulsant/Neuropathic Pain Agent",
         dosageForm: "capsule",
-        dosageUnit: "mg",
+        dosageUnit: "300mg",
         routeOfAdministration: "oral"
     },
     {
@@ -143,7 +144,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Cozaar",
         medicationClassification: "Angiotensin II Receptor Blocker (ARB)",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "50mg",
         routeOfAdministration: "oral"
     },
     {
@@ -152,7 +153,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Singulair",
         medicationClassification: "Leukotriene Receptor Antagonist",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "10mg",
         routeOfAdministration: "oral"
     },
     {
@@ -161,7 +162,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Lantus",
         medicationClassification: "Long-Acting Insulin",
         dosageForm: "solution",
-        dosageUnit: "units",
+        dosageUnit: "100units/mL",
         routeOfAdministration: "subcutaneous"
     },
     {
@@ -170,7 +171,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Amoxil",
         medicationClassification: "Penicillin Antibiotic",
         dosageForm: "capsule",
-        dosageUnit: "mg",
+        dosageUnit: "500mg",
         routeOfAdministration: "oral"
     },
     {
@@ -179,7 +180,7 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Microzide",
         medicationClassification: "Thiazide Diuretic",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "25mg",
         routeOfAdministration: "oral"
     },
     {
@@ -188,9 +189,27 @@ export const MedicationList: Medications[] = [
         medicationBrandName: "Coumadin",
         medicationClassification: "Anticoagulant",
         dosageForm: "tablet",
-        dosageUnit: "mg",
+        dosageUnit: "5mg",
         routeOfAdministration: "oral"
-    }
+    },
+    {
+        medicationId: "MED-016",
+        medicationGenericName: "atorvastatin",
+        medicationBrandName: "Lipitor",
+        medicationClassification: "HMG-CoA Reductase Inhibitor (Statin)",
+        dosageForm: "tablet",
+        dosageUnit: "20mg",
+        routeOfAdministration: "oral"
+    },
+    {
+        medicationId: "MED-017",
+        medicationGenericName: "lisinopril",
+        medicationBrandName: "Prinivil",
+        medicationClassification: "ACE Inhibitor",
+        dosageForm: "tablet",
+        dosageUnit: "20mg",
+        routeOfAdministration: "oral"
+    },
 ];
 
 export const MedicationProfileEntries: MedicationProfile[] = [
@@ -204,6 +223,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "C-302",
             chiefComplaint: "Chest pain and shortness of breath",
             diagnosis: "Acute Coronary Syndrome, Hypertension",
+            allergies: "Penicillin",
             lastAdministeredMedication: "lisinopril (Prinivil)",
             lastTimeAdministered: "0815",
             dosageGiven: "10mg",
@@ -216,7 +236,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Prinivil",
                         medicationClassification: "ACE Inhibitor",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "10mg"
                     },
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
@@ -233,7 +253,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Lipitor",
                         medicationClassification: "HMG-CoA Reductase Inhibitor (Statin)",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "40mg"
                     },
                     orderedDosage: "40mg",
                     orderedFrequency: "Once daily",
@@ -269,6 +289,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "E-115",
             chiefComplaint: "Uncontrolled blood sugar levels",
             diagnosis: "Type 2 Diabetes Mellitus, Hypothyroidism",
+            allergies: "None",
             lastAdministeredMedication: "metformin (Glucophage)",
             lastTimeAdministered: "0805",
             dosageGiven: "1000mg",
@@ -281,7 +302,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Glucophage",
                         medicationClassification: "Biguanide Antidiabetic",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "1000mg"
                     },
                     orderedDosage: "1000mg",
                     orderedFrequency: "Twice daily",
@@ -298,7 +319,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Synthroid",
                         medicationClassification: "Thyroid Hormone",
                         dosageForm: "tablet",
-                        dosageUnit: "mcg"
+                        dosageUnit: "75mcg"
                     },
                     orderedDosage: "75mcg",
                     orderedFrequency: "Once daily",
@@ -315,7 +336,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Lantus",
                         medicationClassification: "Long-Acting Insulin",
                         dosageForm: "solution",
-                        dosageUnit: "units"
+                        dosageUnit: "100units/mL"
                     },
                     orderedDosage: "20 units",
                     orderedFrequency: "Once daily",
@@ -363,6 +384,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "P-208",
             chiefComplaint: "Severe asthma exacerbation",
             diagnosis: "Acute Asthma Exacerbation, Allergic Rhinitis",
+            allergies: "Pollens",
             lastAdministeredMedication: "albuterol (Ventolin)",
             lastTimeAdministered: "1045",
             dosageGiven: "2 puffs (180mcg)",
@@ -375,7 +397,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Ventolin",
                         medicationClassification: "Beta-2 Agonist Bronchodilator",
                         dosageForm: "aerosol",
-                        dosageUnit: "mcg"
+                        dosageUnit: "90mcg"
                     },
                     orderedDosage: "2 puffs (180mcg)",
                     orderedFrequency: "Every 4 hours as needed",
@@ -423,6 +445,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "PS-402",
             chiefComplaint: "Major depressive episode",
             diagnosis: "Major Depressive Disorder, Generalized Anxiety Disorder",
+            allergies: "None",
             lastAdministeredMedication: "sertraline (Zoloft)",
             lastTimeAdministered: "0920",
             dosageGiven: "50mg",
@@ -435,7 +458,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Zoloft",
                         medicationClassification: "Selective Serotonin Reuptake Inhibitor (SSRI)",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "50mg"
                     },
                     orderedDosage: "50mg",
                     orderedFrequency: "Once daily",
@@ -471,6 +494,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "N-301",
             chiefComplaint: "Chronic neuropathic pain",
             diagnosis: "Diabetic Peripheral Neuropathy, Atrial Fibrillation",
+            allergies: "None",
             lastAdministeredMedication: "gabapentin (Neurontin)",
             lastTimeAdministered: "0810",
             dosageGiven: "300mg",
@@ -483,7 +507,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Neurontin",
                         medicationClassification: "Anticonvulsant/Neuropathic Pain Agent",
                         dosageForm: "capsule",
-                        dosageUnit: "mg"
+                        dosageUnit: "300mg"
                     },
                     orderedDosage: "300mg",
                     orderedFrequency: "Three times daily",
@@ -500,7 +524,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Coumadin",
                         medicationClassification: "Anticoagulant",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "5mg"
                     },
                     orderedDosage: "5mg",
                     orderedFrequency: "Once daily",
@@ -536,6 +560,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "C-418",
             chiefComplaint: "Hypertensive crisis",
             diagnosis: "Hypertensive Emergency, Congestive Heart Failure",
+            allergies: "None",
             lastAdministeredMedication: "hydrochlorothiazide (Microzide)",
             lastTimeAdministered: "0905",
             dosageGiven: "25mg",
@@ -548,7 +573,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Cozaar",
                         medicationClassification: "Angiotensin II Receptor Blocker (ARB)",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "50mg"
                     },
                     orderedDosage: "50mg",
                     orderedFrequency: "Once daily",
@@ -565,7 +590,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Microzide",
                         medicationClassification: "Thiazide Diuretic",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "25mg"
                     },
                     orderedDosage: "25mg",
                     orderedFrequency: "Once daily",
@@ -582,7 +607,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Norvasc",
                         medicationClassification: "Calcium Channel Blocker",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "10mg"
                     },
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
@@ -630,6 +655,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "ID-205",
             chiefComplaint: "Bacterial pneumonia",
             diagnosis: "Community-Acquired Pneumonia",
+            allergies: "None",
             lastAdministeredMedication: "amoxicillin (Amoxil)",
             lastTimeAdministered: "1405",
             dosageGiven: "500mg",
@@ -642,7 +668,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Amoxil",
                         medicationClassification: "Penicillin Antibiotic",
                         dosageForm: "capsule",
-                        dosageUnit: "mg"
+                        dosageUnit: "500mg"
                     },
                     orderedDosage: "500mg",
                     orderedFrequency: "Three times daily",
@@ -690,6 +716,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "P-312",
             chiefComplaint: "Chronic asthma management",
             diagnosis: "Moderate Persistent Asthma, Seasonal Allergies",
+            allergies: "Latex, Dust, Pollens",
             lastAdministeredMedication: "montelukast (Singulair)",
             lastTimeAdministered: "2010",
             dosageGiven: "10mg",
@@ -702,7 +729,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Singulair",
                         medicationClassification: "Leukotriene Receptor Antagonist",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "10mg"
                     },
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
@@ -719,7 +746,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Ventolin",
                         medicationClassification: "Beta-2 Agonist Bronchodilator",
                         dosageForm: "aerosol",
-                        dosageUnit: "mcg"
+                        dosageUnit: "90mcg"
                     },
                     orderedDosage: "2 puffs (180mcg)",
                     orderedFrequency: "Every 4-6 hours as needed",
@@ -755,6 +782,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "G-104",
             chiefComplaint: "Severe GERD symptoms",
             diagnosis: "Gastroesophageal Reflux Disease (GERD), Peptic Ulcer Disease",
+            allergies: "None",
             lastAdministeredMedication: "N/A",
             lastTimeAdministered: "N/A",
             dosageGiven: "N/A",
@@ -767,7 +795,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                         medicationBrandName: "Prilosec",
                         medicationClassification: "Proton Pump Inhibitor",
                         dosageForm: "capsule",
-                        dosageUnit: "mg"
+                        dosageUnit: "40mg"
                     },
                     orderedDosage: "40mg",
                     orderedFrequency: "Once daily",
@@ -790,6 +818,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             currentRoom: "C-527",
             chiefComplaint: "Elevated cholesterol and blood pressure",
             diagnosis: "Hyperlipidemia, Stage 2 Hypertension, Obesity",
+            allergies: "Nuts, Shellfish",
             lastAdministeredMedication: "N/A",
             lastTimeAdministered: "N/A",
             dosageGiven: "N/A",
@@ -797,12 +826,12 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                 {
                     medicationOrderId: "MO-2025-010-001",
                     medicationDetails: {
-                        medicationId: "MED-001",
+                        medicationId: "MED-016",
                         medicationGenericName: "atorvastatin",
                         medicationBrandName: "Lipitor",
                         medicationClassification: "HMG-CoA Reductase Inhibitor (Statin)",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "20mg"
                     },
                     orderedDosage: "20mg",
                     orderedFrequency: "Once daily",
@@ -814,12 +843,12 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                 {
                     medicationOrderId: "MO-2025-010-002",
                     medicationDetails: {
-                        medicationId: "MED-003",
+                        medicationId: "MED-017",
                         medicationGenericName: "lisinopril",
                         medicationBrandName: "Prinivil",
                         medicationClassification: "ACE Inhibitor",
                         dosageForm: "tablet",
-                        dosageUnit: "mg"
+                        dosageUnit: "20mg"
                     },
                     orderedDosage: "20mg",
                     orderedFrequency: "Once daily",

@@ -21,7 +21,7 @@ export function MedicationStepper({
           "flex items-start gap-4 p-6 text-left transition-colors",
           "hover:bg-accent/50",
           activeStep === "pending" 
-            ? "bg-blue-50 dark:bg-blue-850/30 border-r-2 border-blue-500" 
+            ? "bg-blue-100 dark:bg-blue-850/30 border-r-2 border-blue-500" 
             : "bg-background border-r"
         )}
       >
@@ -80,7 +80,7 @@ export function MedicationStepper({
         <div className="flex-1 min-w-0">
           <h3 className={cn(
             "font-semibold mb-1",
-            activeStep === "administered" && "text-green-600 dark:text-green-400"
+            activeStep === "administered" && "text-green-600 dark:primary"
           )}>
             Administration Records
           </h3>

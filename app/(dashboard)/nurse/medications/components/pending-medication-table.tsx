@@ -7,8 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, PillBottle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select"
-import { Select } from "@/components/ui/select"
+import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 
 interface PendingMedicationTableProps {
@@ -70,6 +69,7 @@ export default function PendingMedicationTable({data}: PendingMedicationTablePro
                 
                 if (earliestOrder.timeAdminSchedule === "PRN") return "PRN"
                 
+                // Format time to 24-hour format
                 const time = earliestOrder.timeAdminSchedule.split(",")[0].trim()
                 if (time.length === 4) {
                     const hours = time.substring(0, 2)
@@ -89,7 +89,7 @@ export default function PendingMedicationTable({data}: PendingMedicationTablePro
                             <TooltipTrigger asChild>
                                 <Button 
                                     size="sm" 
-                                    className="bg-blue-400 hover:bg-blue-500"
+                                    className="bg-blue-500 hover:bg-blue-600"
                                 >
                                     <PillBottle className="h-4 w-4 mr-2" />
                                     Administer
@@ -222,7 +222,7 @@ export default function PendingMedicationTable({data}: PendingMedicationTablePro
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No pending medications found.
+                                    No pending medication orders found.
                                 </TableCell>
                             </TableRow>
                         )}

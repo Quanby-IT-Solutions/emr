@@ -4,11 +4,10 @@ import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, Colu
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, Eye, PillBottle } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select"
-import { Select } from "@/components/ui/select"
+import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select"
 
 interface MedicationTableProps {
     data: MedicationProfile[]
@@ -68,21 +67,6 @@ export default function MedicationTable({data}: MedicationTableProps) {
                 return (
                     <TooltipProvider>
                         <div className="flex items-center justify-center gap-2">
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button 
-                                size="sm" 
-                                // onClick={() => onRecord(row.original)} 
-                                className="bg-blue-400 hover:bg-blue-500"
-                            >
-                                <PillBottle className="h-4 w-4" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                            <p>Administer Medication</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        
                         <Tooltip>
                             <TooltipTrigger asChild>
                             <Button 
