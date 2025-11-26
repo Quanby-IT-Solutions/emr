@@ -48,13 +48,11 @@ const mockOrders: Order[] = [
     patient: "Jane Smith", 
     medication: "Amlodipine 5mg", 
     prescriber: "Dr. Johnson", 
-    status: "Verification",
+    status: "Pending",
     orderDate: "2024-11-26",
     dosage: "5mg",
     frequency: "Once daily",
-    quantity: "30 tablets",
-    verifiedBy: "Pharmacist A",
-    verifiedDate: "2024-11-26"
+    quantity: "30 tablets"
   },
   { 
     id: 3, 
@@ -115,14 +113,8 @@ export default function PharmacyOrdersPage() {
       icon: IconClock
     },
     {
-      id: "verification",
-      title: "Verification",
-      description: "Orders in verification",
-      icon: IconShieldCheck
-    },
-    {
       id: "approved",
-      title: "Approved",
+      title: "Approved Orders",
       description: "Processed orders",
       icon: IconPackage
     }
@@ -147,7 +139,6 @@ export default function PharmacyOrdersPage() {
   })
 
   const pendingOrders = filteredOrders.filter(order => order.status === "Pending" || order.status === "Flagged")
-  const verificationOrders = filteredOrders.filter(order => order.status === "Verification")
   const approvedOrders = filteredOrders.filter(order => order.status === "Approved")
 
   const renderOrdersTable = (orders: Order[], showActions = false) => (
@@ -269,7 +260,6 @@ export default function PharmacyOrdersPage() {
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="verification">Verification</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="flagged">Flagged</SelectItem>
                     </SelectContent>
@@ -348,40 +338,6 @@ export default function PharmacyOrdersPage() {
                   )}
                   
                   {currentStep === 1 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <IconShieldCheck className="h-5 w-5" />
-                          Order Verification ({verificationOrders.length})
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Orders currently under verification process
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        {verificationOrders.length > 0 ? (
-                          <div className="space-y-4">
-                            {renderOrdersTable(verificationOrders)}
-                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border">
-                              <h4 className="font-semibold mb-2">Verification Process</h4>
-                              <ul className="text-sm text-muted-foreground space-y-1">
-                                <li>• Check drug interactions and contraindications</li>
-                                <li>• Verify dosage and frequency appropriateness</li>
-                                <li>• Confirm patient allergies and medical history</li>
-                                <li>• Review prescriber credentials and authorization</li>
-                              </ul>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 text-muted-foreground">
-                            No orders in verification
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  {currentStep === 2 && (
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
