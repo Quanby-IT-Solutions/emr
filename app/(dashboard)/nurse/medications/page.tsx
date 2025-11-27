@@ -10,16 +10,25 @@ import PendingMedicationTable from "./components/pending-medication-table"
 import { MedicationStepper } from "./components/medication-stepper"
 import { useState } from "react"
 import { MedicationProfileEntries, MedicationProfile } from "../../dummy-data/dummy-medication-admin"
+import { ViewMedRecordModal } from "./components/view-med-record-modal"
 
 
 export default function MedicationsPage() {
-  const [medicationsData, setMedicationsData] = useState<MedicationProfile[]>(MedicationProfileEntries)
+  const [medicationsData] = useState<MedicationProfile[]>(MedicationProfileEntries)
   const [activeStep, setActiveStep] = useState<"pending" | "administered">("pending")
+
+  const [openViewRecord, setOpenViewRecord] = useState(false)
+  const [selectedPatient, setSelectedPatient] = useState<MedicationProfile | null>(null)
 
   // Calculate pending medications count (those with pending orders)
   const pendingCount = medicationsData.filter(profile => 
     profile.patient.medicationOrders.length > 0
   ).length
+
+  const handleViewRecord = (profile: MedicationProfile) => {
+    setSelectedPatient(profile)
+    setOpenViewRecord(true)
+  }
 
   return (
     <ProtectedRoute requiredRole={UserRole.NURSE}>
@@ -56,14 +65,21 @@ export default function MedicationsPage() {
               <CardContent>
                 <div className="mb-6">
                   {activeStep === "pending" ? (
-                    <PendingMedicationTable data={medicationsData} />
+                    <PendingMedicationTable data={medicationsData} onViewRecord={handleViewRecord}/>
                   ) : (
-                    <MedicationTable data={medicationsData} />
+                    <MedicationTable data={medicationsData} onViewRecord={handleViewRecord} />
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
+
+        <ViewMedRecordModal 
+          open={openViewRecord} 
+          onOpenChange={setOpenViewRecord} 
+          selectedPatient={selectedPatient}
+        />
+
         </div>
       </DashboardLayout>
     </ProtectedRoute>

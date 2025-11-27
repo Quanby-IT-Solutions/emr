@@ -11,11 +11,10 @@ import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@
 
 interface MedicationTableProps {
     data: MedicationProfile[]
-    // onRecord: (record: MedicationProfile) => void
-    // onViewRecord: (record: MedicationProfile) => void
+    onViewRecord: (record: MedicationProfile) => void
 }
 
-export default function MedicationTable({data}: MedicationTableProps) {
+export default function MedicationTable({data, onViewRecord}: MedicationTableProps) {
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -68,17 +67,17 @@ export default function MedicationTable({data}: MedicationTableProps) {
                     <TooltipProvider>
                         <div className="flex items-center justify-center gap-2">
                         <Tooltip>
-                            <TooltipTrigger asChild>
+                        <TooltipTrigger asChild>
                             <Button 
-                                variant="ghost" 
-                                // onClick={() => onViewRecord(row.original)}
+                            variant="ghost" 
+                            onClick={() => onViewRecord(row.original)}
                             >
-                                <Eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                             </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
+                        </TooltipTrigger>
+                        <TooltipContent>
                             <p>View Medication Records</p>
-                            </TooltipContent>
+                        </TooltipContent>
                         </Tooltip>
                         </div>
                     </TooltipProvider>

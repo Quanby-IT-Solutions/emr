@@ -37,8 +37,11 @@ export interface MedicationProfile {
         orderedFrequency: string
         routeOfAdministration: string
         timeAdminSchedule: string 
+        startDate: Date
+        stopDate: Date
         physician: string
         specialInstructions: string
+        status: "PENDING" |"ACTIVE" | "ON HOLD" | "FLAGGED" | "EXPIRED" | "DISCONTINUED" | "COMPLETED" | "CANCELLED"
      }[]
      administeredMedicationRecords:
      {
@@ -242,8 +245,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0800",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Sarah Chen, MD",
-                    specialInstructions: "Take in the morning. Monitor blood pressure."
+                    specialInstructions: "Take in the morning. Monitor blood pressure.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-001-002",
@@ -259,8 +265,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "2000",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Sarah Chen, MD",
-                    specialInstructions: "Take at bedtime with full glass of water."
+                    specialInstructions: "Take at bedtime with full glass of water.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -308,8 +317,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Twice daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0800, 2000",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
-                    specialInstructions: "Take with meals to reduce GI upset. Monitor blood glucose."
+                    specialInstructions: "Take with meals to reduce GI upset. Monitor blood glucose.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-002-002",
@@ -325,8 +337,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0600",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
-                    specialInstructions: "Take on empty stomach 30 minutes before breakfast."
+                    specialInstructions: "Take on empty stomach 30 minutes before breakfast.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-002-003",
@@ -342,8 +357,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "subcutaneous",
                     timeAdminSchedule: "2200",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
-                    specialInstructions: "Administer in abdomen. Rotate injection sites."
+                    specialInstructions: "Administer in abdomen. Rotate injection sites.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -370,6 +388,18 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     administeringNurse: "RN James Wilson",
                     isAdministered: true,
                     nurseNotes: "Given with breakfast tray. Blood glucose 165 mg/dL pre-meal."
+                },
+                {
+                    medicationId: "MED-012",
+                    medicationGenericName: "insulin glargine",
+                    medicationBrandName: "Lantus",
+                    medicationClassification: "Long-Acting Insulin",
+                    dosageAdministered: "20 units",
+                    timeAdministered: "2200",
+                    dateAdministered: new Date("2025-11-24"),
+                    administeringNurse: "RN James Wilson",
+                    isAdministered: true,
+                    nurseNotes: "Patient tolerated well. BP 138/82 pre-administration."
                 }
             ]
         }
@@ -403,8 +433,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Every 4 hours as needed",
                     routeOfAdministration: "inhalation",
                     timeAdminSchedule: "PRN",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Lisa Patel, MD",
-                    specialInstructions: "Shake well before use. Rinse mouth after administration."
+                    specialInstructions: "Shake well before use. Rinse mouth after administration.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -464,8 +497,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0900",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Kevin Nguyen, MD",
-                    specialInstructions: "Take with food. Monitor for mood changes and suicidal ideation."
+                    specialInstructions: "Take with food. Monitor for mood changes and suicidal ideation.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -513,8 +549,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Three times daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0800, 1400, 2000",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Amanda Foster, MD",
-                    specialInstructions: "Titrate gradually. Monitor for dizziness and sedation."
+                    specialInstructions: "Titrate gradually. Monitor for dizziness and sedation.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-005-002",
@@ -530,8 +569,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "1700",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Amanda Foster, MD",
-                    specialInstructions: "Monitor INR closely. Target INR 2.0-3.0. Avoid vitamin K-rich foods."
+                    specialInstructions: "Monitor INR closely. Target INR 2.0-3.0. Avoid vitamin K-rich foods.",
+                    status: "ON HOLD"
                 }
             ],
             administeredMedicationRecords: [
@@ -579,8 +621,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0900",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Robert Taylor, MD",
-                    specialInstructions: "Monitor BP closely. Hold if SBP < 100 mmHg."
+                    specialInstructions: "Monitor BP closely. Hold if SBP < 100 mmHg.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-006-002",
@@ -596,8 +641,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0900",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Robert Taylor, MD",
-                    specialInstructions: "Monitor fluid balance and electrolytes. Take in morning to avoid nocturia."
+                    specialInstructions: "Monitor fluid balance and electrolytes. Take in morning to avoid nocturia.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-006-003",
@@ -613,8 +661,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "2100",
+                    startDate: new Date("2025-10-15"),
+                    stopDate: new Date("2025-10-30"),
                     physician: "Dr. Robert Taylor, MD",
-                    specialInstructions: "Monitor for peripheral edema and dizziness."
+                    specialInstructions: "Monitor for peripheral edema and dizziness.",
+                    status: "COMPLETED"
                 }
             ],
             administeredMedicationRecords: [
@@ -674,8 +725,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Three times daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0800, 1400, 2000",
+                    startDate: new Date("2025-11-15"),
+                    stopDate: new Date("2025-11-30"),
                     physician: "Dr. Susan Martinez, MD",
-                    specialInstructions: "Complete full 7-day course. Monitor for allergic reaction."
+                    specialInstructions: "Complete full 7-day course. Monitor for allergic reaction.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -735,8 +789,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "2000",
+                    startDate: new Date("2025-11-24"),
+                    stopDate: new Date("2025-12-24"),
                     physician: "Dr. James Cooper, MD",
-                    specialInstructions: "Take in the evening. Monitor for mood changes."
+                    specialInstructions: "Take in the evening. Monitor for mood changes.",
+                    status: "ACTIVE"
                 },
                 {
                     medicationOrderId: "MO-2025-008-002",
@@ -752,8 +809,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Every 4-6 hours as needed",
                     routeOfAdministration: "inhalation",
                     timeAdminSchedule: "PRN",
+                    startDate: new Date("2025-11-24"),
+                    stopDate: new Date("2025-12-24"),
                     physician: "Dr. James Cooper, MD",
-                    specialInstructions: "Use as rescue inhaler for acute symptoms."
+                    specialInstructions: "Use as rescue inhaler for acute symptoms.",
+                    status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
@@ -801,8 +861,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0700",
+                    startDate: new Date("2025-11-26"),
+                    stopDate: new Date("2025-12-15"),
                     physician: "Dr. Rachel Kim, MD",
-                    specialInstructions: "Take 30 minutes before breakfast. Do not crush or chew capsule."
+                    specialInstructions: "Take 30 minutes before breakfast. Do not crush or chew capsule.",
+                    status: "PENDING"
                 }
             ],
             administeredMedicationRecords: []
@@ -837,8 +900,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "2100",
+                    startDate: new Date("2025-11-26"),
+                    stopDate: new Date("2025-12-15"),
                     physician: "Dr. David Wright, MD",
-                    specialInstructions: "Take at bedtime. Monitor liver function. Avoid grapefruit juice."
+                    specialInstructions: "Take at bedtime. Monitor liver function. Avoid grapefruit juice.",
+                    status: "PENDING"
                 },
                 {
                     medicationOrderId: "MO-2025-010-002",
@@ -854,8 +920,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
                     timeAdminSchedule: "0800",
+                    startDate: new Date("2025-11-26"),
+                    stopDate: new Date("2025-12-15"),
                     physician: "Dr. David Wright, MD",
-                    specialInstructions: "Monitor BP and potassium levels. Take consistently at same time daily."
+                    specialInstructions: "Monitor BP and potassium levels. Take consistently at same time daily.",
+                    status: "PENDING"
                 }
             ],
             administeredMedicationRecords: []

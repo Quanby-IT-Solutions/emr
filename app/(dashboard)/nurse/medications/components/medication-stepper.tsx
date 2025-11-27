@@ -82,7 +82,7 @@ export function MedicationStepper({
             "font-semibold mb-1",
             activeStep === "administered" && "text-green-600 dark:primary"
           )}>
-            Administration Records
+            Medication Administration Records
           </h3>
           <p className="text-sm text-muted-foreground">
             View previously administered medications

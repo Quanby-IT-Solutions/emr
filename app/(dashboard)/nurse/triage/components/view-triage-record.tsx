@@ -8,20 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { 
-  User, 
-  Calendar, 
-  Clock, 
-  Activity, 
-  Heart, 
-  Thermometer, 
-  Wind, 
-  Weight, 
-  Ruler,
-  Stethoscope,
-  FileText,
-  AlertCircle
-} from "lucide-react"
+import { User, Calendar, Clock, Activity, Heart, Thermometer, Wind, Weight, Ruler, Stethoscope, FileText, AlertCircle } from "lucide-react"
 
 // Mock data structure matching your TriageAssessment type
 interface TriageRecord {

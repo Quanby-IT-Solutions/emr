@@ -212,7 +212,7 @@ export const TriageEntry: TriageAssessment[] = [
       phoneNumber: 9171234567,
       address: "123 Barangay Poblacion, Nasugbu, Batangas",
       occupation: "Teacher",
-      currentTriageCategory: "URGENT",
+      currentTriageCategory: "NON_URGENT",
       status: "TRANSFERRED",
       lastDateOfTriage: new Date("2025-11-17"),
       lastTimeOfTriage: "14:30",

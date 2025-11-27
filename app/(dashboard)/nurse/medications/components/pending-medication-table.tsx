@@ -4,7 +4,7 @@ import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, Colu
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, PillBottle } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, Eye, PillBottle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { SelectTrigger, SelectValue, SelectContent, SelectItem, Select } from "@/components/ui/select"
@@ -12,9 +12,11 @@ import { Badge } from "@/components/ui/badge"
 
 interface PendingMedicationTableProps {
     data: MedicationProfile[]
+    onViewRecord: (record: MedicationProfile) => void
+    // selectedPatient: MedicationProfile | null
 }
 
-export default function PendingMedicationTable({data}: PendingMedicationTableProps) {
+export default function PendingMedicationTable({data, onViewRecord}: PendingMedicationTableProps) {
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -89,14 +91,27 @@ export default function PendingMedicationTable({data}: PendingMedicationTablePro
                             <TooltipTrigger asChild>
                                 <Button 
                                     size="sm" 
-                                    className="bg-blue-500 hover:bg-blue-600"
+                                    className="bg-blue-500 hover:bg-blue-600 mr-2"
                                 >
-                                    <PillBottle className="h-4 w-4 mr-2" />
-                                    Administer
+                                    <PillBottle className="h-4 w-4" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Administer Pending Medications</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => onViewRecord(row.original)}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                            <p>View Medication Records</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
