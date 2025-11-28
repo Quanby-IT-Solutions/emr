@@ -11,6 +11,7 @@ import { MedicationStepper } from "./components/medication-stepper"
 import { useState } from "react"
 import { MedicationProfileEntries, MedicationProfile } from "../../dummy-data/dummy-medication-admin"
 import { ViewMedRecordModal } from "./components/view-med-record-modal"
+import { AdministerMedicineWizard } from "./components/administer-med-modal"
 
 
 export default function MedicationsPage() {
@@ -18,6 +19,7 @@ export default function MedicationsPage() {
   const [activeStep, setActiveStep] = useState<"pending" | "administered">("pending")
 
   const [openViewRecord, setOpenViewRecord] = useState(false)
+  const [openAdministerModal, setOpenAdministerModal] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<MedicationProfile | null>(null)
 
   // Calculate pending medications count (those with pending orders)
@@ -28,6 +30,11 @@ export default function MedicationsPage() {
   const handleViewRecord = (profile: MedicationProfile) => {
     setSelectedPatient(profile)
     setOpenViewRecord(true)
+  }
+
+  const handleAdminister = (profile: MedicationProfile) => {
+    setSelectedPatient(profile)
+    setOpenAdministerModal(true)
   }
 
   return (
@@ -65,7 +72,7 @@ export default function MedicationsPage() {
               <CardContent>
                 <div className="mb-6">
                   {activeStep === "pending" ? (
-                    <PendingMedicationTable data={medicationsData} onViewRecord={handleViewRecord}/>
+                    <PendingMedicationTable data={medicationsData} onViewRecord={handleViewRecord} onAdminister={handleAdminister}/>
                   ) : (
                     <MedicationTable data={medicationsData} onViewRecord={handleViewRecord} />
                   )}
@@ -78,6 +85,13 @@ export default function MedicationsPage() {
           open={openViewRecord} 
           onOpenChange={setOpenViewRecord} 
           selectedPatient={selectedPatient}
+        />
+
+        <AdministerMedicineWizard 
+          open={openAdministerModal} 
+          onOpenChange={setOpenAdministerModal}
+          patient={selectedPatient?.patient || null}
+          selectedOrder={selectedPatient?.patient?.medicationOrders?.[0] || null}
         />
 
         </div>

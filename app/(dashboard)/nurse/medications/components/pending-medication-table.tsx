@@ -13,10 +13,11 @@ import { Badge } from "@/components/ui/badge"
 interface PendingMedicationTableProps {
     data: MedicationProfile[]
     onViewRecord: (record: MedicationProfile) => void
+    onAdminister: (record: MedicationProfile) => void
     // selectedPatient: MedicationProfile | null
 }
 
-export default function PendingMedicationTable({data, onViewRecord}: PendingMedicationTableProps) {
+export default function PendingMedicationTable({data, onViewRecord, onAdminister}: PendingMedicationTableProps) {
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -92,6 +93,7 @@ export default function PendingMedicationTable({data, onViewRecord}: PendingMedi
                                 <Button 
                                     size="sm" 
                                     className="bg-blue-500 hover:bg-blue-600 mr-2"
+                                    onClick={() => onAdminister(row.original)}
                                 >
                                     <PillBottle className="h-4 w-4" />
                                 </Button>
