@@ -1,46 +1,13 @@
 import { useState } from "react"
-import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-  ColumnDef,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, ColumnDef, SortingState, getSortedRowModel } from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AppointmentEntry } from "@/app/(dashboard)/dummy-data/dummy-appointments"
 import { AppointmentActionsMenu } from "./appointment-action-menu"
 import { Badge } from "@/components/ui/badge"
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react"
+import { ChevronUpIcon, ChevronDownIcon, ChevronFirstIcon, ChevronLastIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "@/components/ui/pagination"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
 
 interface AppointmentsTableProps {
   data: AppointmentEntry[]
@@ -49,12 +16,7 @@ interface AppointmentsTableProps {
   onCancel: (appointment: AppointmentEntry) => void
 }
 
-export function AppointmentsTable({
-  data,
-  onEdit,
-  onConfirm,
-  onCancel,
-}: AppointmentsTableProps) {
+export function AppointmentsTable({ data, onEdit, onConfirm, onCancel }: AppointmentsTableProps) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,

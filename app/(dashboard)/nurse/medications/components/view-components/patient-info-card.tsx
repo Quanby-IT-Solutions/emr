@@ -32,8 +32,15 @@ export function PatientInfoCard({ patientData, medicationOrdersCount, showHeader
         </div>
       )}
 
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-2">
+        <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+        <p className="text-xs text-blue-800">
+          This patient has <strong>{medicationOrdersCount}</strong> medication order(s) on file.
+        </p>
+      </div>
+
       <Card className="border-blue-200 bg-blue-50/30">
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-1 mb-2">
           <div className="space-y-3">
             <div>
               <Label className="text-xs text-muted-foreground">Patient ID</Label>
@@ -79,13 +86,6 @@ export function PatientInfoCard({ patientData, medicationOrdersCount, showHeader
           </div>
         </CardContent>
       </Card>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-2">
-        <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-        <p className="text-xs text-blue-800">
-          This patient has <strong>{medicationOrdersCount}</strong> medication order(s) on file.
-        </p>
-      </div>
     </div>
   )
 }

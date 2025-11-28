@@ -2,6 +2,7 @@ import { Pill, Calendar, Clock, UserCheck, FileText, CheckCircle2, XCircle } fro
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { CalendarAdministration } from "./med-record-calendar-view"
+import { Separator } from "@/components/ui/separator"
 
 interface MedicationAdminCardProps {
   record: CalendarAdministration | null
@@ -25,7 +26,7 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
   return (
     <div className="space-y-4 ml-2 mr-6">
       <Card className={`border-${isTaken ? 'green' : 'red'}-200 bg-${isTaken ? 'green' : 'red'}-50/30`}>
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-4">
           <div className="space-y-4">
             {/* Status Banner */}
             <div className={`flex items-center gap-2 p-3 rounded-md ${isTaken ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -45,21 +46,12 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-xs text-muted-foreground">Dosage Given</Label>
-                <p className="font-medium text-sm">{record.dosageAdministered}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Nurse</Label>
-                <div className="flex items-center gap-1.5">
-                    <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="font-medium text-sm truncate">{record.administeringNurse}</p>
-                </div>
-              </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Dosage Given</Label>
+              <p className="font-medium text-sm">{record.dosageAdministered}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-[2fr_1fr] gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground">Date</Label>
                 <div className="flex items-center gap-1.5">
@@ -73,6 +65,15 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                     <p className="font-medium text-sm">{formatTime(record.time)}</p>
                 </div>
+              </div>
+            </div>
+
+            <Separator  />
+            <div>
+              <Label className="text-xs text-muted-foreground">Nurse</Label>
+              <div className="flex items-center gap-1.5">
+                <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                <p className="font-medium text-sm truncate">{record.administeringNurse}</p>
               </div>
             </div>
 

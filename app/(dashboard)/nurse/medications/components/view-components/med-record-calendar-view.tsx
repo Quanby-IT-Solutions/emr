@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Mouse } from "lucide-react"
 
 // --- Interface Definitions ---
 export interface CalendarAdministration {
@@ -120,12 +120,12 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
   const dailyHours = getDailyHours()
 
   const getAdministrationForDate = (medication: CalendarMedication, date: Date) => {
-    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
     return medication.administrations.filter((admin) => admin.date === dateStr)
   }
 
   const getAdministrationForHour = (medication: CalendarMedication, date: Date, hour: number) => {
-    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
     return medication.administrations.filter((admin) => {
       if (admin.date !== dateStr) return false
       const timeMatch = admin.time.match(/(\d{1,2}):?(\d{2})/)
@@ -243,7 +243,7 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
               </table>
             </div>
           </div>
-          {/* Legend code remains same */}
+          {/* Legend code */}
           <div className="flex items-center justify-center gap-6 text-sm bg-gray-50 p-3 rounded border">
              <p className="text-muted-foreground">Legend:</p>
              <div className="flex items-center gap-2">
@@ -254,7 +254,14 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
                <div className="w-6 h-6 bg-red-500 rounded"></div>
                <span>Refused/Not Taken</span>
              </div>
-           </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-2">
+            <Mouse className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700">
+              Click on a colored cell to view the medication administration details.
+            </p>
+          </div>
         </div>
       </div>
     </div>

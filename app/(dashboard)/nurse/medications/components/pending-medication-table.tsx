@@ -65,19 +65,25 @@ export default function PendingMedicationTable({data, onViewRecord, onAdminister
                 
                 // Get the earliest scheduled time
                 const earliestOrder = orders.reduce((earliest, current) => {
-                    if (current.timeAdminSchedule === "PRN") return earliest
-                    if (earliest.timeAdminSchedule === "PRN") return current
-                    return current.timeAdminSchedule < earliest.timeAdminSchedule ? current : earliest
+                    const currentTime = Array.isArray(current.timeAdminSchedule) ? current.timeAdminSchedule[0] : current.timeAdminSchedule
+                    const earliestTime = Array.isArray(earliest.timeAdminSchedule) ? earliest.timeAdminSchedule[0] : earliest.timeAdminSchedule
+                    
+                    if (currentTime.includes("PRN")) return earliest
+                    if (earliestTime.includes("PRN")) return current
+                    return currentTime < earliestTime ? current : earliest
                 })
                 
-                if (earliestOrder.timeAdminSchedule === "PRN") return "PRN"
+                const scheduleTime = Array.isArray(earliestOrder.timeAdminSchedule) ? earliestOrder.timeAdminSchedule[0] : earliestOrder.timeAdminSchedule
+                if (scheduleTime.includes("PRN")) return "PRN"
                 
                 // Format time to 24-hour format
-                const time = earliestOrder.timeAdminSchedule.split(",")[0].trim()
+                const time = scheduleTime.trim()
                 if (time.length === 4) {
                     const hours = time.substring(0, 2)
                     const minutes = time.substring(2, 4)
                     return `${hours}:${minutes}`
+                } else if (time.includes(":")) {
+                    return time
                 }
                 return time
             }

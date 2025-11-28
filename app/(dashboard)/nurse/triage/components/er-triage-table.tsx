@@ -1,52 +1,12 @@
 import { useState } from "react"
-import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-  ColumnDef,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, ColumnDef, SortingState, getSortedRowModel} from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import {
-  ChevronUp,
-  ChevronDown,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardClock,
-  Eye,
-} from "lucide-react"
+import { ChevronUp, ChevronDown, ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight, ClipboardClock, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-} from "@/components/ui/pagination"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { TriageAssessment } from "@/app/(dashboard)/dummy-data/dummy-triage"
 import { Button } from "@/components/ui/button"
