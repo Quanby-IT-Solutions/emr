@@ -13,6 +13,7 @@ export interface CalendarAdministration {
   medicationName?: string
   dosageAdministered?: string
   classification?: string
+  medicationOrderId?: string
 }
 
 export interface CalendarMedication {
@@ -22,6 +23,7 @@ export interface CalendarMedication {
   discontinuedDate?: string
   administrations: CalendarAdministration[]
   classification?: string
+  medicationOrderId?: string
 }
 
 type ViewType = "daily" | "weekly" | "monthly"
@@ -29,13 +31,14 @@ type ViewType = "daily" | "weekly" | "monthly"
 
 interface MedRecordCalendarViewProps {
   transformedMedicationOrders: CalendarMedication[]
-  onRecordClick: (record: CalendarAdministration) => void // New Prop
+  onRecordClick: (record: CalendarAdministration) => void
+  onMedicationClick: (medicationOrderId: string) => void
 }
 
 const getWeekDates = (date: Date) => {
     const week = []
     const startOfWeek = new Date(date)
-    startOfWeek.setDate(date.getDate() - date.getDay()) // Start from Sunday
+    startOfWeek.setDate(date.getDate() - date.getDay())
     
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek)
@@ -75,7 +78,7 @@ const getWeekDates = (date: Date) => {
     return timeStr
   }
 
-export function MedRecordCalendarView({ transformedMedicationOrders, onRecordClick }: MedRecordCalendarViewProps) {
+export function MedRecordCalendarView({ transformedMedicationOrders, onRecordClick, onMedicationClick }: MedRecordCalendarViewProps) {
   const [viewType, setViewType] = useState<ViewType>("weekly")
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [currentDay, setCurrentDay] = useState(new Date())
@@ -164,6 +167,14 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
             </div>
           </div>
 
+          {/* Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-2">
+            <Mouse className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-700">
+              Click on a <strong>medication name</strong> to view order details, or click on a <strong>colored cell</strong> to view administration record details.
+            </p>
+          </div>
+
           <div className="border rounded-lg overflow-hidden bg-white">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -191,9 +202,14 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
                 <tbody>
                   {transformedMedicationOrders.map((medication, medIdx) => (
                     <tr key={medIdx} className="border-b hover:bg-gray-50">
-                      <td className="p-3 align-top sticky left-0 bg-white">
+                      <td 
+                        className="p-3 align-top sticky left-0 bg-white cursor-pointer hover:bg-blue-50 transition-colors"
+                        onClick={() => medication.medicationOrderId && onMedicationClick(medication.medicationOrderId)}
+                      >
                         <div className="space-y-1">
-                          <div className="font-semibold text-sm">{medication.medicationGenericName}</div>
+                          <div className="font-semibold text-sm">
+                            {medication.medicationGenericName}
+                          </div>
                           <div className="text-xs text-muted-foreground">{medication.dosage}</div>
                           <div className="text-xs text-muted-foreground">{medication.schedule}</div>
                           {medication.discontinuedDate && (
@@ -243,6 +259,7 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
               </table>
             </div>
           </div>
+
           {/* Legend code */}
           <div className="flex items-center justify-center gap-6 text-sm bg-gray-50 p-3 rounded border">
              <p className="text-muted-foreground">Legend:</p>
@@ -255,13 +272,7 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
                <span>Refused/Not Taken</span>
              </div>
           </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-start gap-2">
-            <Mouse className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-700">
-              Click on a colored cell to view the medication administration details.
-            </p>
-          </div>
+        
         </div>
       </div>
     </div>

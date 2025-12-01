@@ -12,15 +12,16 @@ import { useState } from "react"
 import { MedicationProfileEntries, MedicationProfile } from "../../dummy-data/dummy-medication-admin"
 import { ViewMedRecordModal } from "./components/view-med-record-modal"
 import { AdministerMedicineWizard } from "./components/administer-med-modal"
+import { AdministrationData, Patient, AdministeredRecord } from "@/components/shared/medication/types"
 
 
 export default function MedicationsPage() {
-  const [medicationsData] = useState<MedicationProfile[]>(MedicationProfileEntries)
+  const [medicationsData, setMedicationsData] = useState<MedicationProfile[]>(MedicationProfileEntries)
   const [activeStep, setActiveStep] = useState<"pending" | "administered">("pending")
 
   const [openViewRecord, setOpenViewRecord] = useState(false)
   const [openAdministerModal, setOpenAdministerModal] = useState(false)
-  const [selectedPatient, setSelectedPatient] = useState<MedicationProfile | null>(null)
+  const [selectedPatientProfile, setSelectedPatientProfile] = useState<MedicationProfile | null>(null)
 
   // Calculate pending medications count (those with pending orders)
   const pendingCount = medicationsData.filter(profile => 
@@ -28,13 +29,73 @@ export default function MedicationsPage() {
   ).length
 
   const handleViewRecord = (profile: MedicationProfile) => {
-    setSelectedPatient(profile)
+    setSelectedPatientProfile(profile)
     setOpenViewRecord(true)
   }
 
   const handleAdminister = (profile: MedicationProfile) => {
-    setSelectedPatient(profile)
+    setSelectedPatientProfile(profile)
     setOpenAdministerModal(true)
+  }
+
+  const handleAdministrationSubmit = (data: AdministrationData) => {
+    if (!selectedPatientProfile) return
+
+    setMedicationsData(prevData => {
+      return prevData.map(profile => {
+        // Find the patient profile being updated
+        if (profile.patient.patientId === selectedPatientProfile.patient.patientId) {
+          
+          const administeredOrder = profile.patient.medicationOrders.find(
+             order => order.medicationOrderId === data.medicationOrderId
+          )
+
+          // Clone the entire patient object to update it immutably
+          const updatedPatient: Patient = { ...profile.patient }
+
+          if (administeredOrder) {
+            // Update last administered details for the table display
+            updatedPatient.lastAdministeredMedication = data.isAdministered 
+              ? administeredOrder.medicationDetails.medicationGenericName
+              : `${administeredOrder.medicationDetails.medicationGenericName} (Refused)`
+
+            updatedPatient.lastTimeAdministered = data.timeAdministered.replace(':', '') 
+            updatedPatient.dosageGiven = data.isAdministered ? data.dosageAdministered : 'N/A'
+            
+            // Remove the administered order from the medicationOrders list (updates the Pending table)
+            updatedPatient.medicationOrders = updatedPatient.medicationOrders.filter(
+              order => order.medicationOrderId !== data.medicationOrderId
+            )
+
+            // Add a new record to the administeredMedicationRecords array
+            const newRecord: AdministeredRecord = {
+              medicationId: administeredOrder.medicationDetails.medicationId,
+              medicationGenericName: administeredOrder.medicationDetails.medicationGenericName,
+              medicationBrandName: administeredOrder.medicationDetails.medicationBrandName,
+              medicationClassification: administeredOrder.medicationDetails.medicationClassification,
+              dosageAdministered: data.dosageAdministered,
+              timeAdministered: data.timeAdministered.replace(':', ''),
+              dateAdministered: data.dateAdministered,
+              administeringNurse: "RN Jane Doe (Demo)",
+              isAdministered: data.isAdministered,
+              nurseNotes: data.nurseNotes,
+            }
+            updatedPatient.administeredMedicationRecords = [...updatedPatient.administeredMedicationRecords, newRecord]
+          }
+
+          // Return the entire MedicationProfile object with the updated patient data
+          return {
+            ...profile,
+            patient: updatedPatient,
+          } as MedicationProfile
+        }
+        return profile
+      })
+    })
+
+    // Close the modal and reset state
+    setOpenAdministerModal(false)
+    setSelectedPatientProfile(null) 
   }
 
   return (
@@ -84,14 +145,15 @@ export default function MedicationsPage() {
         <ViewMedRecordModal 
           open={openViewRecord} 
           onOpenChange={setOpenViewRecord} 
-          selectedPatient={selectedPatient}
+          selectedPatient={selectedPatientProfile}
         />
 
         <AdministerMedicineWizard 
           open={openAdministerModal} 
           onOpenChange={setOpenAdministerModal}
-          patient={selectedPatient?.patient || null}
-          selectedOrder={selectedPatient?.patient?.medicationOrders?.[0] || null}
+          patient={selectedPatientProfile?.patient || null}
+          selectedOrder={selectedPatientProfile?.patient?.medicationOrders?.[0] || null}
+          onSubmit={handleAdministrationSubmit}
         />
 
         </div>

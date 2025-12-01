@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, User, FileText, Stethoscope, ClipboardList } from "lucide-react" // Icons
+import { ChevronLeft, ChevronRight, User, FileText, Stethoscope, ClipboardList } from "lucide-react"
 
 // Import Components
 import { PatientInfoCard } from "./view-components/patient-info-card"
@@ -71,9 +71,11 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
           administeringNurse: record.administeringNurse,
           // PASSING EXTRA DATA FOR DETAIL VIEW
           nurseNotes: record.nurseNotes,
-          medicationName: `${record.medicationGenericName.charAt(0).toUpperCase() + record.medicationGenericName.slice(1)} (${record.medicationBrandName})`,
+          medicationName: `${record.medicationGenericName} (${record.medicationBrandName})`,
           dosageAdministered: record.dosageAdministered,
-          classification: record.medicationClassification
+          classification: record.medicationClassification,
+          // ADD MEDICATION ORDER ID FOR LINKING
+          medicationOrderId: order.medicationOrderId
         }
       })
 
@@ -85,7 +87,9 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
       schedule: `${order.orderedFrequency} - ${order.routeOfAdministration}`,
       discontinuedDate: isDiscontinued ? new Date(order.stopDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : undefined,
       administrations,
-      classification: order.medicationDetails.medicationClassification
+      classification: order.medicationDetails.medicationClassification,
+      // ADD MEDICATION ORDER ID TO CALENDAR MEDICATION
+      medicationOrderId: order.medicationOrderId
     }
   })
 
@@ -96,6 +100,13 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
     setActiveSidebarView("record")
   }
 
+  // NEW: Handler for clicking medication name in calendar
+  const handleMedicationClick = (medicationOrderId: string) => {
+    setSelectedOrder(medicationOrderId)
+    setActiveTab("medication-order")
+    setActiveOrderSidebarView("order-details")
+  }
+
   const handleOrderClick = (medicationOrderId: string) => {
     setActiveOrderSidebarView("order-details")
     setSelectedOrder(medicationOrderId)
@@ -103,7 +114,9 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
 
   const handleClose = () => {
     setActiveSidebarView("patient-info")
+    setActiveOrderSidebarView("order")
     setSelectedAdminRecord(null)
+    setSelectedOrder(null)
     onOpenChange(false)
   }
 
@@ -179,7 +192,7 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
                       <PatientInfoCard 
                         patientData={patientData}
                         medicationOrdersCount={transformedMedicationOrders.length}
-                        showHeader={false} // Disable internal header
+                        showHeader={false}
                       />
                   ) : (
                       <MedicationAdminCard record={selectedAdminRecord} />
@@ -229,13 +242,13 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
                 {activeOrderSidebarView === "order" ? (
                     <MedicationOrdersCard
                         medicationOrders={patientData.medicationOrders}
-                        showHeader={false} // Disable internal header
+                        showHeader={false}
                         onRecordClick={handleOrderClick}
                     />
                 ) : (
                     <MedicationOrderDetails
                         medicationOrder={patientData.medicationOrders.find((order) => order.medicationOrderId === selectedOrder) || null}
-                        showHeader={false} // Disable internal header
+                        showHeader={false}
                     />
                 )}
               </TabsContent>
@@ -246,7 +259,8 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
           {/* Right Side - Calendar View Component */}
           <MedRecordCalendarView 
             transformedMedicationOrders={transformedMedicationOrders}
-            onRecordClick={handleRecordClick} // Pass handler
+            onRecordClick={handleRecordClick}
+            onMedicationClick={handleMedicationClick}
           />
         </div>
 

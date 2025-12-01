@@ -40,7 +40,7 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
                 <div className="flex items-start gap-2 mt-1">
                     <Pill className="h-4 w-4 text-muted-foreground mt-0.5" />
                     <div>
-                        <p className="font-medium text-sm leading-tight">{record.medicationName}</p>
+                        <p className="font-medium text-sm leading-tight capitalize">{record.medicationName}</p>
                         <p className="text-xs text-muted-foreground mt-1">{record.classification}</p>
                     </div>
                 </div>

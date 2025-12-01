@@ -1,11 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { ClipboardList, ClipboardPenLine, Clock, Pill, Ruler } from "lucide-react"
+import { ClipboardList, ClipboardPenLine, Clock, Pill} from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 
-interface MedicationOrderDetails {
+export interface MedicationOrderDetails {
     medicationOrderId: string
         medicationDetails: {
             medicationId: string
@@ -33,13 +33,57 @@ interface MedicationOrderDetailsProps {
 
 export function MedicationOrderDetails ({ medicationOrder, showHeader }: MedicationOrderDetailsProps) {
     const formatTime = (timeStr: string): string => {
-        const match = timeStr.match(/(\d{1,2}):?(\d{2})/)
+        // Remove any whitespace
+        const cleaned = timeStr.trim()
+        
+        // Match 4-digit time format (HHMM) or time with colon (HH:MM)
+        const match = cleaned.match(/^(\d{2})(\d{2})$|^(\d{1,2}):(\d{2})$/)
         if (match) {
-        const hours = match[1].padStart(2, '0')
-        const minutes = match[2]
-        return `${hours}:${minutes}`
+            // If HHMM format (e.g., "0800")
+            if (match[1] && match[2]) {
+                return `${match[1]}:${match[2]}`
+            }
+            // If HH:MM format (e.g., "08:00")
+            if (match[3] && match[4]) {
+                const hours = match[3].padStart(2, '0')
+                return `${hours}:${match[4]}`
+            }
         }
         return timeStr
+    }
+
+    const categorizeTimesByPeriod = (times: string[] | undefined) => {
+        if (!times || times.length === 0) return { morning: [], afternoon: [], evening: [] }
+        
+        // Handle case where times might be in a single string separated by comma
+        const allTimes: string[] = []
+        times.forEach(timeStr => {
+            if (timeStr.includes(',')) {
+                allTimes.push(...timeStr.split(',').map(t => t.trim()))
+            } else {
+                allTimes.push(timeStr)
+            }
+        })
+        
+        const morning: string[] = []
+        const afternoon: string[] = []
+        const evening: string[] = []
+        
+        allTimes.forEach(timeStr => {
+            const formatted = formatTime(timeStr)
+            // Extract hour from formatted time (HH:MM)
+            const hour = parseInt(formatted.split(':')[0])
+            
+            if (hour >= 5 && hour < 12) {
+                morning.push(formatted)
+            } else if (hour >= 12 && hour < 17) {
+                afternoon.push(formatted)
+            } else {
+                evening.push(formatted)
+            }
+        })
+        
+        return { morning, afternoon, evening }
     }
 
     const calculateDuration = (startDate: Date | undefined, stopDate: Date | undefined): string => {
@@ -59,6 +103,8 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
         const months = Math.floor(diffDays / 30)
         return months === 1 ? "1 month" : `${months} months`
     }
+
+    const timePeriods = categorizeTimesByPeriod(medicationOrder?.timeAdminSchedule)
 
     return (
         <div className="space-y-4 ml-2 mr-6">
@@ -90,7 +136,7 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
                         <div className="flex items-start gap-2 mt-1">
                             <Pill className="h-4 w-4 text-muted-foreground mt-0.5" />
                             <div>
-                                <p className="font-medium text-sm leading-tight">{medicationOrder && medicationOrder.medicationDetails.medicationGenericName.charAt(0).toUpperCase() + medicationOrder.medicationDetails.medicationGenericName.slice(1)} ({medicationOrder?.medicationDetails.medicationBrandName})</p>
+                                <p className="font-medium text-sm leading-tight capitalize">{medicationOrder && medicationOrder.medicationDetails.medicationGenericName} ({medicationOrder?.medicationDetails.medicationBrandName})</p>
                                 <p className="text-xs text-muted-foreground mt-1">{medicationOrder?.medicationDetails.medicationClassification}</p>
                             </div>
                         </div>
@@ -100,13 +146,12 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
                         <div>
                             <Label className="text-xs text-muted-foreground">Dosage Form</Label>
                             <div className="flex items-center gap-1.5"> 
-                                <p className="font-medium text-sm">{medicationOrder?.medicationDetails.dosageForm}</p>
+                                <p className="font-medium text-sm capitalize">{medicationOrder?.medicationDetails.dosageForm}</p>
                             </div>
                         </div>
                         <div>
                             <Label className="text-xs text-muted-foreground">Dosage Unit</Label>
                             <div className="flex items-center gap-1.5">
-                                <Ruler className="h-3.5 w-3.5 text-muted-foreground" />
                                 <p className="font-medium text-sm truncate">{medicationOrder?.medicationDetails.dosageUnit}</p>
                             </div>
                         </div>
@@ -123,30 +168,55 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
                         </div>
                         <div>
                             <Label className="text-xs text-muted-foreground">Intake Route</Label>
-                            <p className="font-medium text-sm">{medicationOrder?.routeOfAdministration}</p>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Frequency</Label>
-                            <p className="font-medium text-sm">{medicationOrder?.orderedFrequency}</p>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Administer Time</Label>
-                            <div className="flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                <p className="font-medium text-sm">{medicationOrder?.timeAdminSchedule?.map(formatTime).join(', ')}</p>
-                            </div>
-                            
+                            <p className="font-medium text-sm capitalize">{medicationOrder?.routeOfAdministration}</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div>
+                        <Label className="text-xs text-muted-foreground">Frequency</Label>
+                        <p className="font-medium text-sm">{medicationOrder?.orderedFrequency}</p>
+                    </div>
+
+                    <div>
+                        <Label className="text-xs text-muted-foreground flex items-center gap-1.5 mb-2">
+                            <Clock className="h-3.5 w-3.5" />
+                            Administer Time
+                        </Label>
+                        <div className="bg-white/50 border rounded-md p-3 space-y-2">
+                            {timePeriods.morning.length > 0 && (
+                                <div className="flex items-start gap-2">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[70px]">Morning:</span>
+                                    <span className="text-xs font-medium">{timePeriods.morning.join(', ')}</span>
+                                </div>
+                            )}
+                            {timePeriods.afternoon.length > 0 && (
+                                <div className="flex items-start gap-2">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[70px]">Afternoon:</span>
+                                    <span className="text-xs font-medium">{timePeriods.afternoon.join(', ')}</span>
+                                </div>
+                            )}
+                            {timePeriods.evening.length > 0 && (
+                                <div className="flex items-start gap-2">
+                                    <span className="text-xs font-semibold text-muted-foreground min-w-[70px]">Evening:</span>
+                                    <span className="text-xs font-medium">{timePeriods.evening.join(', ')}</span>
+                                </div>
+                            )}
+                            {timePeriods.morning.length === 0 && timePeriods.afternoon.length === 0 && timePeriods.evening.length === 0 && (
+                                <span className="text-xs text-muted-foreground italic">No schedule</span>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <Separator />
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label className="text-xs text-muted-foreground">Start Date</Label>
-                            <p className="font-medium text-sm">{medicationOrder?.startDate.toLocaleDateString()}</p>
+                            <p className="font-medium text-sm">{medicationOrder?.startDate.toDateString()}</p>
                         </div>
                         <div>
                             <Label className="text-xs text-muted-foreground">Stop Date</Label>
-                            <p className="font-medium text-sm">{medicationOrder?.stopDate.toLocaleDateString()}</p>
+                            <p className="font-medium text-sm">{medicationOrder?.stopDate.toDateString()}</p>
                         </div>
                         <div>
                             <Label className="text-xs text-muted-foreground">Duration</Label>
@@ -154,6 +224,8 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
                         </div>
                     </div>
                     
+                    <Separator />
+
                     <div>
                         <Label className="text-xs text-muted-foreground">Ordered by</Label>
                         <p className="font-medium text-sm">{medicationOrder?.physician}</p>
