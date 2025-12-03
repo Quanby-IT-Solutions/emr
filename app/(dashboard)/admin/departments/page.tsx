@@ -23,49 +23,50 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
-import { useAdminData, Facility } from "@/components/admin-context"
+import { useAdminData, Department } from "@/components/admin-context"
 
-export default function FacilitiesPage() {
-  const { facilities, addFacility, updateFacility, deleteFacility } = useAdminData()
+export default function DepartmentsPage() {
+  const { departments, facilities, addDepartment, updateDepartment, deleteDepartment } = useAdminData()
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDiscardOpen, setIsDiscardOpen] = useState(false)
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null)
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
   
   const [formData, setFormData] = useState({
     name: "",
-    address: "",
-    contactPhone: "",
-    isActive: "true"
+    facilityId: "",
+    type: "CLINICAL"
   })
 
   const resetForm = () => {
     setFormData({
       name: "",
-      address: "",
-      contactPhone: "",
-      isActive: "true"
+      facilityId: "",
+      type: "CLINICAL"
     })
-    setSelectedFacility(null)
+    setSelectedDepartment(null)
   }
 
   const handleAdd = () => {
-    if (!formData.name) {
-      toast.error("Please fill in required fields")
+    if (!formData.name || !formData.facilityId || !formData.type) {
+      toast.error("Please fill in all required fields")
       return
     }
 
-    const newFacility: Facility = {
-      id: `fac_${Date.now()}`,
+    const selectedFacility = facilities.find(f => f.id === formData.facilityId)
+
+    const newDepartment: Department = {
+      id: `dept_${Date.now()}`,
       name: formData.name,
-      address: formData.address,
-      contactPhone: formData.contactPhone,
-      isActive: formData.isActive === "true"
+      facilityId: formData.facilityId,
+      facilityName: selectedFacility ? selectedFacility.name : "Unknown",
+      type: formData.type as "CLINICAL" | "ADMINISTRATIVE",
+      totalBeds: 0 // Default to 0 for new departments
     }
-    addFacility(newFacility)
+    addDepartment(newDepartment)
     setIsAddOpen(false)
     resetForm()
     // Toast handled in context
@@ -74,9 +75,8 @@ export default function FacilitiesPage() {
   const handleAddCancel = () => {
     const hasChanges = 
       formData.name !== "" ||
-      formData.address !== "" ||
-      formData.contactPhone !== "" ||
-      formData.isActive !== "true"
+      formData.facilityId !== "" ||
+      formData.type !== "CLINICAL"
 
     if (hasChanges) {
       setIsDiscardOpen(true)
@@ -87,57 +87,58 @@ export default function FacilitiesPage() {
   }
 
   const handleEdit = () => {
-    if (!selectedFacility) return
+    if (!selectedDepartment) return
 
-    if (!formData.name) {
-      toast.error("Please fill in required fields")
+    if (!formData.name || !formData.facilityId || !formData.type) {
+      toast.error("Please fill in all required fields")
       return
     }
     
-    const updatedFacility: Facility = {
-      ...selectedFacility,
-      name: formData.name,
-      address: formData.address,
-      contactPhone: formData.contactPhone,
-      isActive: formData.isActive === "true"
+    const selectedFacility = facilities.find(f => f.id === formData.facilityId)
+
+    const updatedDepartment: Department = {
+      ...selectedDepartment,
+      name: formData.name, 
+      facilityId: formData.facilityId,
+      facilityName: selectedFacility ? selectedFacility.name : selectedDepartment.facilityName,
+      type: formData.type as "CLINICAL" | "ADMINISTRATIVE"
+      // totalBeds remains unchanged as it's not in the form
     }
-    updateFacility(updatedFacility)
+    updateDepartment(updatedDepartment)
     setIsEditOpen(false)
     resetForm()
     // Toast handled in context
   }
 
   const handleDelete = () => {
-    if (!selectedFacility) return
+    if (!selectedDepartment) return
     
-    deleteFacility(selectedFacility.id)
+    deleteDepartment(selectedDepartment.id)
     setIsDeleteOpen(false)
-    setSelectedFacility(null)
+    setSelectedDepartment(null)
     // Toast handled in context
   }
 
-  const openEditModal = (facility: Facility) => {
-    setSelectedFacility(facility)
+  const openEditModal = (department: Department) => {
+    setSelectedDepartment(department)
     setFormData({
-      name: facility.name,
-      address: facility.address || "",
-      contactPhone: facility.contactPhone || "",
-      isActive: facility.isActive.toString()
+      name: department.name,
+      facilityId: department.facilityId,
+      type: department.type
     })
     setIsEditOpen(true)
   }
 
   const handleEditCancel = () => {
-    if (!selectedFacility) {
+    if (!selectedDepartment) {
       setIsEditOpen(false)
       return
     }
 
     const hasChanges = 
-      formData.name !== selectedFacility.name ||
-      formData.address !== (selectedFacility.address || "") ||
-      formData.contactPhone !== (selectedFacility.contactPhone || "") ||
-      formData.isActive !== selectedFacility.isActive.toString()
+      formData.name !== selectedDepartment.name ||
+      formData.facilityId !== selectedDepartment.facilityId ||
+      formData.type !== selectedDepartment.type
 
     if (hasChanges) {
       setIsDiscardOpen(true)
@@ -154,19 +155,19 @@ export default function FacilitiesPage() {
     resetForm()
   }
 
-  const openViewModal = (facility: Facility) => {
-    setSelectedFacility(facility)
+  const openViewModal = (department: Department) => {
+    setSelectedDepartment(department)
     setIsViewOpen(true)
   }
 
-  const openDeleteModal = (facility: Facility) => {
-    setSelectedFacility(facility)
+  const openDeleteModal = (department: Department) => {
+    setSelectedDepartment(department)
     setIsDeleteOpen(true)
   }
 
-  const filteredFacilities = facilities.filter(f => 
-    f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (f.address && f.address.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredDepartments = departments.filter(d => 
+    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    d.facilityName.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -176,14 +177,14 @@ export default function FacilitiesPage() {
           <div className="px-4 lg:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold">Facility Management</h1>
+                <h1 className="text-2xl font-bold">Department Management</h1>
                 <p className="text-muted-foreground">
-                  Manage hospital facilities
+                  Manage hospital departments and assignments
                 </p>
               </div>
               <Button onClick={() => setIsAddOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Facility
+                Add Department
               </Button>
             </div>
           </div>
@@ -195,7 +196,7 @@ export default function FacilitiesPage() {
                   <div className="relative flex-1">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      placeholder="Search facilities..." 
+                      placeholder="Search departments..." 
                       className="pl-8" 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -207,31 +208,31 @@ export default function FacilitiesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>Contact Phone</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Department Name</TableHead>
+                      <TableHead>Facility (Parent)</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Total Beds</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredFacilities.length === 0 ? (
+                    {filteredDepartments.length === 0 ? (
                        <TableRow>
                         <TableCell colSpan={5} className="text-center h-24">
-                          No facilities found.
+                          No departments found.
                         </TableCell>
                        </TableRow>
                     ) : (
-                      filteredFacilities.map((facility) => (
-                        <TableRow key={facility.id}>
-                          <TableCell className="font-medium">{facility.name}</TableCell>
-                          <TableCell>{facility.address}</TableCell>
-                          <TableCell>{facility.contactPhone}</TableCell>
+                      filteredDepartments.map((department) => (
+                        <TableRow key={department.id}>
+                          <TableCell className="font-medium">{department.name}</TableCell>
+                          <TableCell>{department.facilityName}</TableCell>
                           <TableCell>
-                            <Badge variant={facility.isActive ? "default" : "secondary"}>
-                              {facility.isActive ? "Active" : "Inactive"}
+                            <Badge variant="outline">
+                              {department.type}
                             </Badge>
                           </TableCell>
+                          <TableCell>{department.totalBeds}</TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -242,16 +243,16 @@ export default function FacilitiesPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => openViewModal(facility)}>
+                                <DropdownMenuItem onClick={() => openViewModal(department)}>
                                   <Eye className="mr-2 h-4 w-4" />
                                   View
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openEditModal(facility)}>
+                                <DropdownMenuItem onClick={() => openEditModal(department)}>
                                   <Pencil className="mr-2 h-4 w-4" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => openDeleteModal(facility)} className="text-destructive focus:text-destructive">
+                                <DropdownMenuItem onClick={() => openDeleteModal(department)} className="text-destructive focus:text-destructive">
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Delete
                                 </DropdownMenuItem>
@@ -268,13 +269,13 @@ export default function FacilitiesPage() {
           </div>
         </div>
 
-        {/* Add Facility Modal */}
+        {/* Add Department Modal */}
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogContent className="sm:max-w-[500px]" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
-              <DialogTitle>Add New Facility</DialogTitle>
+              <DialogTitle>Add New Department</DialogTitle>
               <DialogDescription>
-                Enter the details of the new facility.
+                Enter the details of the new department here.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -287,48 +288,44 @@ export default function FacilitiesPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="col-span-3"
-                  placeholder="Facility Name"
+                  placeholder="e.g. Cardiology"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="address" className="text-right">
-                  Address
-                </Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="col-span-3"
-                  placeholder="Address"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="contactPhone" className="text-right">
-                  Phone
-                </Label>
-                <Input
-                  id="contactPhone"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                  className="col-span-3"
-                  placeholder="Contact Phone"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="isActive" className="text-right">
-                  Status
+                <Label htmlFor="facility" className="text-right">
+                  Facility
                 </Label>
                 <div className="col-span-3">
                   <Select 
-                    value={formData.isActive} 
-                    onValueChange={(value) => setFormData({ ...formData, isActive: value })}
+                    value={formData.facilityId} 
+                    onValueChange={(value) => setFormData({ ...formData, facilityId: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select facility" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="true">Active</SelectItem>
-                      <SelectItem value="false">Inactive</SelectItem>
+                      {facilities.map(f => (
+                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Type
+                </Label>
+                <div className="col-span-3">
+                  <Select 
+                    value={formData.type} 
+                    onValueChange={(value) => setFormData({ ...formData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CLINICAL">Clinical</SelectItem>
+                      <SelectItem value="ADMINISTRATIVE">Administrative</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -336,18 +333,18 @@ export default function FacilitiesPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleAddCancel}>Cancel</Button>
-              <Button onClick={handleAdd}>Save Facility</Button>
+              <Button onClick={handleAdd}>Save Department</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Edit Facility Modal */}
+        {/* Edit Department Modal */}
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="sm:max-w-[500px]" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
-              <DialogTitle>Edit Facility</DialogTitle>
+              <DialogTitle>Edit Department</DialogTitle>
               <DialogDescription>
-                Update facility details.
+                Make changes to the department here.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -363,42 +360,40 @@ export default function FacilitiesPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-address" className="text-right">
-                  Address
-                </Label>
-                <Input
-                  id="edit-address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-contactPhone" className="text-right">
-                  Phone
-                </Label>
-                <Input
-                  id="edit-contactPhone"
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-isActive" className="text-right">
-                  Status
+                <Label htmlFor="edit-facility" className="text-right">
+                  Facility
                 </Label>
                 <div className="col-span-3">
                   <Select 
-                    value={formData.isActive} 
-                    onValueChange={(value) => setFormData({ ...formData, isActive: value })}
+                    value={formData.facilityId} 
+                    onValueChange={(value) => setFormData({ ...formData, facilityId: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select facility" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="true">Active</SelectItem>
-                      <SelectItem value="false">Inactive</SelectItem>
+                      {facilities.map(f => (
+                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-type" className="text-right">
+                  Type
+                </Label>
+                <div className="col-span-3">
+                  <Select 
+                    value={formData.type} 
+                    onValueChange={(value) => setFormData({ ...formData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CLINICAL">Clinical</SelectItem>
+                      <SelectItem value="ADMINISTRATIVE">Administrative</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -411,35 +406,35 @@ export default function FacilitiesPage() {
           </DialogContent>
         </Dialog>
 
-        {/* View Facility Modal */}
+        {/* View Department Modal */}
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Facility Details</DialogTitle>
+              <DialogTitle>Department Details</DialogTitle>
               <DialogDescription>
-                View details for {selectedFacility?.name}
+                View details for {selectedDepartment?.name}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right font-bold">ID</Label>
+                <div className="col-span-3">{selectedDepartment?.id}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right font-bold">Name</Label>
-                <div className="col-span-3">{selectedFacility?.name}</div>
+                <div className="col-span-3">{selectedDepartment?.name}</div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right font-bold">Address</Label>
-                <div className="col-span-3">{selectedFacility?.address}</div>
+                <Label className="text-right font-bold">Facility</Label>
+                <div className="col-span-3">{selectedDepartment?.facilityName}</div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right font-bold">Contact No.</Label>
-                <div className="col-span-3">{selectedFacility?.contactPhone}</div>
+                <Label className="text-right font-bold">Type</Label>
+                <div className="col-span-3">{selectedDepartment?.type}</div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right font-bold">Status</Label>
-                <div className="col-span-3">
-                   <Badge variant={selectedFacility?.isActive ? "default" : "secondary"}>
-                      {selectedFacility?.isActive ? "Active" : "Inactive"}
-                   </Badge>
-                </div>
+                <Label className="text-right font-bold">Total Beds</Label>
+                <div className="col-span-3">{selectedDepartment?.totalBeds}</div>
               </div>
             </div>
             <DialogFooter>
@@ -454,8 +449,8 @@ export default function FacilitiesPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the facility
-                <span className="font-bold"> {selectedFacility?.name} </span>
+                This action cannot be undone. This will permanently delete the department
+                <span className="font-bold"> {selectedDepartment?.name} </span>
                 and remove its data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>

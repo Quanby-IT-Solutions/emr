@@ -22,6 +22,7 @@ import {
   IconCurrencyDollar,
   IconHistory,
   IconMessage,
+  IconSitemap,
 } from "@tabler/icons-react"
 import { UserRole } from "./roles"
 
@@ -48,6 +49,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Facility Management",
       url: "/admin/facilities",
       icon: IconBuildingHospital,
+    },
+    {
+      title: "Department Management",
+      url: "/admin/departments",
+      icon: IconSitemap,
     },
     {
       title: "System Configuration",

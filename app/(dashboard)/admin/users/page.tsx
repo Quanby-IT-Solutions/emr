@@ -57,31 +57,80 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
 
-// Types
-type UserStatus = "active" | "inactive"
+// Based on Prisma Schema
+// model User {
+//   id           String   @id @default(cuid())
+//   username     String   @unique
+//   email        String   @unique
+//   role         UserRole
+//   isActive     Boolean
+//   staff        Staff?
+//   ...
+// }
+// model Staff {
+//   firstName    String
+//   lastName     String
+//   ...
+// }
 
 interface User {
-  id: number
-  name: string
+  id: string
+  username: string
   email: string
+  firstName: string // From Staff relation
+  lastName: string  // From Staff relation
   role: UserRole
-  status: UserStatus
+  isActive: boolean
 }
 
 // Mock Data
 const initialUsers: User[] = [
-  { id: 1, name: "Dr. John Smith", email: "john.smith@hospital.com", role: UserRole.CLINICIAN, status: "active" },
-  { id: 2, name: "Sarah Johnson", email: "sarah.j@hospital.com", role: UserRole.NURSE, status: "active" },
-  { id: 3, name: "Mike Davis", email: "mike.d@hospital.com", role: UserRole.PHARMACIST, status: "active" },
-  { id: 4, name: "Emily Brown", email: "emily.b@hospital.com", role: UserRole.REGISTRAR, status: "inactive" },
+  { 
+    id: "user_1", 
+    username: "drsmith", 
+    email: "john.smith@hospital.com", 
+    firstName: "John", 
+    lastName: "Smith", 
+    role: UserRole.CLINICIAN, 
+    isActive: true 
+  },
+  { 
+    id: "user_2", 
+    username: "nurse_sarah", 
+    email: "sarah.j@hospital.com", 
+    firstName: "Sarah", 
+    lastName: "Johnson", 
+    role: UserRole.NURSE, 
+    isActive: true 
+  },
+  { 
+    id: "user_3", 
+    username: "pharma_mike", 
+    email: "mike.d@hospital.com", 
+    firstName: "Mike", 
+    lastName: "Davis", 
+    role: UserRole.PHARMACIST, 
+    isActive: true 
+  },
+  { 
+    id: "user_4", 
+    username: "reg_emily", 
+    email: "emily.b@hospital.com", 
+    firstName: "Emily", 
+    lastName: "Brown", 
+    role: UserRole.REGISTRAR, 
+    isActive: false 
+  },
 ]
 
 // Form Schema
 const userFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   role: z.nativeEnum(UserRole),
-  status: z.enum(["active", "inactive"] as [string, ...string[]]),
+  isActive: z.enum(["true", "false"]),
 })
 
 type UserFormValues = z.infer<typeof userFormSchema>
@@ -97,7 +146,9 @@ export default function UsersPage() {
   // Filtered users
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.role.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -106,10 +157,12 @@ export default function UsersPage() {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: "",
+      username: "",
+      firstName: "",
+      lastName: "",
       email: "",
       role: UserRole.CLINICIAN,
-      status: "active",
+      isActive: "true",
     },
   })
 
@@ -127,10 +180,12 @@ export default function UsersPage() {
   const handleAddCancel = () => {
     const values = form.getValues()
     const hasChanges = 
-      values.name !== "" ||
+      values.username !== "" ||
+      values.firstName !== "" ||
+      values.lastName !== "" ||
       values.email !== "" ||
       values.role !== UserRole.CLINICIAN ||
-      values.status !== "active"
+      values.isActive !== "true"
 
     if (hasChanges && isAddDialogOpen) {
       setIsDiscardOpen(true)
@@ -143,9 +198,13 @@ export default function UsersPage() {
   // Handle Add User
   const onAddSubmit = (data: UserFormValues) => {
     const newUser: User = {
-      id: Math.max(...users.map((u) => u.id)) + 1,
-      ...data,
-      status: data.status as UserStatus,
+      id: `user_${Date.now()}`,
+      username: data.username,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+      isActive: data.isActive === "true",
     }
     setUsers([...users, newUser])
     setIsAddDialogOpen(false)
@@ -157,17 +216,23 @@ export default function UsersPage() {
   const onEditClick = (user: User) => {
     setEditingUser(user)
     form.reset({
-      name: user.name,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
-      status: user.status,
+      isActive: user.isActive ? "true" : "false",
     })
   }
 
   const onEditSubmit = (data: UserFormValues) => {
     if (!editingUser) return
 
-    setUsers(users.map((u) => (u.id === editingUser.id ? { ...u, ...data, status: data.status as UserStatus } : u)))
+    setUsers(users.map((u) => (u.id === editingUser.id ? { 
+      ...u, 
+      ...data, 
+      isActive: data.isActive === "true" 
+    } : u)))
     setEditingUser(null)
     toast.success("User updated successfully")
     form.reset()
@@ -181,10 +246,12 @@ export default function UsersPage() {
 
     const currentValues = form.getValues()
     const hasChanges = 
-        currentValues.name !== editingUser.name ||
+        currentValues.username !== editingUser.username ||
+        currentValues.firstName !== editingUser.firstName ||
+        currentValues.lastName !== editingUser.lastName ||
         currentValues.email !== editingUser.email ||
         currentValues.role !== editingUser.role ||
-        currentValues.status !== editingUser.status
+        currentValues.isActive !== (editingUser.isActive ? "true" : "false")
 
     if (hasChanges) {
         setIsDiscardOpen(true)
@@ -232,7 +299,7 @@ export default function UsersPage() {
                     Add User
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]" onInteractOutside={(e) => e.preventDefault()}>
+                <DialogContent className="sm:max-w-[600px]" onInteractOutside={(e) => e.preventDefault()}>
                   <DialogHeader>
                     <DialogTitle>Add New User</DialogTitle>
                     <DialogDescription>
@@ -241,77 +308,109 @@ export default function UsersPage() {
                   </DialogHeader>
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onAddSubmit)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Dr. John Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input placeholder="john.doe@hospital.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
+                                <Input placeholder="John" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                {Object.values(UserRole).map((role) => (
-                                  <SelectItem key={role} value={role}>
-                                    {ROLE_LABELS[role] || role}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
+                                <Input placeholder="Doe" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Username</FormLabel>
+                              <FormControl>
+                                <Input placeholder="jdoe" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input placeholder="john.doe@hospital.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="role"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Role</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a role" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {Object.values(UserRole).map((role) => (
+                                    <SelectItem key={role} value={role}>
+                                      {ROLE_LABELS[role] || role}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="isActive"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Status</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Active</SelectItem>
+                                  <SelectItem value="false">Inactive</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       <DialogFooter>
                         <Button variant="outline" type="button" onClick={handleAddCancel}>Cancel</Button>
                         <Button type="submit">Create User</Button>
@@ -343,6 +442,7 @@ export default function UsersPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
+                      <TableHead>Username</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Status</TableHead>
@@ -352,21 +452,22 @@ export default function UsersPage() {
                   <TableBody>
                     {filteredUsers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">
+                        <TableCell colSpan={6} className="h-24 text-center">
                           No results.
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredUsers.map((user) => (
                         <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.name}</TableCell>
+                          <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
+                          <TableCell>{user.username}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
                             <Badge variant="secondary">{ROLE_LABELS[user.role] || user.role}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                              {user.status}
+                            <Badge variant={user.isActive ? "default" : "secondary"}>
+                              {user.isActive ? "Active" : "Inactive"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -407,7 +508,7 @@ export default function UsersPage() {
           <Dialog open={!!editingUser} onOpenChange={(open) => {
              if (!open) handleEditCancel()
           }}>
-            <DialogContent className="sm:max-w-[425px]" onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent className="sm:max-w-[600px]" onInteractOutside={(e) => e.preventDefault()}>
               <DialogHeader>
                 <DialogTitle>Edit User</DialogTitle>
                 <DialogDescription>
@@ -416,77 +517,109 @@ export default function UsersPage() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onEditSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
+                            <Input {...field} />
                           </FormControl>
-                          <SelectContent>
-                            {Object.values(UserRole).map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {ROLE_LABELS[role] || role}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
+                            <Input {...field} />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.values(UserRole).map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  {ROLE_LABELS[role] || role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Active</SelectItem>
+                              <SelectItem value="false">Inactive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <DialogFooter>
                     <Button variant="outline" type="button" onClick={handleEditCancel}>Cancel</Button>
                     <Button type="submit">Save Changes</Button>
@@ -503,7 +636,7 @@ export default function UsersPage() {
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. This will permanently delete{" "}
-                  <span className="font-medium">{deletingUser?.name}</span>'s account and remove their data
+                  <span className="font-medium">{deletingUser?.firstName} {deletingUser?.lastName}</span>'s account and remove their data
                   from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
