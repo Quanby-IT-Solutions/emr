@@ -23,7 +23,7 @@ interface AdministerMedicineWizardProps {
   onOpenChange: (open: boolean) => void
   patient: Patient | null
   selectedOrder?: MedicationOrder | null
-  onSubmit?: (data: AdministrationData) => void
+  onSubmit?: (data: AdministrationData, medOrder: MedicationOrder) => void
 }
 
 const initialChecks: VerificationChecks = {
@@ -34,13 +34,7 @@ const initialChecks: VerificationChecks = {
   rightTime: false
 }
 
-export function AdministerMedicineWizard({ 
-  open, 
-  onOpenChange, 
-  patient, 
-  selectedOrder: initialSelectedOrder,
-  onSubmit 
-}: AdministerMedicineWizardProps) {
+export function AdministerMedicineWizard({ open, onOpenChange, patient,  selectedOrder: initialSelectedOrder, onSubmit }: AdministerMedicineWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedOrder, setSelectedOrder] = useState<MedicationOrder | null>(initialSelectedOrder || null)
   const [administrationStatus, setAdministrationStatus] = useState<AdministrationStatus>(null)
@@ -97,18 +91,29 @@ export function AdministerMedicineWizard({
     if (!selectedOrder || !patient) return
 
     const now = new Date()
+
+    const hours = now.getHours().toString().padStart(2, '0')
+    const minutes = now.getMinutes().toString().padStart(2, '0')
+    const timeAdministered = `${hours}:${minutes}`
+
     const data: AdministrationData = {
       medicationOrderId: selectedOrder.medicationOrderId,
       dosageAdministered: administrationStatus === "administered" ? dosageAdministered : "0",
-      timeAdministered: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+      timeAdministered: timeAdministered,
       dateAdministered: now,
-      isAdministered: administrationStatus === "administered",
-      refusalReason: administrationStatus === "refused" ? refusalReason : undefined,
+      isAdministered: administrationStatus === "administered" ? true : false,
+      refusalReason: administrationStatus === "refused" ? refusalReason : "",
       nurseNotes,
       verificationChecks
     }
 
-    onSubmit?.(data)
+    const medOrder: MedicationOrder = {
+      ...selectedOrder,
+      attemptAdministerToday: true,
+    }
+
+    onSubmit?.(data, medOrder)
+    console.log(data)
     handleClose()
   }
 

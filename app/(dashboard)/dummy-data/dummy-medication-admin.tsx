@@ -41,10 +41,12 @@ export interface MedicationProfile {
         stopDate: Date
         physician: string
         specialInstructions: string
+        attemptAdministerToday: boolean
         status: "PENDING" |"ACTIVE" | "ON HOLD" | "FLAGGED" | "EXPIRED" | "DISCONTINUED" | "COMPLETED" | "CANCELLED"
      }[]
      administeredMedicationRecords:
      {
+        administeredMedOrderId: string
         medicationId: string
         medicationGenericName: string
         medicationBrandName: string
@@ -55,6 +57,7 @@ export interface MedicationProfile {
         administeringNurse: string
         isAdministered: boolean
         nurseNotes: string
+        refusalReason: string
      }[]
    }
 }
@@ -228,7 +231,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Acute Coronary Syndrome, Hypertension",
             allergies: "Penicillin",
             lastAdministeredMedication: "lisinopril (Prinivil)",
-            lastTimeAdministered: "0815",
+            lastTimeAdministered: "08:15",
             dosageGiven: "10mg",
             medicationOrders: [
                 {
@@ -244,10 +247,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0800"],
+                    timeAdminSchedule: ["08:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Sarah Chen, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take in the morning. Monitor blood pressure.",
                     status: "ACTIVE"
                 },
@@ -264,26 +268,30 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "40mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["2000"],
+                    timeAdminSchedule: ["20:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Sarah Chen, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take at bedtime with full glass of water.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    
+                    administeredMedOrderId: "MO-2025-001-001",
                     medicationId: "MED-003",
                     medicationGenericName: "lisinopril",
                     medicationBrandName: "Prinivil",
                     medicationClassification: "ACE Inhibitor",
                     dosageAdministered: "10mg",
-                    timeAdministered: "0815",
+                    timeAdministered: "08:15",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Maria Santos",
                     isAdministered: true,
-                    nurseNotes: "Patient tolerated well. BP 138/82 pre-administration."
+                    nurseNotes: "Patient tolerated well. BP 138/82 pre-administration.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -300,7 +308,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Type 2 Diabetes Mellitus, Hypothyroidism",
             allergies: "None",
             lastAdministeredMedication: "metformin (Glucophage)",
-            lastTimeAdministered: "0805",
+            lastTimeAdministered: "08:05",
             dosageGiven: "1000mg",
             medicationOrders: [
                 {
@@ -316,10 +324,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "1000mg",
                     orderedFrequency: "Twice daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0800", "2000"],
+                    timeAdminSchedule: ["08:00", "20:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take with meals to reduce GI upset. Monitor blood glucose.",
                     status: "ACTIVE"
                 },
@@ -336,10 +345,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "75mcg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0600"],
+                    timeAdminSchedule: ["06:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take on empty stomach 30 minutes before breakfast.",
                     status: "ACTIVE"
                 },
@@ -356,50 +366,57 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "20 units",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "subcutaneous",
-                    timeAdminSchedule: ["2200"],
+                    timeAdminSchedule: ["22:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Michael Rodriguez, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Administer in abdomen. Rotate injection sites.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-002-002",
                     medicationId: "MED-005",
                     medicationGenericName: "levothyroxine",
                     medicationBrandName: "Synthroid",
                     medicationClassification: "Thyroid Hormone",
                     dosageAdministered: "75mcg",
-                    timeAdministered: "0610",
+                    timeAdministered: "06:10",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN James Wilson",
                     isAdministered: true,
-                    nurseNotes: "Administered as ordered. Patient reminded to wait 30 min before eating."
+                    nurseNotes: "Administered as ordered. Patient reminded to wait 30 min before eating.",
+                    refusalReason: "",
                 },
                 {
+                    administeredMedOrderId: "MO-2025-002-001",
                     medicationId: "MED-002",
                     medicationGenericName: "metformin",
                     medicationBrandName: "Glucophage",
                     medicationClassification: "Biguanide Antidiabetic",
                     dosageAdministered: "1000mg",
-                    timeAdministered: "0805",
+                    timeAdministered: "08:05",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN James Wilson",
                     isAdministered: true,
-                    nurseNotes: "Given with breakfast tray. Blood glucose 165 mg/dL pre-meal."
+                    nurseNotes: "Given with breakfast tray. Blood glucose 165 mg/dL pre-meal.",
+                    refusalReason: "",
                 },
                 {
+                    administeredMedOrderId: "MO-2025-002-003",
                     medicationId: "MED-012",
                     medicationGenericName: "insulin glargine",
                     medicationBrandName: "Lantus",
                     medicationClassification: "Long-Acting Insulin",
                     dosageAdministered: "20 units",
-                    timeAdministered: "2200",
+                    timeAdministered: "22:00",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN James Wilson",
                     isAdministered: true,
-                    nurseNotes: "Patient tolerated well. BP 138/82 pre-administration."
+                    nurseNotes: "Patient tolerated well. BP 138/82 pre-administration.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -416,7 +433,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Acute Asthma Exacerbation, Allergic Rhinitis",
             allergies: "Pollens",
             lastAdministeredMedication: "albuterol (Ventolin)",
-            lastTimeAdministered: "1045",
+            lastTimeAdministered: "10:45",
             dosageGiven: "2 puffs (180mcg)",
             medicationOrders: [
                 {
@@ -436,34 +453,39 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Lisa Patel, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Shake well before use. Rinse mouth after administration.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-003-001",
                     medicationId: "MED-007",
                     medicationGenericName: "albuterol",
                     medicationBrandName: "Ventolin",
                     medicationClassification: "Beta-2 Agonist Bronchodilator",
                     dosageAdministered: "2 puffs (180mcg)",
-                    timeAdministered: "0630",
+                    timeAdministered: "06:30",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Patricia Lee",
                     isAdministered: true,
-                    nurseNotes: "Patient experiencing wheezing. O2 sat 91% pre-admin, 96% post-admin. Good technique observed."
+                    nurseNotes: "Patient experiencing wheezing. O2 sat 91% pre-admin, 96% post-admin. Good technique observed.",
+                    refusalReason: "",
                 },
                 {
+                    administeredMedOrderId: "MO-2025-003-001",
                     medicationId: "MED-007",
                     medicationGenericName: "albuterol",
                     medicationBrandName: "Ventolin",
                     medicationClassification: "Beta-2 Agonist Bronchodilator",
                     dosageAdministered: "2 puffs (180mcg)",
-                    timeAdministered: "1045",
+                    timeAdministered: "10:45",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Patricia Lee",
                     isAdministered: true,
-                    nurseNotes: "Patient requested PRN dose. Breathing improved. O2 sat maintained at 97%."
+                    nurseNotes: "Patient requested PRN dose. Breathing improved. O2 sat maintained at 97%.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -480,7 +502,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Major Depressive Disorder, Generalized Anxiety Disorder",
             allergies: "None",
             lastAdministeredMedication: "sertraline (Zoloft)",
-            lastTimeAdministered: "0920",
+            lastTimeAdministered: "09:20",
             dosageGiven: "50mg",
             medicationOrders: [
                 {
@@ -496,26 +518,29 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "50mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0900"],
+                    timeAdminSchedule: ["09:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Kevin Nguyen, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take with food. Monitor for mood changes and suicidal ideation.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-004-001",
                     medicationId: "MED-008",
                     medicationGenericName: "sertraline",
                     medicationBrandName: "Zoloft",
                     medicationClassification: "Selective Serotonin Reuptake Inhibitor (SSRI)",
                     dosageAdministered: "50mg",
-                    timeAdministered: "0920",
+                    timeAdministered: "09:20",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Thomas Anderson",
                     isAdministered: true,
-                    nurseNotes: "Medication administered with breakfast. Patient cooperative. Mood stable, no suicidal ideation reported."
+                    nurseNotes: "Medication administered with breakfast. Patient cooperative. Mood stable, no suicidal ideation reported.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -532,7 +557,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Diabetic Peripheral Neuropathy, Atrial Fibrillation",
             allergies: "None",
             lastAdministeredMedication: "gabapentin (Neurontin)",
-            lastTimeAdministered: "0810",
+            lastTimeAdministered: "08:10",
             dosageGiven: "300mg",
             medicationOrders: [
                 {
@@ -548,10 +573,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "300mg",
                     orderedFrequency: "Three times daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0800", "1400", "2000"],
+                    timeAdminSchedule: ["08:00", "14:00", "20:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Amanda Foster, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Titrate gradually. Monitor for dizziness and sedation.",
                     status: "ACTIVE"
                 },
@@ -568,26 +594,29 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "5mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["1700"],
+                    timeAdminSchedule: ["17:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Amanda Foster, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Monitor INR closely. Target INR 2.0-3.0. Avoid vitamin K-rich foods.",
                     status: "ON HOLD"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-005-001",
                     medicationId: "MED-009",
                     medicationGenericName: "gabapentin",
                     medicationBrandName: "Neurontin",
                     medicationClassification: "Anticonvulsant/Neuropathic Pain Agent",
                     dosageAdministered: "300mg",
-                    timeAdministered: "0810",
+                    timeAdministered: "08:10",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Catherine Moore",
                     isAdministered: true,
-                    nurseNotes: "Morning dose given. Patient reports pain level 6/10. No dizziness noted."
+                    nurseNotes: "Morning dose given. Patient reports pain level 6/10. No dizziness noted.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -604,7 +633,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Hypertensive Emergency, Congestive Heart Failure",
             allergies: "None",
             lastAdministeredMedication: "hydrochlorothiazide (Microzide)",
-            lastTimeAdministered: "0905",
+            lastTimeAdministered: "09:05",
             dosageGiven: "25mg",
             medicationOrders: [
                 {
@@ -620,10 +649,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "50mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0900"],
+                    timeAdminSchedule: ["09:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Robert Taylor, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Monitor BP closely. Hold if SBP < 100 mmHg.",
                     status: "ACTIVE"
                 },
@@ -640,10 +670,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "25mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0900"],
+                    timeAdminSchedule: ["09:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Robert Taylor, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Monitor fluid balance and electrolytes. Take in morning to avoid nocturia.",
                     status: "ACTIVE"
                 },
@@ -660,38 +691,43 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["2100"],
+                    timeAdminSchedule: ["21:00"],
                     startDate: new Date("2025-10-15"),
                     stopDate: new Date("2025-10-30"),
                     physician: "Dr. Robert Taylor, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Monitor for peripheral edema and dizziness.",
                     status: "COMPLETED"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-006-001",
                     medicationId: "MED-010",
                     medicationGenericName: "losartan",
                     medicationBrandName: "Cozaar",
                     medicationClassification: "Angiotensin II Receptor Blocker (ARB)",
                     dosageAdministered: "50mg",
-                    timeAdministered: "0905",
+                    timeAdministered: "09:05",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Jennifer Brown",
                     isAdministered: true,
-                    nurseNotes: "BP 152/94 prior to administration. Patient tolerated well."
+                    nurseNotes: "BP 152/94 prior to administration. Patient tolerated well.",
+                    refusalReason: "",
                 },
                 {
+                    administeredMedOrderId: "MO-2025-006-002",
                     medicationId: "MED-014",
                     medicationGenericName: "hydrochlorothiazide",
                     medicationBrandName: "Microzide",
                     medicationClassification: "Thiazide Diuretic",
                     dosageAdministered: "25mg",
-                    timeAdministered: "0905",
+                    timeAdministered: "09:05",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Jennifer Brown",
                     isAdministered: true,
-                    nurseNotes: "Given with losartan. I&O charted. Patient voiding adequately."
+                    nurseNotes: "Given with losartan. I&O charted. Patient voiding adequately.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -708,7 +744,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Community-Acquired Pneumonia",
             allergies: "None",
             lastAdministeredMedication: "amoxicillin (Amoxil)",
-            lastTimeAdministered: "1405",
+            lastTimeAdministered: "14:05",
             dosageGiven: "500mg",
             medicationOrders: [
                 {
@@ -724,38 +760,43 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "500mg",
                     orderedFrequency: "Three times daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0800, 1400, 2000"],
+                    timeAdminSchedule: ["08:00", "14:00", "20:00"],
                     startDate: new Date("2025-11-15"),
                     stopDate: new Date("2025-11-30"),
                     physician: "Dr. Susan Martinez, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Complete full 7-day course. Monitor for allergic reaction.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-007-001",
                     medicationId: "MED-013",
                     medicationGenericName: "amoxicillin",
                     medicationBrandName: "Amoxil",
                     medicationClassification: "Penicillin Antibiotic",
                     dosageAdministered: "500mg",
-                    timeAdministered: "0800",
+                    timeAdministered: "08:00",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Daniel Park",
                     isAdministered: true,
-                    nurseNotes: "Day 3 of antibiotic therapy. No signs of allergic reaction. Patient reports improved breathing."
+                    nurseNotes: "Day 3 of antibiotic therapy. No signs of allergic reaction. Patient reports improved breathing.",
+                    refusalReason: "",
                 },
                 {
+                    administeredMedOrderId: "MO-2025-007-001",
                     medicationId: "MED-013",
                     medicationGenericName: "amoxicillin",
                     medicationBrandName: "Amoxil",
                     medicationClassification: "Penicillin Antibiotic",
                     dosageAdministered: "500mg",
-                    timeAdministered: "1405",
+                    timeAdministered: "14:05",
                     dateAdministered: new Date("2025-11-24"),
                     administeringNurse: "RN Sarah Mitchell",
                     isAdministered: true,
-                    nurseNotes: "Afternoon dose administered. Patient afebrile, temp 98.4°F. Lungs clear to auscultation."
+                    nurseNotes: "Afternoon dose administered. Patient afebrile, temp 98.4°F. Lungs clear to auscultation.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -772,7 +813,7 @@ export const MedicationProfileEntries: MedicationProfile[] = [
             diagnosis: "Moderate Persistent Asthma, Seasonal Allergies",
             allergies: "Latex, Dust, Pollens",
             lastAdministeredMedication: "montelukast (Singulair)",
-            lastTimeAdministered: "2010",
+            lastTimeAdministered: "20:10",
             dosageGiven: "10mg",
             medicationOrders: [
                 {
@@ -788,10 +829,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "10mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["2000"],
+                    timeAdminSchedule: ["20:00"],
                     startDate: new Date("2025-11-24"),
                     stopDate: new Date("2025-12-24"),
                     physician: "Dr. James Cooper, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take in the evening. Monitor for mood changes.",
                     status: "ACTIVE"
                 },
@@ -812,22 +854,25 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     startDate: new Date("2025-11-24"),
                     stopDate: new Date("2025-12-24"),
                     physician: "Dr. James Cooper, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Use as rescue inhaler for acute symptoms.",
                     status: "ACTIVE"
                 }
             ],
             administeredMedicationRecords: [
                 {
+                    administeredMedOrderId: "MO-2025-008-001",
                     medicationId: "MED-011",
                     medicationGenericName: "montelukast",
                     medicationBrandName: "Singulair",
                     medicationClassification: "Leukotriene Receptor Antagonist",
                     dosageAdministered: "10mg",
-                    timeAdministered: "2010",
+                    timeAdministered: "20:10",
                     dateAdministered: new Date("2025-11-23"),
                     administeringNurse: "RN Emily Watson",
                     isAdministered: true,
-                    nurseNotes: "Evening dose given as ordered. Patient reports good symptom control today."
+                    nurseNotes: "Evening dose given as ordered. Patient reports good symptom control today.",
+                    refusalReason: "",
                 }
             ]
         }
@@ -860,10 +905,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "40mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0700"],
+                    timeAdminSchedule: ["07:00"],
                     startDate: new Date("2025-11-26"),
                     stopDate: new Date("2025-12-15"),
                     physician: "Dr. Rachel Kim, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take 30 minutes before breakfast. Do not crush or chew capsule.",
                     status: "PENDING"
                 }
@@ -899,10 +945,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "20mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["2100"],
+                    timeAdminSchedule: ["21:00"],
                     startDate: new Date("2025-11-26"),
                     stopDate: new Date("2025-12-15"),
                     physician: "Dr. David Wright, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Take at bedtime. Monitor liver function. Avoid grapefruit juice.",
                     status: "PENDING"
                 },
@@ -919,10 +966,11 @@ export const MedicationProfileEntries: MedicationProfile[] = [
                     orderedDosage: "20mg",
                     orderedFrequency: "Once daily",
                     routeOfAdministration: "oral",
-                    timeAdminSchedule: ["0800"],
+                    timeAdminSchedule: ["08:00"],
                     startDate: new Date("2025-11-26"),
                     stopDate: new Date("2025-12-15"),
                     physician: "Dr. David Wright, MD",
+                    attemptAdministerToday: false,
                     specialInstructions: "Monitor BP and potassium levels. Take consistently at same time daily.",
                     status: "PENDING"
                 }

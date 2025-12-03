@@ -15,14 +15,7 @@ interface MedRecSummaryProps {
     onNurseNotesChange: (notes: string) => void
 }
 
-export function MedRecSummary({
-    selectedOrder,
-    administrationStatus,
-    dosageAdministered,
-    refusalReason,
-    nurseNotes,
-    onNurseNotesChange
-}: MedRecSummaryProps) {
+export function MedRecSummary({ selectedOrder, administrationStatus, dosageAdministered, refusalReason, nurseNotes, onNurseNotesChange}: MedRecSummaryProps) {
     const now = new Date()
 
     return (

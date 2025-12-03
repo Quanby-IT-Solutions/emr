@@ -54,7 +54,7 @@ export function MedRecPatientInfo({ patient }: MedRecPatientInfoProps) {
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-900">
-                    <strong>Next:</strong> You will select which medication to administer from this patient&apos;s active orders.
+                    <strong>Next:</strong> Select which medication to administer from this patient&apos;s active orders in the next page.
                 </p>
             </div>
         </div>

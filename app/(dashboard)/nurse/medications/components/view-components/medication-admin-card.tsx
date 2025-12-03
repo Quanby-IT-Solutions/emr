@@ -13,16 +13,6 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
 
   const isTaken = record.status === "taken"
 
-  const formatTime = (timeStr: string): string => {
-    const match = timeStr.match(/(\d{1,2}):?(\d{2})/)
-    if (match) {
-      const hours = match[1].padStart(2, '0')
-      const minutes = match[2]
-      return `${hours}:${minutes}`
-    }
-    return timeStr
-  }
-
   return (
     <div className="space-y-4 ml-2 mr-6">
       <Card className={`border-${isTaken ? 'green' : 'red'}-200 bg-${isTaken ? 'green' : 'red'}-50/30`}>
@@ -63,10 +53,20 @@ export function MedicationAdminCard({ record }: MedicationAdminCardProps) {
                 <Label className="text-xs text-muted-foreground">Time</Label>
                 <div className="flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="font-medium text-sm">{formatTime(record.time)}</p>
+                    <p className="font-medium text-sm">{record.time}</p>
                 </div>
               </div>
             </div>
+
+            {record.refusalReason !== "" && (
+              <div>
+              <Label className="text-xs text-muted-foreground mb-1 block">Refusal Reason</Label>
+              <div className="bg-white/50 border rounded-md p-3 text-sm italic text-muted-foreground flex gap-2">
+                 <FileText className="h-4 w-4 shrink-0 mt-0.5" />
+                 {record.refusalReason || "No refusal reason recorded."}
+              </div>
+            </div>
+            )}
 
             <Separator  />
             <div>

@@ -55,21 +55,11 @@ export function MedicationOrderDetails ({ medicationOrder, showHeader }: Medicat
     const categorizeTimesByPeriod = (times: string[] | undefined) => {
         if (!times || times.length === 0) return { morning: [], afternoon: [], evening: [] }
         
-        // Handle case where times might be in a single string separated by comma
-        const allTimes: string[] = []
-        times.forEach(timeStr => {
-            if (timeStr.includes(',')) {
-                allTimes.push(...timeStr.split(',').map(t => t.trim()))
-            } else {
-                allTimes.push(timeStr)
-            }
-        })
-        
         const morning: string[] = []
         const afternoon: string[] = []
         const evening: string[] = []
         
-        allTimes.forEach(timeStr => {
+        times.forEach(timeStr => {
             const formatted = formatTime(timeStr)
             // Extract hour from formatted time (HH:MM)
             const hour = parseInt(formatted.split(':')[0])

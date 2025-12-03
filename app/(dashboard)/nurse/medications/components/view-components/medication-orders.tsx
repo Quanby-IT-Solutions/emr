@@ -1,12 +1,6 @@
 import { Card, CardContent} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-    Pill, 
-    Clock, 
-    User, 
-    Stethoscope,
-    MoreHorizontal
-} from "lucide-react"
+import { Pill, Clock, User, Stethoscope, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Using the interfaces provided in your prompt
