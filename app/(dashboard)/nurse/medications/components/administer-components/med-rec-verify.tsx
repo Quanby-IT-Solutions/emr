@@ -23,7 +23,6 @@ export function MedRecVerify({
     onVerificationChange
 }: MedRecVerifyProps) {
     const allChecksComplete = Object.values(verificationChecks).every(check => check)
-    const formattedSchedule = selectedOrder.timeAdminSchedule.join(', ')
     
     const handleCheckChange = (key: keyof VerificationChecks, checked: boolean) => {
         onVerificationChange({ ...verificationChecks, [key]: checked })
@@ -154,7 +153,7 @@ export function MedRecVerify({
                                 Right Time
                             </Label>
                             <p className="text-xs text-muted-foreground mt-1">
-                                Verified administration time is appropriate (Schedule: {formattedSchedule})
+                                Verified administration time is appropriate (Schedule: {selectedOrder.timeAdminSchedule})
                             </p>
                         </div>
                     </div>

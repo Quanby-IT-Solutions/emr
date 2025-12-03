@@ -10,8 +10,10 @@ export interface CalendarAdministration {
   status: 'taken' | 'refused'
   administeringNurse?: string
   nurseNotes?: string
+  refusalReason?: string
   medicationName?: string
   dosageAdministered?: string
+  isAdministered?: boolean
   classification?: string
   medicationOrderId?: string
 }
@@ -66,16 +68,6 @@ const getWeekDates = (date: Date) => {
       dates.push(new Date(year, month, i))
     }
     return dates
-  }
-  
-  const formatTime = (timeStr: string): string => {
-    const match = timeStr.match(/(\d{1,2}):?(\d{2})/)
-    if (match) {
-      const hours = match[1].padStart(2, '0')
-      const minutes = match[2]
-      return `${hours}:${minutes}`
-    }
-    return timeStr
   }
 
 export function MedRecordCalendarView({ transformedMedicationOrders, onRecordClick, onMedicationClick }: MedRecordCalendarViewProps) {
@@ -241,7 +233,7 @@ export function MedRecordCalendarView({ transformedMedicationOrders, onRecordCli
                                       : 'bg-red-500 text-white'
                                   }`}
                                 >
-                                  <div className="font-semibold">{formatTime(administration.time)}</div>
+                                  <div className="font-semibold">{administration.time}</div>
                                   {viewType !== 'monthly' && (
                                     <div className="text-[10px] mt-1">
                                       {administration.status === 'taken' ? 'Taken' : 'Refused'}

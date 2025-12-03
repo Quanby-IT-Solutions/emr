@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, User, FileText, Stethoscope, ClipboardList } from "lucide-react"
 
-// Import Components
 import { PatientInfoCard } from "./view-components/patient-info-card"
 import { MedRecordCalendarView, CalendarMedication, CalendarAdministration } from "./view-components/med-record-calendar-view"
 import { MedicationAdminCard } from "./view-components/medication-admin-card"
@@ -71,6 +70,7 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
           administeringNurse: record.administeringNurse,
           // PASSING EXTRA DATA FOR DETAIL VIEW
           nurseNotes: record.nurseNotes,
+          refusalReason: record.refusalReason,
           medicationName: `${record.medicationGenericName} (${record.medicationBrandName})`,
           dosageAdministered: record.dosageAdministered,
           classification: record.medicationClassification,
@@ -100,7 +100,7 @@ export function ViewMedRecordModal({ open, onOpenChange, selectedPatient }: View
     setActiveSidebarView("record")
   }
 
-  // NEW: Handler for clicking medication name in calendar
+  // Handler for clicking medication name in calendar
   const handleMedicationClick = (medicationOrderId: string) => {
     setSelectedOrder(medicationOrderId)
     setActiveTab("medication-order")

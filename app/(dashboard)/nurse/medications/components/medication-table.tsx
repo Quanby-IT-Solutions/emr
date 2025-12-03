@@ -46,14 +46,6 @@ export default function MedicationTable({data, onViewRecord}: MedicationTablePro
         {
             accessorKey: "patient.lastTimeAdministered",
             header: "Time Administered",
-            cell: ({ row }) => {
-                const time = row.original.patient.lastTimeAdministered;
-                if (time.length === 4) {
-                    const hours = time.substring(0, 2);
-                    const minutes = time.substring(2, 4);
-                    return `${hours}:${minutes}`;
-                }
-            }
         },
         {
             accessorKey: "patient.dosageGiven",

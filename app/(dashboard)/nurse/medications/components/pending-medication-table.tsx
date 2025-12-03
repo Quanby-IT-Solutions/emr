@@ -47,10 +47,10 @@ export default function PendingMedicationTable({data, onViewRecord, onAdminister
             accessorKey: "patient.medicationOrders",
             header: "Pending Orders",
             cell: ({ row }) => {
-                const orders = row.original.patient.medicationOrders
+                const pendingOrders = row.original.patient.medicationOrders.filter((order) => !order.attemptAdministerToday)
                 return (
                     <Badge variant="outline" className="bg-yellow-50 text-yellow-800 border-yellow-200">
-                        {orders.length} pending
+                        {pendingOrders.length} pending
                     </Badge>
                 )
             }
@@ -60,7 +60,7 @@ export default function PendingMedicationTable({data, onViewRecord, onAdminister
             accessorKey: "patient.medicationOrders",
             header: "Next Scheduled",
             cell: ({ row }) => {
-                const orders = row.original.patient.medicationOrders
+                const orders = row.original.patient.medicationOrders.filter((order) => !order.attemptAdministerToday)
                 if (orders.length === 0) return "N/A"
                 
                 // Get the earliest scheduled time

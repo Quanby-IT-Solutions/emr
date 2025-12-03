@@ -11,6 +11,7 @@ export interface AdministeredRecord {
     administeringNurse: string
     isAdministered: boolean
     nurseNotes: string
+    refusalReason: string
 }
 
 export interface MedicationOrder {
@@ -30,6 +31,7 @@ export interface MedicationOrder {
   startDate: Date
   stopDate: Date
   physician: string
+  attemptAdministerToday: boolean
   specialInstructions: string
   status: "PENDING" | "ACTIVE" | "ON HOLD" | "FLAGGED" | "EXPIRED" | "DISCONTINUED" | "COMPLETED" | "CANCELLED"
 }
@@ -65,7 +67,7 @@ export interface AdministrationData {
   timeAdministered: string
   dateAdministered: Date
   isAdministered: boolean
-  refusalReason?: string
+  refusalReason: string
   nurseNotes: string
   verificationChecks: VerificationChecks
 }

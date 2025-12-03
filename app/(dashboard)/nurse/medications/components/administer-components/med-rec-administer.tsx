@@ -18,16 +18,7 @@ interface MedRecAdministerProps {
     onRefusalReasonChange: (reason: string) => void
 }
 
-export function MedRecAdminister({
-    selectedOrder,
-    administrationStatus,
-    onStatusChange,
-    dosageAdministered,
-    onDosageChange,
-    refusalReason,
-    onRefusalReasonChange
-}: MedRecAdministerProps) {
-    
+export function MedRecAdminister({ selectedOrder, administrationStatus, onStatusChange, dosageAdministered, onDosageChange, refusalReason, onRefusalReasonChange }: MedRecAdministerProps) {
     const dosageCardRef = useRef<HTMLDivElement>(null)
     const refusalCardRef = useRef<HTMLDivElement>(null)
 
