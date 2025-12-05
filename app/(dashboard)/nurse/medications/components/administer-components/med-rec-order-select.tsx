@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Pill, AlertTriangle } from "lucide-react"
-import { MedicationOrder } from '@/components/shared/medication/types'
+import { MedicationOrder } from '@/components/shared/nurse/medication/types'
 
 interface MedRecOrderSelectProps {
     activeOrders: MedicationOrder[]

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react"
-import { Patient, MedicationOrder, AdministrationStatus, VerificationChecks } from '@/components/shared/medication/types'
+import { Patient, MedicationOrder, AdministrationStatus, VerificationChecks } from '@/components/shared/nurse/medication/types'
 
 interface MedRecVerifyProps {
     patient: Patient

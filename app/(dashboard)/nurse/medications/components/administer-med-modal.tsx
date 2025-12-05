@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react"
 
 // Import types
-import { Patient, MedicationOrder, AdministrationData, AdministrationStatus, VerificationChecks } from "@/components/shared/medication/types"
+import { Patient, MedicationOrder, AdministrationData, AdministrationStatus, VerificationChecks } from "@/components/shared/nurse/medication/types"
 
 // Import Step Components
 import { MedRecPatientInfo } from "./administer-components/med-rec-patient-info"

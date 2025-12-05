@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { FileText } from "lucide-react"
-import { MedicationOrder, AdministrationStatus } from '@/components/shared/medication/types'
+import { MedicationOrder, AdministrationStatus } from '@/components/shared/nurse/medication/types'
 
 interface MedRecSummaryProps {
     selectedOrder: MedicationOrder

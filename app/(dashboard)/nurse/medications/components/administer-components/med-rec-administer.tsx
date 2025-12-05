@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Activity, CheckCircle2, XCircle } from "lucide-react"
-import { MedicationOrder, AdministrationStatus } from '@/components/shared/medication/types'
+import { MedicationOrder, AdministrationStatus } from '@/components/shared/nurse/medication/types'
 
 interface MedRecAdministerProps {
     selectedOrder: MedicationOrder

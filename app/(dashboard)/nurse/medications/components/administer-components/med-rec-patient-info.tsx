@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { User, AlertTriangle } from "lucide-react"
-import { Patient } from '@/components/shared/medication/types'
+import { Patient } from '@/components/shared/nurse/medication/types'
 
 interface MedRecPatientInfoProps {
     patient: Patient

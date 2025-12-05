@@ -14,7 +14,7 @@ import { MedicationProfileEntries, MedicationProfile } from "../../dummy-data/du
 import { ViewMedRecordModal } from "./components/view-med-record-modal"
 import { AdministerMedicineWizard } from "./components/administer-med-modal"
 // Import MedicationOrder here, as it's now used in the handler signature
-import { AdministrationData, Patient, AdministeredRecord, MedicationOrder } from "@/components/shared/medication/types" 
+import { AdministrationData, Patient, AdministeredRecord, MedicationOrder } from "@/components/shared/nurse/medication/types" 
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
