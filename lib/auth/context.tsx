@@ -19,60 +19,130 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const STORAGE_KEY = 'emr-user'
+
+const demoUsers: Record<string, User> = {
+  admin: {
+    id: 'demo-admin',
+    username: 'admin',
+    email: 'admin@emr.demo',
+    role: UserRole.SYSTEM_ADMIN,
+    isActive: true,
+  },
+  scheduler: {
+    id: 'demo-scheduler',
+    username: 'scheduler',
+    email: 'scheduler@emr.demo',
+    role: UserRole.SCHEDULER,
+    isActive: true,
+  },
+  registrar: {
+    id: 'demo-registrar',
+    username: 'registrar',
+    email: 'registrar@emr.demo',
+    role: UserRole.REGISTRAR,
+    isActive: true,
+  },
+  nurse: {
+    id: 'staff_nurse_1',
+    username: 'nurse',
+    email: 'nurse@emr.demo',
+    role: UserRole.NURSE,
+    isActive: true,
+  },
+  clinician: {
+    id: 'staff_doctor_1',
+    username: 'clinician',
+    email: 'clinician@emr.demo',
+    role: UserRole.CLINICIAN,
+    isActive: true,
+  },
+  pharmacist: {
+    id: 'demo-pharmacist',
+    username: 'pharmacist',
+    email: 'pharmacist@emr.demo',
+    role: UserRole.PHARMACIST,
+    isActive: true,
+  },
+  labtech: {
+    id: 'demo-labtech',
+    username: 'labtech',
+    email: 'labtech@emr.demo',
+    role: UserRole.LAB_TECH,
+    isActive: true,
+  },
+  himcoder: {
+    id: 'demo-himcoder',
+    username: 'himcoder',
+    email: 'himcoder@emr.demo',
+    role: UserRole.HIM_CODER,
+    isActive: true,
+  },
+  biller: {
+    id: 'demo-biller',
+    username: 'biller',
+    email: 'biller@emr.demo',
+    role: UserRole.BILLER,
+    isActive: true,
+  },
+  patient: {
+    id: 'demo-patient',
+    username: 'patient',
+    email: 'patient@emr.demo',
+    role: UserRole.PATIENT,
+    isActive: true,
+  },
+  auditor: {
+    id: 'demo-auditor',
+    username: 'auditor',
+    email: 'auditor@emr.demo',
+    role: UserRole.AUDITOR,
+    isActive: true,
+  },
+}
+
+export const DEMO_USERNAMES = Object.keys(demoUsers)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/me')
-        if (response.ok) {
-          const userData = await response.json()
-          setUser(userData)
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    try {
+      const storedUser = localStorage.getItem(STORAGE_KEY)
 
-    checkAuth()
+      if (storedUser) {
+        setUser(JSON.parse(storedUser))
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error)
+      localStorage.removeItem(STORAGE_KEY)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, _password: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      })
+      const normalizedUsername = username.trim().toLowerCase()
+      const demoUser = demoUsers[normalizedUsername]
 
-      if (response.ok) {
-        const userData = await response.json()
-        setUser(userData)
-        return true
+      if (!demoUser) {
+        return false
       }
-      return false
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(demoUser))
+      setUser(demoUser)
+      return true
     } catch (error) {
       console.error('Login failed:', error)
       return false
     }
   }
 
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' })
-    } catch (error) {
-      console.error('Logout failed:', error)
-    } finally {
-      setUser(null)
-    }
+  const logout = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    setUser(null)
   }
 
   return (

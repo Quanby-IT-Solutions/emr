@@ -1,35 +1,65 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DEMO_USERNAMES, useAuth } from "@/lib/auth/context"
 import { UserRole } from "@/lib/auth/roles"
 
-const roles = [
-  { role: UserRole.SYSTEM_ADMIN, label: "System Admin", path: "/admin" },
-  { role: UserRole.SCHEDULER, label: "Scheduler", path: "/scheduler" },
-  { role: UserRole.REGISTRAR, label: "Registrar", path: "/registrar" },
-  { role: UserRole.NURSE, label: "Nurse", path: "/nurse" },
-  { role: UserRole.CLINICIAN, label: "Clinician", path: "/clinician" },
-  { role: UserRole.PHARMACIST, label: "Pharmacist", path: "/pharmacist" },
-  { role: UserRole.LAB_TECH, label: "Lab Tech", path: "/lab-tech" },
-  { role: UserRole.HIM_CODER, label: "HIM Coder", path: "/him-coder" },
-  { role: UserRole.BILLER, label: "Biller", path: "/biller" },
-  { role: UserRole.PATIENT, label: "Patient", path: "/patient" },
-  { role: UserRole.AUDITOR, label: "Auditor / Privacy Officer", path: "/auditor" },
+const roles: { role: UserRole; label: string; path: string; username: string }[] = [
+  { role: UserRole.SYSTEM_ADMIN, label: "System Admin", path: "/admin", username: "admin" },
+  { role: UserRole.SCHEDULER, label: "Scheduler", path: "/scheduler", username: "scheduler" },
+  { role: UserRole.REGISTRAR, label: "Registrar", path: "/registrar", username: "registrar" },
+  { role: UserRole.NURSE, label: "Nurse", path: "/nurse", username: "nurse" },
+  { role: UserRole.CLINICIAN, label: "Clinician", path: "/clinician", username: "clinician" },
+  { role: UserRole.PHARMACIST, label: "Pharmacist", path: "/pharmacist", username: "pharmacist" },
+  { role: UserRole.LAB_TECH, label: "Lab Tech", path: "/lab-tech", username: "labtech" },
+  { role: UserRole.HIM_CODER, label: "HIM Coder", path: "/him-coder", username: "himcoder" },
+  { role: UserRole.BILLER, label: "Biller", path: "/biller", username: "biller" },
+  { role: UserRole.PATIENT, label: "Patient", path: "/patient", username: "patient" },
+  { role: UserRole.AUDITOR, label: "Auditor / Privacy Officer", path: "/auditor", username: "auditor" },
 ]
 
 export default function Page() {
-  const [email, setEmail] = useState("")
+  const { login } = useAuth()
+  const router = useRouter()
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Add your login logic here
-    console.log("Login with:", email, password)
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const success = await login(username, password)
+
+      if (success) {
+        router.push("/dashboard")
+        return
+      }
+
+      setError(`Invalid username. Valid usernames: ${DEMO_USERNAMES.join(", ")}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleQuickAccess = async (quickUsername: string, path: string) => {
+    setError("")
+    setIsLoading(true)
+    const success = await login(quickUsername, "")
+    if (success) {
+      router.push(path)
+    } else {
+      setError("Failed to login with demo user.")
+    }
+    setIsLoading(false)
   }
 
   return (
@@ -46,14 +76,15 @@ export default function Page() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@hospital.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="e.g. admin, nurse, clinician"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -65,9 +96,13 @@ export default function Page() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              {error ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 Sign In
               </Button>
             </form>
@@ -87,14 +122,13 @@ export default function Page() {
               {roles.map((item) => (
                 <Button
                   key={item.role}
-                  asChild
                   variant="outline"
                   size="sm"
                   className="h-auto py-3 text-xs"
+                  disabled={isLoading}
+                  onClick={() => handleQuickAccess(item.username, item.path)}
                 >
-                  <Link href={item.path}>
-                    {item.label}
-                  </Link>
+                  {item.label}
                 </Button>
               ))}
             </div>

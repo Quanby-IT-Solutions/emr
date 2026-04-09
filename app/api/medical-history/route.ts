@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(_request: NextRequest) {
-  return NextResponse.json({ message: 'Auth handled client-side' })
+  return NextResponse.json({
+    success: true,
+    id: crypto.randomUUID(),
+  })
 }

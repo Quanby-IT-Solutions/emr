@@ -9,15 +9,15 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { dummyRegistrations, PatientRecord } from "./dummyregistration"
 import { RegistrationForm } from "./registrationForm"
 import { EditPatientModal } from "./editPatient"
 import { ViewPatientModal } from "./viewPatient"
-import { 
-  Search, 
-  Eye, 
-  Edit, 
+import {
+  Search,
+  Eye,
+  Edit,
   UserPlus,
   ChevronLeft,
   ChevronRight,
@@ -29,7 +29,50 @@ import { format } from "date-fns"
 
 type SortOption = "name" | "id" | "date"
 
+function getLocalStoragePatients(): PatientRecord[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem("pgh-registered-patients") ?? "[]")
+    return raw.map((p: any) => {
+      // Calculate age from dateOfBirth or registeredAt
+      let age = 0
+      if (p.dateOfBirth) {
+        const birthDate = new Date(p.dateOfBirth)
+        const today = new Date()
+        age = today.getFullYear() - birthDate.getFullYear()
+        const m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--
+      }
+
+      const statusMap: Record<string, "ACTIVE" | "PENDING" | "INACTIVE"> = {
+        active: "ACTIVE",
+        ACTIVE: "ACTIVE",
+        pending: "PENDING",
+        PENDING: "PENDING",
+        inactive: "INACTIVE",
+        INACTIVE: "INACTIVE",
+      }
+
+      return {
+        id: p.hospitalNumber || p.id || "UNKNOWN",
+        firstName: p.firstName || "",
+        middleName: p.middleName || "",
+        lastName: p.lastName || "",
+        gender: (p.gender === "FEMALE" ? "FEMALE" : "MALE") as "MALE" | "FEMALE",
+        age,
+        contactNumber: p.mobileNumber || p.contactNumber || "",
+        dateRegistered: p.registeredAt
+          ? new Date(p.registeredAt).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        status: statusMap[p.status] || "ACTIVE",
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
 export default function PatientRegistrationPage() {
+  const [patients, setPatients] = useState<PatientRecord[]>(dummyRegistrations)
   const [searchQuery, setSearchQuery] = useState("")
   const [genderFilter, setGenderFilter] = useState<string>("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -41,13 +84,19 @@ export default function PatientRegistrationPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
+  // Load localStorage patients on mount and when form closes
+  useEffect(() => {
+    const stored = getLocalStoragePatients()
+    setPatients([...stored, ...dummyRegistrations])
+  }, [isRegistrationOpen])
+
   // Filter and sort patients
-  const filteredPatients = dummyRegistrations
+  const filteredPatients = patients
     .filter(patient => {
-      const matchesSearch = 
+      const matchesSearch =
         patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-      
+
       const matchesGender = genderFilter === "all" || patient.gender === genderFilter
       const matchesStatus = statusFilter === "all" || patient.status === statusFilter
 
@@ -56,19 +105,16 @@ export default function PatientRegistrationPage() {
     .sort((a, b) => {
       switch (sortBy) {
         case "name":
-          // Sort by last name, then first name
           const lastNameCompare = a.lastName.localeCompare(b.lastName)
           if (lastNameCompare !== 0) return lastNameCompare
           return a.firstName.localeCompare(b.firstName)
-        
+
         case "id":
-          // Sort by patient ID
           return a.id.localeCompare(b.id)
-        
+
         case "date":
-          // Sort by registration date (newest first)
           return new Date(b.dateRegistered).getTime() - new Date(a.dateRegistered).getTime()
-        
+
         default:
           return 0
       }

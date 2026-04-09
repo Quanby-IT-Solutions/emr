@@ -1,89 +1,121 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@/src/generated/client/client';
+import { NextRequest, NextResponse } from 'next/server'
+import { getNotes, updateNote } from '@/lib/mock-data/clinical-notes-store'
 
-const prisma = new PrismaClient();
+const staffDirectory: Record<string, { id: string; firstName: string; lastName: string; jobTitle: string }> = {
+  staff_nurse_1: {
+    id: 'staff_nurse_1',
+    firstName: 'Jamie',
+    lastName: 'Cruz',
+    jobTitle: 'RN',
+  },
+  staff_doctor_1: {
+    id: 'staff_doctor_1',
+    firstName: 'Miguel',
+    lastName: 'Santos',
+    jobTitle: 'MD',
+  },
+}
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const noteId = id;
-    const body = await request.json();
-    const { action, staffId, comment, content } = body;
+    const { id: noteId } = await params
+    const body = await request.json()
+    const { action, staffId, comment, content } = body
 
-    // Validate required fields
     if (!action || !staffId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
-      );
+      )
     }
 
-    let updatedNote;
+    const existingNote = getNotes().find((note) => note.id === noteId)
+
+    if (!existingNote) {
+      return NextResponse.json(
+        { error: 'Note not found' },
+        { status: 404 }
+      )
+    }
+
+    let updatedNote
 
     switch (action) {
       case 'sign':
-        // Doctor signs the note
-        updatedNote = await prisma.clinicalNote.update({
-          where: { id: noteId },
-          data: {
-            status: 'SIGNED',
-            signedAt: new Date(),
-          },
-        });
-        break;
+        updatedNote = updateNote(noteId, {
+          comments: [],
+          signedAt: new Date().toISOString(),
+          status: 'SIGNED',
+        })
+        break
 
       case 'reject':
-        // Doctor rejects - MUST have comment
         if (!comment || comment.trim() === '') {
           return NextResponse.json(
             { error: 'Comment is required when rejecting a note' },
             { status: 400 }
-          );
+          )
         }
 
-        // Update note status
-        updatedNote = await prisma.clinicalNote.update({
-          where: { id: noteId },
-          data: {
-            status: 'DRAFT',
-          },
-        });
-        break;
+        updatedNote = updateNote(noteId, {
+          comments: [
+            ...(Array.isArray(existingNote.comments) ? existingNote.comments : []),
+            {
+              id: crypto.randomUUID(),
+              comment,
+              createdAt: new Date().toISOString(),
+              createdByStaff: staffDirectory[staffId] ?? {
+                id: staffId,
+                firstName: 'Demo',
+                lastName: 'Clinician',
+                jobTitle: 'MD',
+              },
+            },
+          ],
+          signedAt: null,
+          status: 'NEEDS_CORRECTION',
+        })
+        break
 
       case 'resubmit':
-        // Nurse resubmits after correction
         if (!content) {
           return NextResponse.json(
             { error: 'Updated content is required' },
             { status: 400 }
-          );
+          )
         }
 
-        updatedNote = await prisma.clinicalNote.update({
-          where: { id: noteId },
-          data: {
-            content,
-            status: 'DRAFT',
-          },
-        });
-        break;
+        updatedNote = updateNote(noteId, {
+          comments: [],
+          content,
+          signedAt: null,
+          status: 'PENDING_COSIGN',
+        })
+        break
 
       default:
         return NextResponse.json(
           { error: 'Invalid action' },
           { status: 400 }
-        );
+        )
     }
 
-    return NextResponse.json({ note: updatedNote });
+    if (!updatedNote) {
+      return NextResponse.json(
+        { error: 'Note not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ note: updatedNote })
   } catch (error) {
-    console.error('Clinical note action error:', error);
+    console.error('Clinical note action error:', error)
     return NextResponse.json(
-      { error: 'Failed to process action', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to process action' },
       { status: 500 }
-    );
+    )
   }
 }

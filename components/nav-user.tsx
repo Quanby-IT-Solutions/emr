@@ -1,16 +1,14 @@
 "use client"
 
 import {
-  IconCreditCard,
   IconDotsVertical,
+  IconHeadset,
   IconLogout,
-  IconNotification,
   IconUserCircle,
-  IconSwitchHorizontal,
 } from "@tabler/icons-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth/context"
-import { UserRole, ROLE_LABELS } from "@/lib/auth/roles"
 
 import {
   Avatar,
@@ -20,14 +18,10 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
@@ -53,27 +47,6 @@ export function NavUser({
     await logout()
     router.push('/login')
   }
-
-  const handleRoleSwitch = (role: UserRole) => {
-    // Get the role-specific dashboard route
-    const roleRoutes: Record<UserRole, string> = {
-      [UserRole.SYSTEM_ADMIN]: '/admin',
-      [UserRole.SCHEDULER]: '/scheduler',
-      [UserRole.REGISTRAR]: '/registrar',
-      [UserRole.NURSE]: '/nurse',
-      [UserRole.CLINICIAN]: '/clinician',
-      [UserRole.PHARMACIST]: '/pharmacist',
-      [UserRole.LAB_TECH]: '/lab-tech',
-      [UserRole.HIM_CODER]: '/him-coder',
-      [UserRole.BILLER]: '/biller',
-      [UserRole.PATIENT]: '/patient',
-      [UserRole.AUDITOR]: '/auditor',
-    }
-    router.push(roleRoutes[role])
-  }
-
-  // Get all roles for the switcher
-  const allRoles = Object.values(UserRole)
 
   return (
     <SidebarMenu>
@@ -118,36 +91,18 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
+            <DropdownMenuItem asChild>
+              <Link href="/profile" className="flex items-center gap-2">
+                <IconUserCircle className="h-4 w-4" />
                 Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <IconSwitchHorizontal />
-                  <span>Accounts</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {allRoles.map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => handleRoleSwitch(role)}
-                    >
-                      {ROLE_LABELS[role]}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            </DropdownMenuGroup>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/it-support" className="flex items-center gap-2">
+                <IconHeadset className="h-4 w-4" />
+                IT Support
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
