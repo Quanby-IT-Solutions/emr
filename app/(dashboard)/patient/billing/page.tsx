@@ -49,11 +49,11 @@ export default function BillingPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Billing</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Read-only statements and balances (Patient Portal — TOR Billing integration:
-              view/pay bills). Sample data below simulates one linked account.
+              Read-only statements and balances linked from billing. The data below illustrates
+              one account for review.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Demo only — no real payment processing.
+              Preview only—payment processing is not enabled here.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export default function BillingPage() {
             <Card className="lg:col-span-1">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Account balance</CardTitle>
-                <CardDescription>Open invoices (sample)</CardDescription>
+                <CardDescription>Open invoices (illustrative)</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold tracking-tight">{currency(openBalance)}</p>
@@ -73,7 +73,7 @@ export default function BillingPage() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-base">Your invoices</CardTitle>
-                <CardDescription>Consolidated charges per visit (sample)</CardDescription>
+                <CardDescription>Consolidated charges per visit (illustrative)</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -108,7 +108,7 @@ export default function BillingPage() {
                             size="sm"
                             variant="outline"
                             disabled={inv.balance <= 0}
-                            title="Demo only"
+                            title="Preview only"
                           >
                             Pay
                           </Button>
@@ -126,8 +126,8 @@ export default function BillingPage() {
               <CardHeader>
                 <CardTitle className="text-base">Charges on file</CardTitle>
                 <CardDescription>
-                  Line items for your visit (TOR: consolidated invoice lists all charges —
-                  sample encounter ENC-2026-88102)
+                  Line items for your visit on consolidated invoice ENC-2026-88102 (illustrative
+                  encounter).
                 </CardDescription>
               </CardHeader>
               <CardContent>

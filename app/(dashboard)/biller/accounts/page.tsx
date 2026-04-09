@@ -36,11 +36,13 @@ export default function AccountsPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Accounts receivable</h1>
             <p className="text-muted-foreground max-w-3xl">
-              TOR workflow: <strong>reconcile</strong>. Bankruptcy / special financial class can
-              halt automated reminders and flag for review (sample row: Taylor Brooks).
+              <strong>Reconcile</strong> open balances and follow up by aging. Bankruptcy or
+              special financial class can pause automated reminders and flag accounts for review
+              (illustrative row: Taylor Brooks).
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Sample aging only — no statements or dunning jobs.
+              Aging buckets below are illustrative—statements and reminder jobs are not run in
+              this preview.
             </p>
           </div>
           <div className="px-4 lg:px-6">

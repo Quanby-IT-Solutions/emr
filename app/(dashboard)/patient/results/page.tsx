@@ -65,8 +65,8 @@ export default function ResultsPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Results</h1>
             <p className="max-w-3xl text-muted-foreground">
-              Read-only laboratory and imaging reports released to the Patient Portal (TOR: LIS / RIS
-              surfaces; release delays and sensitive categories apply in production).
+              Read-only laboratory and imaging reports released to the portal. Release timing and
+              sensitive categories follow organizational policy in production.
             </p>
           </div>
 
@@ -88,8 +88,8 @@ export default function ResultsPage() {
                   <CardHeader>
                     <CardTitle className="text-base">Released lab results</CardTitle>
                     <CardDescription>
-                      Abnormal and critical values are highlighted (TOR-style demo — not clinical
-                      decision support).
+                      Abnormal and critical values are highlighted for visibility—this preview is not
+                      clinical decision support.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="overflow-x-auto">
@@ -159,7 +159,8 @@ export default function ResultsPage() {
                   <CardHeader>
                     <CardTitle className="text-base">Imaging reports</CardTitle>
                     <CardDescription>
-                      Finalized reports (TOR: link to external PACS viewer when integrated).
+                      Finalized reports; viewing images can link to your imaging viewer when
+                      integrated.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">

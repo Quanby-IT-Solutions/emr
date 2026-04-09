@@ -1,6 +1,6 @@
 /**
  * Demo-only fixtures for billing UI previews (not persisted).
- * Mirrors TOR “Billing (Starter RCM)” surface area for layout demos — not production RCM logic.
+ * Covers starter RCM screens for layout review — not production ledger logic.
  */
 
 export const currency = (n: number) =>
@@ -229,7 +229,7 @@ export const sampleAccountsReceivable = [
   },
 ] as const
 
-/** Patient portal: sample statements (TOR integration — patients view/pay bills). */
+/** Patient portal: sample statements (view / pay bills in portal). */
 export const samplePatientPortalInvoices = sampleInvoices.filter(
   (inv) => inv.mrn === "MRN-100501"
 )
@@ -245,7 +245,7 @@ export function totalOpenReceivables() {
   )
 }
 
-/** TOR KPIs only (Billing Starter RCM). */
+/** Illustrative dashboard KPIs for billing preview. */
 export const sampleDashboardKpis = {
   daysInAR: 38,
   chargeCaptureRate: 0.94,

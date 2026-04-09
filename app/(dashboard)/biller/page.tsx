@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -7,14 +6,8 @@ import {
   sampleDashboardKpis,
   sampleInvoices,
 } from "@/lib/biller/sample-data"
-import {
-  TOR_BILLING_KPIS,
-  TOR_BILLING_PURPOSE,
-  TOR_BILLING_VALIDATIONS,
-  TOR_BILLING_WORKFLOWS,
-} from "@/lib/biller/tor-billing"
+import { TOR_BILLING_KPIS, TOR_BILLING_PURPOSE } from "@/lib/biller/tor-billing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { IconCurrencyDollar, IconFileText, IconCash, IconChartBar } from "@tabler/icons-react"
 import {
@@ -38,7 +31,8 @@ export default function BillerDashboard() {
             <h1 className="text-2xl font-bold">Billing (Starter RCM)</h1>
             <p className="text-muted-foreground max-w-3xl">{TOR_BILLING_PURPOSE}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              KPI numbers and invoice rows are sample fixtures — no backend ledger.
+              KPIs and invoice rows are illustrative for review; live data appears when the
+              billing system is connected.
             </p>
           </div>
 
@@ -102,56 +96,13 @@ export default function BillerDashboard() {
             </Card>
           </div>
 
-          <div className="grid gap-4 px-4 lg:grid-cols-2 lg:px-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>TOR — key workflows</CardTitle>
-                <CardDescription>Billing (Starter RCM) Section 2</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                  {TOR_BILLING_WORKFLOWS.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
-                </ol>
-                <div>
-                  <p className="mb-1 font-medium">Validations (paraphrased)</p>
-                  <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-                    {TOR_BILLING_VALIDATIONS.map((v) => (
-                      <li key={v}>{v}</li>
-                    ))}
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick links</CardTitle>
-                <CardDescription>Navigate to each workflow screen</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2 sm:grid-cols-2">
-                <Button className="w-full" asChild>
-                  <Link href="/biller/charges">Charges</Link>
-                </Button>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href="/biller/invoices">Invoices</Link>
-                </Button>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href="/biller/payments">Payments</Link>
-                </Button>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href="/biller/accounts">Accounts receivable</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
           <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
                 <CardTitle>Recent invoices</CardTitle>
-                <CardDescription>Sample list — open Invoices for consolidated line view</CardDescription>
+                <CardDescription>
+                  Recent invoices — open Invoices for a consolidated line-item view.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>

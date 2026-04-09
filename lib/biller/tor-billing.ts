@@ -1,6 +1,6 @@
 /**
- * TOR — Billing (Starter RCM) copy and demo helpers (no backend).
- * Section 2 module: purpose, workflows, validations, integrations, KPIs.
+ * Billing (starter RCM) UI copy and demo helpers — not persisted.
+ * Purpose, workflows, validations, KPI labels.
  */
 
 export const TOR_BILLING_PURPOSE =
@@ -22,21 +22,15 @@ export const TOR_BILLING_VALIDATIONS = [
   "Tax handling is optional and applied per facility rules.",
 ] as const
 
-export const TOR_BILLING_INTEGRATIONS = [
-  "ADT — encounter is the container for charges.",
-  "CPOE — orders can auto-generate or suggest charge lines.",
-  "Patient portal — patients view/pay bills (separate patient experience).",
-] as const
-
 export const TOR_BILLING_KPIS = [
   "Days in accounts receivable",
   "Charge capture rate",
   "Payment collection rate",
 ] as const
 
-/** Demo: active price list scope (TOR: price lists are scoped). */
+/** Demo: active price list scope (price lists are contextual). */
 export const demoActivePriceList = {
   name: "Facility professional fee schedule FY2026",
   scope: "Main campus · OPD / ER / IPD · Effective 2026-01-01",
-  note: "Client-side preview only — no pricing engine.",
+  note: "Preview only—no live pricing engine.",
 } as const

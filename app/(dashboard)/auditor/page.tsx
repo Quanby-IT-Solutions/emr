@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { IconShieldCheck } from "@tabler/icons-react"
+import { IconReport, IconShieldCheck } from "@tabler/icons-react"
 
 export default function AuditorDashboard() {
   return (
@@ -20,13 +20,13 @@ export default function AuditorDashboard() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Auditor / Privacy Officer</h1>
             <p className="text-muted-foreground max-w-3xl">
-              TOR: read-all access and detailed audit logs of system activity.
-              Chart-wide read views will align with other modules as they are built;
-              this area starts with the audit trail.
+              Organization-wide read access and a detailed audit trail of system activity.
+              Additional read-only chart views can be layered in as other modules go live;
+              this area begins with audit logs.
             </p>
           </div>
 
-          <div className="grid gap-4 px-4 lg:grid-cols-2 lg:px-6">
+          <div className="grid gap-4 px-4 lg:grid-cols-3 lg:px-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -34,8 +34,8 @@ export default function AuditorDashboard() {
                   Audit logs
                 </CardTitle>
                 <CardDescription>
-                  Search and review CREATE / READ / UPDATE / DELETE / LOGIN /
-                  BREAK_GLASS events with user, entity, IP, and structured details.
+                  Line-level trail: CREATE / READ / UPDATE / DELETE / LOGIN / BREAK_GLASS with
+                  user, entity, IP, and structured details (TOR audit trail).
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -45,21 +45,35 @@ export default function AuditorDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-dashed">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-base">Other sidebar items</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <IconReport className="h-5 w-5" />
+                  Reports
+                </CardTitle>
                 <CardDescription>
-                  Reports and User Activity are not described in the current TOR for
-                  this role; those pages are intentionally left minimal until scope is
-                  defined.
+                  Aggregated privacy &amp; compliance views, break-glass summary, and CSV export
+                  from the same demo data — not the interactive log grid.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/auditor/reports">Reports (placeholder)</Link>
+              <CardContent>
+                <Button variant="outline" asChild>
+                  <Link href="/auditor/reports">Open reports</Link>
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="text-base">User activity</CardTitle>
+                <CardDescription>
+                  Broader activity summaries when requirements are finalized. Use Audit logs for
+                  each event.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/auditor/activity">User activity (placeholder)</Link>
+                  <Link href="/auditor/activity">User activity</Link>
                 </Button>
               </CardContent>
             </Card>

@@ -58,8 +58,9 @@ export function PaymentReceiptSheet({
         <SheetHeader>
           <SheetTitle>Payment receipt</SheetTitle>
           <SheetDescription>
-            TOR workflow: generate receipt after payment is accepted. Posted payments are not
-            hard-deleted — void or reverse only (adjustment flows are backend work).
+            Receipt generated after payment is accepted. Posted payments are not removed from the
+            record—use void or reverse adjustments per policy (full flows when the ledger is
+            connected).
           </SheetDescription>
         </SheetHeader>
 
@@ -68,7 +69,7 @@ export function PaymentReceiptSheet({
             {invalid ? (
               <p className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 This receipt is no longer valid — payment marked{" "}
-                <strong>{payment.status.toLowerCase()}</strong> (client demo only).
+                <strong>{payment.status.toLowerCase()}</strong> (preview only).
               </p>
             ) : null}
             <div

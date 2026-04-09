@@ -166,8 +166,8 @@ export default function MyProfilePage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">My profile</h1>
             <p className="max-w-3xl text-muted-foreground">
-              Demographics and coverage released to the Patient Portal (read-only per TOR). Updates to
-              legal identity or insurance are handled by registration or billing staff.
+              Demographics and coverage shown here are read-only in the portal. Updates to legal
+              identity or insurance are handled by registration or billing staff.
             </p>
           </div>
 

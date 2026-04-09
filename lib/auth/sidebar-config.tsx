@@ -352,7 +352,7 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconCurrencyDollar,
     },
     {
-      title: "Payments",
+      title: "Billing",
       url: "/biller/payments",
       icon: IconCash,
     },
@@ -360,11 +360,6 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Accounts receivable",
       url: "/biller/accounts",
       icon: IconCurrencyDollar,
-    },
-    {
-      title: "Compile invoice",
-      url: "/biller/generate",
-      icon: IconFileCheck,
     },
     {
       title: "Reports",

@@ -1,9 +1,7 @@
-import Link from "next/link"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   IconCalendar,
   IconFlask,
@@ -20,7 +18,7 @@ export default function PatientDashboard() {
             <h1 className="text-2xl font-bold">Patient portal</h1>
             <p className="max-w-3xl text-muted-foreground">
               Read-only access to released demographics, visits, results, medications, allergies,
-              appointments, and billing (TOR — Patient Portal).
+              appointments, and billing 
             </p>
           </div>
 
@@ -66,32 +64,6 @@ export default function PatientDashboard() {
               <CardContent>
                 <div className="text-2xl font-bold">$350</div>
                 <p className="text-xs text-muted-foreground">Sample open balance</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="px-4 lg:px-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Go to</CardTitle>
-                <CardDescription>TOR-aligned areas (in scope)</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                <Button asChild className="w-full">
-                  <Link href="/patient/profile">My profile</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/patient/history">Health record</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/patient/appointments">Appointments</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/patient/results">Results</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/patient/billing">Billing</Link>
-                </Button>
               </CardContent>
             </Card>
           </div>

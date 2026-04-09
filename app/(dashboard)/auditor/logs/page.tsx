@@ -13,9 +13,9 @@ export default function AuditorLogsPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Audit logs</h1>
             <p className="text-muted-foreground max-w-3xl">
-              Detailed audit log view (TOR — Auditor / Privacy Officer). Table below
-              uses sample fixtures for layout; connect to persisted audit storage when
-              backend work begins.
+              Search and review audit events across the system. The table below uses
+              demonstration data for preview; production will read from your
+              organization&apos;s audit store.
             </p>
           </div>
           <AuditLogExplorer />

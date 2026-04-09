@@ -151,8 +151,8 @@ export default function HealthRecordPage() {
                   <CardHeader>
                     <CardTitle>Released clinical notes</CardTitle>
                     <CardDescription>
-                      Signed documentation released to the portal (TOR: Clinical Documentation → Patient
-                      Portal). Sensitive notes may be withheld by policy.
+                      Signed documentation released to the portal. Sensitive notes may be withheld
+                      by policy.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -212,7 +212,7 @@ export default function HealthRecordPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Current medications</CardTitle>
-                    <CardDescription>Read-only medication list (TOR: patients view current medications).</CardDescription>
+                    <CardDescription>Read-only list of current medications.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {samplePortalMedications.filter((m) => m.status === "Active").length === 0 ? (
@@ -249,7 +249,7 @@ export default function HealthRecordPage() {
                       <IconAlertCircle className="size-5" />
                       Allergies
                     </CardTitle>
-                    <CardDescription>Released allergy list (TOR: patients view allergies).</CardDescription>
+                    <CardDescription>Released allergy list (read-only).</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {samplePortalAllergies.map((a) => (

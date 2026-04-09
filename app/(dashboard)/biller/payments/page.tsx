@@ -120,12 +120,12 @@ export default function PaymentsPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Payments</h1>
             <p className="text-muted-foreground max-w-3xl">
-              TOR workflows: <strong>accept payments</strong>, <strong>generate receipt</strong>.
-              Validations: posted payments cannot be hard-deleted — use{" "}
-              <strong>void</strong> or <strong>reverse</strong> (client demo only; no ledger).
+              <strong>Accept payments</strong> and <strong>generate receipts</strong>. Posted
+              payments should not be deleted outright—use <strong>void</strong> or{" "}
+              <strong>reverse</strong> per policy (preview; no live ledger).
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              New payment rows stay in this session only — no backend.
+              New payment rows in this preview stay in the browser session only.
             </p>
           </div>
 
@@ -198,10 +198,10 @@ export default function PaymentsPage() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => setStatus(p.id, "Voided")}>
-                                    Void (demo)
+                                    Void (preview)
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => setStatus(p.id, "Reversed")}>
-                                    Reverse (demo)
+                                    Reverse (preview)
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -221,8 +221,8 @@ export default function PaymentsPage() {
               <DialogHeader>
                 <DialogTitle>Record payment</DialogTitle>
                 <DialogDescription>
-                  Apply payment to an open invoice (TOR). Invoice balances in the list are static
-                  until a backend posts allocations.
+                  Apply payment to an open invoice. Balances in the list stay static until
+                  allocations post from the billing system.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-2">

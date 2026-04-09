@@ -49,9 +49,9 @@ export default function InvoicesPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Invoices</h1>
             <p className="text-muted-foreground max-w-3xl">
-              TOR workflow: <strong>compile invoice</strong> — consolidated statement for the
-              encounter that lists <strong>all charge line items</strong>. Open a row to view
-              lines, optional tax, and balance due (client-side demo).
+              <strong>Compile invoice</strong>: a consolidated statement for the visit that lists{" "}
+              <strong>all charge lines</strong>. Open a row for lines, optional tax, and balance
+              due (preview).
             </p>
           </div>
           <div className="px-4 lg:px-6">
@@ -59,7 +59,7 @@ export default function InvoicesPage() {
               <CardHeader>
                 <CardTitle>Invoice list</CardTitle>
                 <CardDescription>
-                  Draft, issue, and reconcile against payments. One invoice per visit in this demo.
+                  Draft, issue, and reconcile against payments. One invoice per visit in this preview.
                 </CardDescription>
               </CardHeader>
               <CardContent>

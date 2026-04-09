@@ -189,9 +189,10 @@ export default function AppointmentsPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Appointments</h1>
-            <p className="max-w-3xl text-muted-foreground">
-              Read-only schedule (TOR: Patient Portal displays appointments; booking and changes are
-              staff workflows in Scheduling).
+            <p className="mt-1 max-w-3xl text-muted-foreground">
+              Read-only list of your visits as booked in the system. Scheduling staff manage
+              templates, slots, and bookings; registrars handle check-in. To book or change a visit,
+              contact your clinic—this page only shows what is already on file.
             </p>
           </div>
 
@@ -216,7 +217,7 @@ export default function AppointmentsPage() {
                         <IconCalendar className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
                         <h3 className="mb-2 text-lg font-semibold">No upcoming appointments</h3>
                         <p className="text-muted-foreground">
-                          Contact scheduling or your clinic to book or change visits.
+                          Contact your clinic or scheduling team to book a visit.
                         </p>
                       </div>
                     </CardContent>

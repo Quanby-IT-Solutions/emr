@@ -245,8 +245,7 @@ export function AuditLogExplorer() {
   return (
     <div className="flex flex-col gap-4 px-4 lg:px-6">
       <p className="text-xs text-muted-foreground">
-        Sample events for UI preview only — no API or database call. Wire to real
-        audit storage when backend work starts.
+        Demonstration events for preview—production will load from your audit data store.
       </p>
 
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 md:flex-row md:items-end">

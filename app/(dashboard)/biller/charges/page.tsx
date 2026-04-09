@@ -4,11 +4,7 @@ import * as React from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
-import {
-  demoActivePriceList,
-  TOR_BILLING_INTEGRATIONS,
-  TOR_BILLING_VALIDATIONS,
-} from "@/lib/biller/tor-billing"
+import { demoActivePriceList, TOR_BILLING_VALIDATIONS } from "@/lib/biller/tor-billing"
 import { currency, sampleCharges, type SampleCharge } from "@/lib/biller/sample-data"
 import {
   Card,
@@ -45,6 +41,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+type ChargeRow = {
+  id: string
+  encounterId: string
+  patient: string
+  mrn: string
+  visitType: SampleCharge["visitType"]
+  service: string
+  qty: number
+  unitPrice: number
+  status: SampleCharge["status"]
+  suggestedFrom: SampleCharge["suggestedFrom"]
+}
+
 const ENCOUNTER_PRESETS = [
   {
     encounterId: "ENC-2026-88421",
@@ -72,7 +81,7 @@ function statusVariant(s: SampleCharge["status"]) {
 }
 
 export default function ChargesPage() {
-  const [extra, setExtra] = React.useState<SampleCharge[]>([])
+  const [extra, setExtra] = React.useState<ChargeRow[]>([])
   const [addOpen, setAddOpen] = React.useState(false)
   const [presetIdx, setPresetIdx] = React.useState(0)
   const [service, setService] = React.useState("")
@@ -80,7 +89,7 @@ export default function ChargesPage() {
   const [priceStr, setPriceStr] = React.useState("")
   const [source, setSource] = React.useState<SampleCharge["suggestedFrom"]>("CPOE")
 
-  const rows = React.useMemo(
+  const rows = React.useMemo<ChargeRow[]>(
     () => [...sampleCharges, ...extra],
     [extra]
   )
@@ -90,7 +99,7 @@ export default function ChargesPage() {
     const unitPrice = Number.parseFloat(priceStr)
     const p = ENCOUNTER_PRESETS[presetIdx]
     if (!service.trim() || Number.isNaN(qty) || qty < 1 || Number.isNaN(unitPrice)) return
-    const line: SampleCharge = {
+    const line: ChargeRow = {
       id: `chg-local-${Date.now()}`,
       encounterId: p.encounterId,
       patient: p.patient,
@@ -116,35 +125,22 @@ export default function ChargesPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Charges</h1>
             <p className="text-muted-foreground max-w-3xl">
-              TOR workflow: <strong>add charges</strong> on the encounter (ADT container). Lines can
-              be <strong>suggested</strong> from CPOE orders or documentation — auto-suggest engine
-              is future work; column shows source in the demo.
+              Add <strong>charges</strong> to the visit (encounter). Lines can be{" "}
+              <strong>suggested</strong> from orders or documentation; a full auto-suggest engine
+              can be wired later—the source column reflects this illustrative scenario.
             </p>
           </div>
 
-          <div className="grid gap-4 px-4 lg:grid-cols-2 lg:px-6">
+          <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Scoped price list (TOR validation)</CardTitle>
+                <CardTitle className="text-base">Scoped price list</CardTitle>
                 <CardDescription>{TOR_BILLING_VALIDATIONS[0]}</CardDescription>
               </CardHeader>
               <CardContent className="text-sm">
                 <p className="font-medium">{demoActivePriceList.name}</p>
                 <p className="text-muted-foreground mt-1">{demoActivePriceList.scope}</p>
                 <p className="text-muted-foreground mt-2 text-xs">{demoActivePriceList.note}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Integrations (TOR)</CardTitle>
-                <CardDescription>Billing module touchpoints — not wired to live systems.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-                  {TOR_BILLING_INTEGRATIONS.map((t) => (
-                    <li key={t}>{t}</li>
-                  ))}
-                </ul>
               </CardContent>
             </Card>
           </div>
@@ -155,13 +151,10 @@ export default function ChargesPage() {
                 <div>
                   <CardTitle>Charge items</CardTitle>
                   <CardDescription>
-                    Review and post lines before compiling the invoice. Session-only “add line” for
-                    UI review.
+                    Review and post lines before compiling the invoice. Added lines persist for this
+                    browser session only.
                   </CardDescription>
                 </div>
-                <Button type="button" variant="outline" onClick={() => setAddOpen(true)}>
-                  Add charge line (demo)
-                </Button>
               </CardHeader>
               <CardContent>
                 <Table>

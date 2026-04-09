@@ -33,7 +33,7 @@ type InvoiceDetailSheetProps = {
   onOpenChange: (open: boolean) => void
 }
 
-/** Optional tax for demo — TOR: optional tax handling. */
+/** Optional tax rate for preview (facility rules apply in production). */
 const DEMO_TAX_RATE = 0
 
 export function InvoiceDetailSheet({
@@ -54,9 +54,8 @@ export function InvoiceDetailSheet({
         <SheetHeader>
           <SheetTitle>Consolidated invoice</SheetTitle>
           <SheetDescription>
-            TOR: one statement for the visit listing all charge line items (compile invoice).
-            Encounter is the charge container (ADT). Tax is optional per facility rules — demo
-            uses {DEMO_TAX_RATE * 100}%.
+            One statement for the visit with every charge line. Charges are grouped by encounter.
+            Tax follows facility rules—this preview uses {DEMO_TAX_RATE * 100}%.
           </SheetDescription>
         </SheetHeader>
 
@@ -76,9 +75,9 @@ export function InvoiceDetailSheet({
 
             {!subtotalMatchesInvoice ? (
               <p className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:text-amber-100">
-                Demo: line subtotal {currency(subtotal)} differs from invoice total{" "}
-                {currency(invoice.total)} — with a backend, totals would be enforced when
-                posting charges.
+                Preview: line subtotal {currency(subtotal)} differs from invoice total{" "}
+                {currency(invoice.total)}. In production, totals are enforced when charges and
+                invoices post.
               </p>
             ) : null}
 

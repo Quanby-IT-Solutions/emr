@@ -13,15 +13,15 @@ export default function ActivityPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">User activity</h1>
             <p className="text-muted-foreground max-w-2xl">
-              Not specified for Auditor / Privacy Officer in the current TOR. Use{" "}
+              Activity summaries for this role can be added as requirements are finalized.
+              For detailed events, use{" "}
               <Link
                 href="/auditor/logs"
                 className="font-medium text-foreground underline-offset-4 hover:underline"
               >
                 Audit logs
-              </Link>{" "}
-              for detailed system activity. This page is intentionally blank pending
-              scope.
+              </Link>
+              .
             </p>
           </div>
         </div>

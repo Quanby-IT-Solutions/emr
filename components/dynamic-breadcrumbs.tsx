@@ -70,7 +70,7 @@ export function DynamicBreadcrumbs() {
       ready: "Ready for Billing",
       generate: "Compile invoice",
       invoices: "Invoices",
-      payments: "Payments",
+      payments: "Billing",
       accounts: "Accounts Receivable",
       profile: "My profile",
       history: "Health record",

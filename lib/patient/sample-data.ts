@@ -1,6 +1,6 @@
 /**
- * Demo-only fixtures for Patient Portal (read-only) UI — aligns with TOR “Patient Portal (Read-Only)”.
- * Not persisted; replace with API + release policies when backend exists.
+ * Demo-only fixtures for Patient Portal (read-only) UI.
+ * Not persisted; replace with API and release policies when integrated.
  */
 
 export type VisitSummary = {
