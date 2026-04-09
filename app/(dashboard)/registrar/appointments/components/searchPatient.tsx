@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Search, RefreshCcw, FileText, AlertCircle } from "lucide-react"
 
@@ -34,6 +33,7 @@ export function SearchPatient({
   useEffect(() => {
     // Fetch patient history when searching
     if (searchQuery.length > 3) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingHistory(true)
       
       // Mock API call - check localStorage for existing history
@@ -50,8 +50,6 @@ export function SearchPatient({
   }, [searchQuery])
 
   const handleViewHistory = () => {
-    // Open history modal/panel
-    console.log('Opening patient history:', patientHistory)
     window.open(`/registrar/patient-history/${searchQuery}`, '_blank')
   }
 

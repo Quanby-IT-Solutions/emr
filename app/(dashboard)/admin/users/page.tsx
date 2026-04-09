@@ -4,7 +4,7 @@ import { useState } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole, ROLE_LABELS } from "@/lib/auth/roles"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -198,6 +198,7 @@ export default function UsersPage() {
   // Handle Add User
   const onAddSubmit = (data: UserFormValues) => {
     const newUser: User = {
+      // eslint-disable-next-line react-hooks/purity
       id: `user_${Date.now()}`,
       username: data.username,
       email: data.email,
@@ -303,7 +304,7 @@ export default function UsersPage() {
                   <DialogHeader>
                     <DialogTitle>Add New User</DialogTitle>
                     <DialogDescription>
-                      Create a new user account. Click save when you're done.
+                      Create a new user account. Click save when you&apos;re done.
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...form}>
@@ -512,7 +513,7 @@ export default function UsersPage() {
               <DialogHeader>
                 <DialogTitle>Edit User</DialogTitle>
                 <DialogDescription>
-                  Make changes to the user's profile here. Click save when you're done.
+                  Make changes to the user&apos;s profile here. Click save when you&apos;re done.
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
@@ -636,7 +637,7 @@ export default function UsersPage() {
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. This will permanently delete{" "}
-                  <span className="font-medium">{deletingUser?.firstName} {deletingUser?.lastName}</span>'s account and remove their data
+                  <span className="font-medium">{deletingUser?.firstName} {deletingUser?.lastName}</span>&apos;s account and remove their data
                   from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>

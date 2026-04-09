@@ -181,7 +181,7 @@ export default function RequestRecordsPage() {
     }
   }
 
-  const handleDownload = (requestId: string) => {
+  const handleDownload = (_requestId: string) => {
     // 🎭 MOCK: Simulate download
     toast.success("Download started! Your records will be downloaded as a PDF.")
     

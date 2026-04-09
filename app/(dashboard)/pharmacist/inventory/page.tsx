@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { 
   IconSearch, 
   IconPlus, 
@@ -144,8 +143,8 @@ export default function InventoryPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
+  const [_isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [_selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
 
   const filteredInventory = mockInventory.filter(item => {
     const matchesSearch = 

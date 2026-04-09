@@ -289,7 +289,7 @@ export default function AppointmentsPage() {
     e.preventDefault()
     setLoading(true)
     
-    const formData = new FormData(e.currentTarget)
+    const _formData = new FormData(e.currentTarget)
     
     try {
       // 🎭 MOCK: Simulate API call
@@ -441,7 +441,7 @@ export default function AppointmentsPage() {
                         <IconCalendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No Upcoming Appointments</h3>
                         <p className="text-muted-foreground mb-4">
-                          You don't have any scheduled appointments
+                          You don&apos;t have any scheduled appointments
                         </p>
                         <Button onClick={() => setIsDialogOpen(true)}>
                           <IconPlus className="h-4 w-4 mr-2" />

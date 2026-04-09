@@ -40,17 +40,14 @@ export default function ScheduleAppointmentPage() {
 
   // Handlers
   const handleBookClick = () => { 
-    console.log("Booking appointment...") 
     setOpen(true) 
   }
   
   const handleCreateNewPatient = () => { 
-    console.log("Creating new patient...") 
     setOpenNewPatient(true) 
   }
   
   const handleConfirmBooking = () => { 
-    console.log("Confirming booking...") 
     setOpen(false) 
     setOpenGenerateDetails(true) 
   }
@@ -88,8 +85,6 @@ export default function ScheduleAppointmentPage() {
       birthday: patientData.birthday || "",
       age: patientData.age || 0,
     }
-    
-    console.log("Creating new patient:", newPatient)
     
     // Add to patient list
     setPatients(prev => [...prev, newPatient])

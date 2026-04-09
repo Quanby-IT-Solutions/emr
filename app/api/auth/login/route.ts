@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/lib/generated/prisma'
+import { PrismaClient } from '@/src/generated/client/client'
 
 const prisma = new PrismaClient()
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return user data (without password)
-    const { passwordHash, ...userData } = user
+    const { passwordHash: _passwordHash, ...userData } = user
 
     return NextResponse.json(userData)
   } catch (error) {

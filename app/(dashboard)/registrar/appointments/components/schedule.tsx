@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -107,7 +107,7 @@ export function ScheduleModal({ open, onOpenChange, appointments }: ScheduleModa
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Today's Appointment Schedule
+            Today&apos;s Appointment Schedule
           </DialogTitle>
           <DialogDescription>
             {format(new Date(), "EEEE, MMMM d, yyyy")} • {appointments.length} total appointments

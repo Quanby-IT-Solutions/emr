@@ -102,7 +102,6 @@ export function EditBookingModal({ open, onOpenChange, selectedAppointment, onCo
                 bookingStatus: status,
             });
         }  
-        console.log("Updated Appointment:", selectedAppointment);
         onOpenChange(false);
     }
 

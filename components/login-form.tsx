@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth/context"
-import { ROLE_DASHBOARD_ROUTES } from "@/lib/auth/roles"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
@@ -48,7 +47,7 @@ export function LoginForm({
       } else {
         setError("Invalid credentials")
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Login failed. Please try again.")
     } finally {
       setIsLoading(false)

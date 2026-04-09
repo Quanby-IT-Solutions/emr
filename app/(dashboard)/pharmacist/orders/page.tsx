@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { IconCheck, IconX, IconClock, IconShieldCheck, IconPackage } from "@tabler/icons-react"
+import { IconCheck, IconX, IconClock, IconPackage } from "@tabler/icons-react"
 import { ApproveModal } from "./components/approve-modal"
 import { FlagModal } from "./components/flag-modal"
 

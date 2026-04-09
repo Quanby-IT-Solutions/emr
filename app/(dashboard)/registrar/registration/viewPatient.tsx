@@ -14,7 +14,6 @@ import {
     Shield,
     Heart,
     Stethoscope,
-    Calendar,
     FileText
 } from "lucide-react"
 import { format } from "date-fns"
@@ -28,7 +27,7 @@ interface ViewPatientModalProps {
 export function ViewPatientModal({ open, onOpenChange, patient }: ViewPatientModalProps) {
     if (!patient) return null
 
-    const calculateAge = (dob: string) => {
+    const _calculateAge = (dob: string) => {
         const birthDate = new Date(dob)
         const today = new Date()
         let age = today.getFullYear() - birthDate.getFullYear()

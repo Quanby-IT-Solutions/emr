@@ -48,7 +48,7 @@ export function AppointmentList({
   onCancel,
   onNoShow,
   onRefer,
-  triageMode = false 
+  triageMode: _triageMode = false 
 }: AppointmentListProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null)
@@ -64,7 +64,7 @@ export function AppointmentList({
   const currentAppointments = appointments.slice(startIndex, endIndex)
 
   // Reset to page 1 when appointments change
-  const resetPagination = () => {
+  const _resetPagination = () => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1)
     }

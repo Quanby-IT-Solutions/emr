@@ -5,7 +5,6 @@ import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
@@ -25,13 +24,12 @@ import {
   UserPlus,
   CalendarDays,
   AlertCircle,
-  ArrowRight,
-  Activity
+  ArrowRight
 } from "lucide-react"
 import { NoShowModal } from "./components/noShowModal"
 
 function CheckInPageContent() {
-  const { state, dispatch, createEncounter } = usePatientContext()
+  const { state, dispatch: _dispatch, createEncounter } = usePatientContext()
   const [triageMode, setTriageMode] = useState(false)  // ✅ Changed from erMode
   const [searchQuery, setSearchQuery] = useState("")
   const [departmentFilter, setDepartmentFilter] = useState("all")
@@ -67,18 +65,11 @@ function CheckInPageContent() {
   const totalInTriage = state.patients.filter(p => p.status === "InTriage").length
   const totalReferred = state.patients.filter(p => p.status === "Referred").length
 
-  // Mock real-time updates (simulating patient status changes)
+  // Periodic status check for in-triage patients
   useEffect(() => {
     const interval = setInterval(() => {
-      // Simulate random status updates for demo
-      if (Math.random() > 0.9 && state.patients.length > 0) {
-        const randomIndex = Math.floor(Math.random() * state.patients.length)
-        const patient = state.patients[randomIndex]
-        
-        console.log('Mock update:', patient.name, 'status changed')
-      }
-    }, 10000) // Every 10 seconds
-
+      // Auto-refresh could be added here if API was available
+    }, 30000)
     return () => clearInterval(interval)
   }, [state.patients])
 
@@ -92,7 +83,7 @@ function CheckInPageContent() {
     setIsModalOpen(true)
   }
 
-  const handleConfirmCheckIn = (notes: string, paymentType: string) => {
+  const handleConfirmCheckIn = (_notes: string, _paymentType: string) => {
     if (selectedAppointment) {
       // Update appointment status
       setAppointments(prev =>
@@ -104,7 +95,7 @@ function CheckInPageContent() {
       )
       
       // Create encounter
-      const encounterId = createEncounter(selectedAppointment.patientId)
+      const _encounterId = createEncounter(selectedAppointment.patientId)
       
       // If ER mode, open triage wizard
       if (triageMode) {
@@ -164,11 +155,12 @@ function CheckInPageContent() {
   }
 
   const handleTriageComplete = () => {
-    console.log('Triage completed for patient:', currentPatientId)
+    setIsTriageOpen(false)
+    setCurrentPatientId("")
   }
 
   const handleRefresh = () => {
-    console.log("Refreshing appointments...")
+    setAppointments([...dummyAppointments])
   }
 
   return (

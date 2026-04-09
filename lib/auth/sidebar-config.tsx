@@ -23,6 +23,11 @@ import {
   IconHistory,
   IconMessage,
   IconSitemap,
+  IconTool,
+  IconListNumbers,
+  IconFileDescription,
+  IconBabyCarriage,
+  IconReportMedical,
 } from "@tabler/icons-react"
 import { UserRole } from "./roles"
 
@@ -46,14 +51,14 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconUsers,
     },
     {
-      title: "Facility Management",
-      url: "/admin/facilities",
-      icon: IconBuildingHospital,
+      title: "IT Service Requests",
+      url: "/admin/it-requests",
+      icon: IconTool,
     },
     {
-      title: "Department Management",
-      url: "/admin/departments",
-      icon: IconSitemap,
+      title: "Audit Logs & Reports",
+      url: "/admin/audit-logs",
+      icon: IconShieldCheck,
     },
     {
       title: "System Configuration",
@@ -61,14 +66,14 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconSettings,
     },
     {
-      title: "Audit Logs",
-      url: "/admin/audit-logs",
-      icon: IconShieldCheck,
+      title: "Department Management",
+      url: "/admin/departments",
+      icon: IconSitemap,
     },
     {
-      title: "Reports",
-      url: "/admin/reports",
-      icon: IconReport,
+      title: "Facility Management",
+      url: "/admin/facilities",
+      icon: IconBuildingHospital,
     },
   ],
   [UserRole.SCHEDULER]: [
@@ -78,25 +83,30 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconDashboard,
     },
     {
-      title: "Schedule Appointment",
-      url: "/scheduler/schedule",
-      icon: IconCalendar,
-    },
-    {
-      title: "Appointments",
+      title: "Appointment Management",
       url: "/scheduler/appointments",
       icon: IconClipboard,
+    },
+    {
+      title: "Schedule (Calendar)",
+      url: "/scheduler/schedule",
+      icon: IconCalendar,
     },
     {
       title: "Provider Schedules",
       url: "/scheduler/providers",
       icon: IconStethoscope,
     },
-    // {
-    //   title: "Patients",
-    //   url: "/scheduler/patients",
-    //   icon: IconUser,
-    // },
+    {
+      title: "Queue Management",
+      url: "/scheduler/queue",
+      icon: IconListNumbers,
+    },
+    {
+      title: "Reports",
+      url: "/scheduler/reports",
+      icon: IconReport,
+    },
   ],
   [UserRole.REGISTRAR]: [
     {
@@ -110,29 +120,34 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconUser,
     },
     {
+      title: "Patient Search & Records",
+      url: "/registrar/patients",
+      icon: IconSearch,
+    },
+    {
+      title: "Document Issuance",
+      url: "/registrar/documents",
+      icon: IconFileDescription,
+    },
+    {
+      title: "COLB Processing",
+      url: "/registrar/colb",
+      icon: IconBabyCarriage,
+    },
+    {
+      title: "PhilHealth Processing",
+      url: "/registrar/philhealth",
+      icon: IconCurrencyDollar,
+    },
+    {
       title: "Appointments",
       url: "/registrar/appointments",
       icon: IconFileCheck,
     },
     {
-      title: "Patient Search",
-      url: "/registrar/patients",
-      icon: IconSearch,
-    },
-    {
       title: "Bed Management",
       url: "/registrar/beds",
       icon: IconBed,
-    },
-    {
-      title: "Admissions",
-      url: "/registrar/admissions",
-      icon: IconBuildingHospital,
-    },
-    {
-      title: "Discharge Processing",
-      url: "/registrar/discharge",
-      icon: IconFileText,
     },
   ],
   [UserRole.NURSE]: [
@@ -142,19 +157,19 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconDashboard,
     },
     {
+      title: "Patient Admission",
+      url: "/nurse/admission",
+      icon: IconBuildingHospital,
+    },
+    {
       title: "My Patients",
       url: "/nurse/patients",
       icon: IconUsers,
     },
     {
-      title: "Triage Assessment",
-      url: "/nurse/triage",
-      icon: IconStethoscope,
-    },
-    {
-      title: "Medication Administration",
-      url: "/nurse/medications",
-      icon: IconPill,
+      title: "Clinical Documentation",
+      url: "/nurse/clinical-docs",
+      icon: IconClipboard,
     },
     {
       title: "Vital Signs",
@@ -162,19 +177,29 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconHeartbeat,
     },
     {
-      title: "Patient Assessment",
-      url: "/nurse/assessment",
-      icon: IconClipboard,
+      title: "Medication Administration",
+      url: "/nurse/medications",
+      icon: IconPill,
     },
     {
-      title: "Patient Transfer",
-      url: "/nurse/transfer",
-      icon: IconBed,
+      title: "Discharge Management",
+      url: "/nurse/discharge",
+      icon: IconFileCheck,
     },
     {
-      title: "Orders",
-      url: "/nurse/orders",
-      icon: IconFileText,
+      title: "Specialized Care",
+      url: "/nurse/specialized-care",
+      icon: IconMedicalCross,
+    },
+    {
+      title: "Reports & Endorsement",
+      url: "/nurse/reports",
+      icon: IconReportMedical,
+    },
+    {
+      title: "Triage Assessment",
+      url: "/nurse/triage",
+      icon: IconStethoscope,
     },
   ],
   [UserRole.CLINICIAN]: [

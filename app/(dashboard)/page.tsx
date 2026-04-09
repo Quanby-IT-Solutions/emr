@@ -12,7 +12,7 @@ export default function DashboardRedirect() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      const dashboardRoute = ROLE_DASHBOARD_ROUTES[user.role] || '/dashboard/admin'
+      const dashboardRoute = ROLE_DASHBOARD_ROUTES[user.role as keyof typeof ROLE_DASHBOARD_ROUTES] || '/dashboard/admin'
       router.replace(dashboardRoute)
     }
   }, [user, isLoading, router])

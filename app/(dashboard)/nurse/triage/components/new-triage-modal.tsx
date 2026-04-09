@@ -273,7 +273,6 @@ export function TriageWizard({ open, onOpenChange, onRecord }: TriageWizardProps
 
     // Complete button - close modal
     if (step === 4) {
-      console.log('Form data:', { form, rapidAssessment, initialAssessment })
       const payload: TriageWizardOutput = {
         form,
         rapidAssessment,

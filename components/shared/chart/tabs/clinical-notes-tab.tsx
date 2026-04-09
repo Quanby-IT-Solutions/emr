@@ -42,6 +42,7 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
 
   useEffect(() => {
     fetchClinicalNotes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEncounter])
 
   const handleSignNote = async (noteId: string) => {

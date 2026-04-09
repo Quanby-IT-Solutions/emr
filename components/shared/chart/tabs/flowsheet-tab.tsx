@@ -40,6 +40,7 @@ export function FlowsheetTab({ patientData, role, staffId }: FlowsheetTabProps) 
 
   useEffect(() => {
     fetchFlowsheetObs()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEncounter])
 
   const formatDate = (dateString: string) => {

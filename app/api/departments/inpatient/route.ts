@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/src/generated/client/client'
 
 const prisma = new PrismaClient()
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Get all departments (no isActive field in schema)
     const departments = await prisma.department.findMany({

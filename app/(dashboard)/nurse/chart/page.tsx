@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -180,6 +181,14 @@ import { nursePatientChart } from '../../dummy-data/dummy-nurse-patient';
 // };
 
 export default function NurseChartPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <NurseChartContent />
+    </Suspense>
+  );
+}
+
+function NurseChartContent() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
   const mockPatientData = nursePatientChart;
@@ -214,7 +223,7 @@ export default function NurseChartPage() {
               <Card>
                 <CardContent className="pt-6">
                   <p className="text-center text-muted-foreground">
-                    No patient selected. Please go to "My Patients" and click "View Chart" on a patient.
+                    No patient selected. Please go to &quot;My Patients&quot; and click &quot;View Chart&quot; on a patient.
                   </p>
                 </CardContent>
               </Card>
