@@ -21,7 +21,7 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.SYSTEM_ADMIN]: 'System Administrator',
-  [UserRole.AUDITOR]: 'Auditor',
+  [UserRole.AUDITOR]: 'Auditor / Privacy Officer',
   [UserRole.CLINICIAN]: 'Clinician',
   [UserRole.PHARMACIST]: 'Pharmacist',
   [UserRole.NURSE]: 'Nurse',
@@ -35,7 +35,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 export const ROLE_DASHBOARD_ROUTES: Record<UserRole, string> = {
   [UserRole.SYSTEM_ADMIN]: '/dashboard/admin',
-  [UserRole.AUDITOR]: '/dashboard/admin',
+  [UserRole.AUDITOR]: '/auditor',
   [UserRole.CLINICIAN]: '/dashboard/clinician',
   [UserRole.PHARMACIST]: '/dashboard/pharmacist',
   [UserRole.NURSE]: '/dashboard/nurse',

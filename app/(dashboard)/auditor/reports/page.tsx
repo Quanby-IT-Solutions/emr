@@ -11,12 +11,10 @@ export default function AuditorReportsPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Reports</h1>
-            <p className="text-muted-foreground">
-              Generate audit reports
+            <p className="text-muted-foreground max-w-2xl">
+              Not specified for Auditor / Privacy Officer in the current TOR. This
+              page is intentionally blank pending scope.
             </p>
-          </div>
-          <div className="px-4 lg:px-6">
-            <div>Sample page</div>
           </div>
         </div>
       </DashboardLayout>

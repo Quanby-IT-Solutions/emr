@@ -11,13 +11,8 @@ export default function MessagesPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Messages</h1>
-            <p className="text-muted-foreground">
-              Communicate with your healthcare providers
-            </p>
           </div>
-          <div className="px-4 lg:px-6">
-            <div>Sample page</div>
-          </div>
+          <div className="min-h-[50vh] px-4 lg:px-6" aria-hidden />
         </div>
       </DashboardLayout>
     </ProtectedRoute>

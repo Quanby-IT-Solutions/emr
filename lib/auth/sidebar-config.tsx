@@ -342,14 +342,9 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconDashboard,
     },
     {
-      title: "Ready for Billing",
-      url: "/biller/ready",
+      title: "Charges",
+      url: "/biller/charges",
       icon: IconFileText,
-    },
-    {
-      title: "Generate Invoice",
-      url: "/biller/generate",
-      icon: IconFileCheck,
     },
     {
       title: "Invoices",
@@ -357,14 +352,19 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconCurrencyDollar,
     },
     {
-      title: "Payment Processing",
+      title: "Payments",
       url: "/biller/payments",
       icon: IconCash,
     },
     {
-      title: "Accounts Receivable",
+      title: "Accounts receivable",
       url: "/biller/accounts",
       icon: IconCurrencyDollar,
+    },
+    {
+      title: "Compile invoice",
+      url: "/biller/generate",
+      icon: IconFileCheck,
     },
     {
       title: "Reports",
@@ -379,12 +379,12 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconDashboard,
     },
     {
-      title: "My Profile",
+      title: "My profile",
       url: "/patient/profile",
       icon: IconUser,
     },
     {
-      title: "Medical History",
+      title: "Health record",
       url: "/patient/history",
       icon: IconHistory,
     },
@@ -394,12 +394,17 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       icon: IconCalendar,
     },
     {
-      title: "Test Results",
+      title: "Results",
       url: "/patient/results",
       icon: IconFlask,
     },
     {
-      title: "Request Records",
+      title: "Billing",
+      url: "/patient/billing",
+      icon: IconCurrencyDollar,
+    },
+    {
+      title: "Request records",
       url: "/patient/records",
       icon: IconFileText,
     },
@@ -407,11 +412,6 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Messages",
       url: "/patient/messages",
       icon: IconMessage,
-    },
-    {
-      title: "Billing",
-      url: "/patient/billing",
-      icon: IconCurrencyDollar,
     },
   ],
   [UserRole.AUDITOR]: [

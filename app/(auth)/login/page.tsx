@@ -20,7 +20,7 @@ const roles = [
   { role: UserRole.HIM_CODER, label: "HIM Coder", path: "/him-coder" },
   { role: UserRole.BILLER, label: "Biller", path: "/biller" },
   { role: UserRole.PATIENT, label: "Patient", path: "/patient" },
-  { role: UserRole.AUDITOR, label: "Auditor", path: "/auditor" },
+  { role: UserRole.AUDITOR, label: "Auditor / Privacy Officer", path: "/auditor" },
 ]
 
 export default function Page() {
