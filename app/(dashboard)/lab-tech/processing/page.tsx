@@ -1,10 +1,213 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import {
+  IconTestPipe,
+  IconFlask,
+  IconShieldCheck,
+  IconAlertTriangle,
+  IconSearch,
+  IconDroplet,
+  IconPlayerPlay,
+  IconChecks,
+} from "@tabler/icons-react"
+
+import { labOrders, type LabOrder } from "@/app/(dashboard)/dummy-data/dummy-lab-orders"
+import { CollectSpecimenModal } from "./components/collect-specimen-modal"
+import { ResultEntryModal } from "./components/result-entry-modal"
+import { ValidateResultModal } from "./components/validate-result-modal"
+
+function priorityVariant(priority: string): "destructive" | "warning" | "secondary" {
+  switch (priority) {
+    case "STAT": return "destructive"
+    case "URGENT": return "warning"
+    default: return "secondary"
+  }
+}
+
+function statusVariant(status: string): "default" | "secondary" | "outline" | "warning" {
+  switch (status) {
+    case "COLLECTED": return "outline"
+    case "IN_PROGRESS": return "warning"
+    default: return "secondary"
+  }
+}
 
 export default function ProcessingPage() {
+  const [orders, setOrders] = useState<LabOrder[]>(labOrders)
+  const [search, setSearch] = useState("")
+  const [collectOpen, setCollectOpen] = useState(false)
+  const [resultEntryOpen, setResultEntryOpen] = useState(false)
+  const [validateOpen, setValidateOpen] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<LabOrder | null>(null)
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return orders.filter(o =>
+      o.patient.name.toLowerCase().includes(q) ||
+      o.patient.mrn.toLowerCase().includes(q) ||
+      o.testPanel.toLowerCase().includes(q)
+    )
+  }, [orders, search])
+
+  const placed = filtered.filter(o => o.status === "PLACED")
+  const collected = filtered.filter(o => o.status === "COLLECTED")
+  const inProgress = filtered.filter(o => o.status === "IN_PROGRESS")
+
+  // Stats
+  const collectedCount = orders.filter(o => o.status === "COLLECTED").length
+  const runningCount = orders.filter(o => o.status === "IN_PROGRESS").length
+  const placedCount = orders.filter(o => o.status === "PLACED").length
+  const criticalAlerts = orders.filter(o => o.priority === "STAT" && (o.status === "PLACED" || o.status === "COLLECTED")).length
+
+  const handleCollect = (orderId: string) => {
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, status: "COLLECTED" as const, collectedAt: new Date().toISOString(), collectedBy: "Tech. R. Martinez", specimenCondition: "Satisfactory" as const } : o
+    ))
+  }
+
+  const handleStartProcessing = (orderId: string) => {
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, status: "IN_PROGRESS" as const } : o
+    ))
+  }
+
+  const handleResultSubmit = (orderId: string) => {
+    // In a real app, this would save entered results. Here we just move to awaiting validation (keep IN_PROGRESS).
+  }
+
+  const handleApprove = (orderId: string) => {
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, status: "COMPLETED" as const, completedAt: new Date().toISOString() } : o
+    ))
+  }
+
+  const handleReject = (orderId: string) => {
+    setOrders(prev => prev.map(o =>
+      o.id === orderId ? { ...o, status: "COLLECTED" as const } : o
+    ))
+  }
+
+  function renderTable(items: LabOrder[], tab: "placed" | "collected" | "in-progress") {
+    if (items.length === 0) {
+      return (
+        <div className="flex items-center justify-center py-12 text-muted-foreground">
+          No orders in this category.
+        </div>
+      )
+    }
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Patient</TableHead>
+            <TableHead>MRN</TableHead>
+            <TableHead>Test Panel</TableHead>
+            <TableHead>Specimen Type</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Ordered</TableHead>
+            {tab !== "placed" && <TableHead>Collected</TableHead>}
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map(order => (
+            <TableRow key={order.id}>
+              <TableCell className="font-medium">{order.patient.name}</TableCell>
+              <TableCell>{order.patient.mrn}</TableCell>
+              <TableCell>{order.testPanel}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">{order.specimenType}</TableCell>
+              <TableCell>
+                <Badge variant={priorityVariant(order.priority)}>{order.priority}</Badge>
+              </TableCell>
+              <TableCell className="text-sm">{order.orderedAt}</TableCell>
+              {tab !== "placed" && (
+                <TableCell className="text-sm">{order.collectedAt ?? "—"}</TableCell>
+              )}
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-1">
+                  {tab === "placed" && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="border"
+                          onClick={() => { setSelectedOrder(order); setCollectOpen(true) }}
+                        >
+                          <IconDroplet className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Collect Specimen</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {tab === "collected" && (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="border"
+                            onClick={() => handleStartProcessing(order.id)}
+                          >
+                            <IconPlayerPlay className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Begin Processing</TooltipContent>
+                      </Tooltip>
+                    </>
+                  )}
+                  {tab === "in-progress" && (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="border"
+                            onClick={() => { setSelectedOrder(order); setResultEntryOpen(true) }}
+                          >
+                            <IconFlask className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Enter Results</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="border"
+                            onClick={() => { setSelectedOrder(order); setValidateOpen(true) }}
+                          >
+                            <IconChecks className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Validate & Finalize</TooltipContent>
+                      </Tooltip>
+                    </>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    )
+  }
+
   return (
     <ProtectedRoute requiredRole={UserRole.LAB_TECH}>
       <DashboardLayout role={UserRole.LAB_TECH}>
@@ -12,13 +215,122 @@ export default function ProcessingPage() {
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Test Processing</h1>
             <p className="text-muted-foreground">
-              Process lab tests
+              Manage specimen collection, result entry, and validation
             </p>
           </div>
+
+          {/* Stat Cards */}
+          <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-4 lg:px-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Awaiting Collection</CardTitle>
+                <IconDroplet className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{placedCount}</div>
+                <p className="text-xs text-muted-foreground">Orders placed, not yet collected</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Specimens Collected</CardTitle>
+                <IconTestPipe className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{collectedCount}</div>
+                <p className="text-xs text-muted-foreground">Ready for processing</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Tests Running</CardTitle>
+                <IconFlask className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{runningCount}</div>
+                <p className="text-xs text-muted-foreground">In progress / awaiting validation</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">STAT Pending</CardTitle>
+                <IconAlertTriangle className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{criticalAlerts}</div>
+                <p className="text-xs text-muted-foreground">Urgent orders awaiting processing</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tabbed Content */}
           <div className="px-4 lg:px-6">
-            <div>Sample page</div>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Processing Queue</CardTitle>
+                  <div className="relative w-72">
+                    <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search patient, MRN, or test..."
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="placed">
+                  <TabsList>
+                    <TabsTrigger value="placed">
+                      Awaiting Collection
+                      {placed.length > 0 && <Badge variant="secondary" className="ml-2">{placed.length}</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="collected">
+                      Collected
+                      {collected.length > 0 && <Badge variant="secondary" className="ml-2">{collected.length}</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="in-progress">
+                      In Progress
+                      {inProgress.length > 0 && <Badge variant="secondary" className="ml-2">{inProgress.length}</Badge>}
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="placed" className="mt-4">
+                    {renderTable(placed, "placed")}
+                  </TabsContent>
+                  <TabsContent value="collected" className="mt-4">
+                    {renderTable(collected, "collected")}
+                  </TabsContent>
+                  <TabsContent value="in-progress" className="mt-4">
+                    {renderTable(inProgress, "in-progress")}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
           </div>
         </div>
+
+        {/* Modals */}
+        <CollectSpecimenModal
+          open={collectOpen}
+          onOpenChange={setCollectOpen}
+          order={selectedOrder}
+          onConfirm={(id, data) => handleCollect(id)}
+        />
+        <ResultEntryModal
+          open={resultEntryOpen}
+          onOpenChange={setResultEntryOpen}
+          order={selectedOrder}
+          onSubmit={handleResultSubmit}
+        />
+        <ValidateResultModal
+          open={validateOpen}
+          onOpenChange={setValidateOpen}
+          order={selectedOrder}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
       </DashboardLayout>
     </ProtectedRoute>
   )
