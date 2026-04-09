@@ -7,6 +7,7 @@ import { UserRole } from "@/lib/auth/roles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PatientChartTabs } from "@/components/shared/chart/patient-chart-tabs";
+import { ProblemsAllergiesStrip } from "./components/problems-allergies-strip";
 import { IconUser, IconAlertCircle } from '@tabler/icons-react';
 
 // Mock patient data (same as before)
@@ -21,11 +22,12 @@ const mockPatientData: Record<string, any> = {
       gender: "Male",
       contactPhone: "+1-555-0123",
       email: "john.doe@email.com",
+      primaryDiagnosis: "Type 2 Diabetes Mellitus",
       allergies: [
         {
           id: "a1",
           substance: "Penicillin",
-          reaction: "Severe rash and hives",
+          reaction: "Anaphylaxis",
           severity: "SEVERE",
           status: "ACTIVE"
         },
@@ -75,6 +77,14 @@ const mockPatientData: Record<string, any> = {
           icd10Code: "I10",
           status: "ACTIVE",
           onsetDate: "2018-06-15"
+        },
+        {
+          id: "h3",
+          type: "MEDICAL_HISTORY",
+          entry: "Hyperlipidemia",
+          icd10Code: "E78.5",
+          status: "ACTIVE",
+          onsetDate: "2019-03-10"
         }
       ]
     },
@@ -113,6 +123,7 @@ const mockPatientData: Record<string, any> = {
       gender: "Female",
       contactPhone: "+1-555-0456",
       email: "jane.smith@email.com",
+      primaryDiagnosis: "Asthma",
       allergies: [
         {
           id: "a3",
@@ -148,6 +159,14 @@ const mockPatientData: Record<string, any> = {
           icd10Code: "J45.909",
           status: "ACTIVE",
           onsetDate: "2005-05-01"
+        },
+        {
+          id: "h6",
+          type: "MEDICAL_HISTORY",
+          entry: "Iron Deficiency Anemia",
+          icd10Code: "D50.9",
+          status: "ACTIVE",
+          onsetDate: "2021-08-15"
         }
       ]
     },
@@ -163,6 +182,7 @@ const mockPatientData: Record<string, any> = {
       gender: "Male",
       contactPhone: "+1-555-0789",
       email: "bob.wilson@email.com",
+      primaryDiagnosis: "Chronic Kidney Disease Stage 3",
       allergies: [],
       encounters: [
         {
@@ -190,6 +210,14 @@ const mockPatientData: Record<string, any> = {
           icd10Code: "N18.3",
           status: "ACTIVE",
           onsetDate: "2022-03-01"
+        },
+        {
+          id: "h8",
+          type: "MEDICAL_HISTORY",
+          entry: "Gout",
+          icd10Code: "M10.9",
+          status: "ACTIVE",
+          onsetDate: "2023-01-20"
         }
       ]
     },
@@ -296,9 +324,16 @@ export default function ClinicianChartPage() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline">
-                    {data.patient.encounters.filter((e: any) => e.status === 'ACTIVE').length} Active Encounters
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {data.patient.primaryDiagnosis && (
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                        Dx: {data.patient.primaryDiagnosis}
+                      </Badge>
+                    )}
+                    <Badge variant="outline">
+                      {data.patient.encounters.filter((e: any) => e.status === 'ACTIVE').length} Active Encounters
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -319,32 +354,11 @@ export default function ClinicianChartPage() {
               </CardContent>
             </Card>
 
-            {/* Critical Alerts */}
-            {data.patient.allergies.length > 0 && (
-              <Card className="border-red-500">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-600">
-                    <IconAlertCircle className="h-5 w-5" />
-                    Active Allergies - {data.patient.allergies.length} Alert(s)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {data.patient.allergies.map((allergy: any) => (
-                      <div key={allergy.id} className="flex items-center justify-between p-3 bg-red-50 rounded border border-red-200">
-                        <div>
-                          <p className="font-semibold text-red-900">{allergy.substance}</p>
-                          <p className="text-sm text-red-700">{allergy.reaction}</p>
-                        </div>
-                        <Badge variant="destructive">
-                          {allergy.severity}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Problems & Allergies Strip */}
+            <ProblemsAllergiesStrip
+              problems={data.patient.patientHistories}
+              allergies={data.patient.allergies}
+            />
 
             {/* Tabs Component */}
             <PatientChartTabs 
