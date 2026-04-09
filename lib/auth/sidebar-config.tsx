@@ -28,6 +28,7 @@ import {
   IconFileDescription,
   IconBabyCarriage,
   IconReportMedical,
+  IconHeadset,
 } from "@tabler/icons-react"
 import { UserRole } from "./roles"
 
@@ -107,6 +108,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/scheduler/reports",
       icon: IconReport,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.REGISTRAR]: [
     {
@@ -148,6 +154,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Bed Management",
       url: "/registrar/beds",
       icon: IconBed,
+    },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
     },
   ],
   [UserRole.NURSE]: [
@@ -201,6 +212,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/nurse/triage",
       icon: IconStethoscope,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.CLINICIAN]: [
     {
@@ -253,6 +269,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/clinician/notifications",
       icon: IconMessage,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.PHARMACIST]: [
     {
@@ -290,6 +311,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/pharmacist/patients",
       icon: IconUser,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.LAB_TECH]: [
     {
@@ -321,6 +347,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Reports",
       url: "/lab-tech/reports",
       icon: IconReport,
+    },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
     },
   ],
   [UserRole.HIM_CODER]: [
@@ -359,6 +390,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/him-coder/reports",
       icon: IconReport,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.BILLER]: [
     {
@@ -395,6 +431,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "Reports",
       url: "/biller/reports",
       icon: IconReport,
+    },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
     },
   ],
   [UserRole.PATIENT]: [
@@ -438,6 +479,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       url: "/patient/billing",
       icon: IconCurrencyDollar,
     },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
+    },
   ],
   [UserRole.AUDITOR]: [
     {
@@ -459,6 +505,11 @@ export const SIDEBAR_CONFIG: Record<UserRole, NavItem[]> = {
       title: "User Activity",
       url: "/auditor/activity",
       icon: IconUsers,
+    },
+    {
+      title: "IT Support",
+      url: "/it-support",
+      icon: IconHeadset,
     },
   ],
 }
