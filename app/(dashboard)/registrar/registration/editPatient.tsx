@@ -28,6 +28,7 @@ import {
     Stethoscope
 } from "lucide-react"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 interface EditPatientModalProps {
     open: boolean
@@ -43,8 +44,7 @@ export function EditPatientModal({ open, onOpenChange, patient }: EditPatientMod
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Handle form submission
-        console.log("Patient updated")
+        toast.success(`Patient ${patient.id} updated successfully`)
         onOpenChange(false)
     }
 

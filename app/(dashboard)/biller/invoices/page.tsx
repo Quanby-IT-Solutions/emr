@@ -32,8 +32,6 @@ function invoiceBadge(status: Inv["status"]) {
       return "secondary" as const
     case "Partial":
       return "warning" as const
-    case "Sent":
-      return "tertiary" as const
     default:
       return "outline" as const
   }

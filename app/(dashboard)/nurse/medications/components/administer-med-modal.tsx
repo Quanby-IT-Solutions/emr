@@ -113,7 +113,6 @@ export function AdministerMedicineWizard({ open, onOpenChange, patient,  selecte
     }
 
     onSubmit?.(data, medOrder)
-    console.log(data)
     handleClose()
   }
 

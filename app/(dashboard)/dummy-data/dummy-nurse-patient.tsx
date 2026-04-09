@@ -38,22 +38,27 @@ export interface NursePatientChart {
           lastName: string;
           jobTitle: string;
         };
-        currentLocation: {
+        currentLocation?: {
         unit: string;
         roomNumber: string;
         bedNumber: string;
-      };
-      _count: {
+      } | null;
+      _count?: {
         clinicalNotes: number;
         orders: number;
       };
       }[];
       patientHistories: {
         id: string;
-        condition: string;
-        startDateTime: string;
-        endDateTime: string;
-        attendingProvider: {
+        type?: string;
+        entry?: string;
+        icd10Code?: string;
+        condition?: string;
+        status?: string;
+        onsetDate?: string;
+        startDateTime?: string;
+        endDateTime?: string;
+        attendingProvider?: {
           firstName: string;
           lastName: string;
           jobTitle: string;
@@ -179,7 +184,7 @@ export const nursePatientList: NursePatient[] = [
   } 
 ];
 
-export const nursePatientChart: Record<string, unknown> = {
+export const nursePatientChart: NursePatientChart = {
   "1": {
     patient: {
       id: "1",

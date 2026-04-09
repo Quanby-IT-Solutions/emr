@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/src/generated/client/client';
 
 const prisma = new PrismaClient();
 
@@ -21,11 +21,11 @@ export async function GET(request: NextRequest) {
     if (needsCosign && staffId) {
       // Notes pending co-signature for this doctor
       where.cosignerId = staffId;
-      where.status = 'PENDING_COSIGN';
-    } else if (status === 'NEEDS_CORRECTION' && staffId) {
-      // Notes needing correction by this nurse
+      where.status = 'DRAFT';
+    } else if (status && staffId) {
+      // Notes by status for this staff member
       where.authorId = staffId;
-      where.status = 'NEEDS_CORRECTION';
+      where.status = status;
     }
 
     const notes = await prisma.clinicalNote.findMany({
@@ -43,20 +43,6 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             jobTitle: true,
-          },
-        },
-        comments: {
-          include: {
-            createdByStaff: {
-              select: {
-                firstName: true,
-                lastName: true,
-                jobTitle: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
           },
         },
       },
@@ -89,7 +75,7 @@ export async function POST(request: NextRequest) {
         noteType,
         title: title || null,
         content: content || null,
-        status: submitForCosign ? 'PENDING_COSIGN' : 'DRAFT',
+        status: submitForCosign ? 'DRAFT' : 'DRAFT',
         isSensitive: false,
       },
       include: {

@@ -175,7 +175,7 @@ const PatientContext = createContext<PatientContextType | undefined>(undefined)
 export function PatientProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(patientReducer, initialState)
 
-  const createEncounter = (patientId: string): string => {
+  const createEncounter = (_patientId: string): string => {
     const encounterId = `ENC-${Date.now()}`
     // In real implementation, this would make an API call
     return encounterId

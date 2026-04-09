@@ -168,6 +168,7 @@ export default function AppointmentsPage() {
     }
   }
 
+
   if (loading && appointments.length === 0) {
     return (
       <ProtectedRoute requiredRole={UserRole.PATIENT}>

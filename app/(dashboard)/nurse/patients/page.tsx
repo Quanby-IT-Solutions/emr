@@ -49,7 +49,7 @@ import { NursePatient, nursePatientList } from '../../dummy-data/dummy-nurse-pat
 export default function NursePatientsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [patientList, setPatientList] = useState<NursePatient[]>(nursePatientList);
+  const [patientList, _setPatientList] = useState<NursePatient[]>(nursePatientList);
 
   // Filter patients based on search
   const filteredPatients = patientList.filter(patient => 

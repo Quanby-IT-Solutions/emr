@@ -1,11 +1,7 @@
 "use client"
 
-import { useAuth } from '@/lib/auth/context'
-import { UserRole } from '@/lib/generated/prisma/enums'
-import { hasRole } from '@/lib/auth/roles'
-import { useRouter } from 'next/navigation'
-import { useEffect, ReactNode } from 'react'
-import { Loader2 } from 'lucide-react'
+import { UserRole } from '@/lib/auth/roles'
+import { ReactNode } from 'react'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -15,8 +11,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({
   children,
-  requiredRole,
-  fallbackPath = '/login'
+  requiredRole: _requiredRole,
+  fallbackPath: _fallbackPath = '/login'
 }: ProtectedRouteProps) {
   // TEMPORARY: Bypass authentication for testing
   return <>{children}</>

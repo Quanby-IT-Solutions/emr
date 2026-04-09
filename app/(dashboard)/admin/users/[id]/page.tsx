@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { IconArrowLeft } from "@tabler/icons-react"
 import Link from "next/link"
 
-export default function UserDetailPage({ params }: { params: { id: string } }) {
+export default function UserDetailPage() {
   return (
     <ProtectedRoute requiredRole={UserRole.SYSTEM_ADMIN}>
       <DashboardLayout role={UserRole.SYSTEM_ADMIN}>
@@ -32,7 +32,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
-                <CardDescription>User's basic details</CardDescription>
+                <CardDescription>User&apos;s basic details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -59,7 +59,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
             <Card>
               <CardHeader>
                 <CardTitle>Role & Permissions</CardTitle>
-                <CardDescription>User's system access</CardDescription>
+                <CardDescription>User&apos;s system access</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">

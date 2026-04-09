@@ -28,6 +28,7 @@ import {
     Stethoscope
 } from "lucide-react"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 interface RegistrationFormProps {
     open: boolean
@@ -40,14 +41,23 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // Handle form submission
-        console.log("Form submitted")
+        const form = e.target as HTMLFormElement
+        const formData = new FormData(form)
+        const patientData = Object.fromEntries(formData.entries())
+        // Store in localStorage as a simple persistence mechanism
+        const existing = JSON.parse(localStorage.getItem("pgh-registered-patients") ?? "[]")
+        const hospitalNumber = `PGH-${new Date().getFullYear()}-${String(existing.length + 1).padStart(5, "0")}`
+        existing.push({ ...patientData, hospitalNumber, registeredAt: new Date().toISOString(), status: "active" })
+        localStorage.setItem("pgh-registered-patients", JSON.stringify(existing))
+        toast.success(`Patient registered successfully — ${hospitalNumber}`)
         onOpenChange(false)
     }
 
     const handleSaveAsDraft = () => {
-        // Handle save as draft
-        console.log("Saved as draft")
+        const drafts = JSON.parse(localStorage.getItem("pgh-registration-drafts") ?? "[]")
+        drafts.push({ savedAt: new Date().toISOString(), dateOfBirth: dateOfBirth?.toISOString() })
+        localStorage.setItem("pgh-registration-drafts", JSON.stringify(drafts))
+        toast.info("Registration saved as draft")
         onOpenChange(false)
     }
 
@@ -71,6 +81,75 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                 <ScrollArea className="max-h-[calc(90vh-180px)] pr-4">
                     <form onSubmit={handleSubmit} id="registration-form">
                         <div className="space-y-6">
+                            {/* PGH Registration Details */}
+                            <div className="space-y-4">
+                                <h3 className="font-semibold flex items-center gap-2 text-lg">
+                                    <FileText className="h-5 w-5" />
+                                    PGH Registration Details
+                                </h3>
+                                <div className="grid gap-4 md:grid-cols-3">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="hospitalNumber">Hospital Number</Label>
+                                        <Input id="hospitalNumber" value="PGH-2026-AUTO" disabled className="font-mono bg-muted" />
+                                        <p className="text-xs text-muted-foreground">Auto-assigned upon registration</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="registrationType">Registration Type *</Label>
+                                        <Select required>
+                                            <SelectTrigger id="registrationType">
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="NEW_OPD">New OPD</SelectItem>
+                                                <SelectItem value="ELECTIVE">Elective Admission</SelectItem>
+                                                <SelectItem value="EMERGENCY">Emergency</SelectItem>
+                                                <SelectItem value="OB_GYNE">OB-Gyne</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="patientCategory">Patient Category *</Label>
+                                        <Select required>
+                                            <SelectTrigger id="patientCategory">
+                                                <SelectValue placeholder="Select category" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="CHARITY">Charity (Service)</SelectItem>
+                                                <SelectItem value="PHILHEALTH">PhilHealth</SelectItem>
+                                                <SelectItem value="PAY">Pay Patient</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="mssClassification">MSS Classification</Label>
+                                        <Select>
+                                            <SelectTrigger id="mssClassification">
+                                                <SelectValue placeholder="Select MSS class" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="A">Class A (Indigent)</SelectItem>
+                                                <SelectItem value="B">Class B</SelectItem>
+                                                <SelectItem value="C1">Class C1</SelectItem>
+                                                <SelectItem value="C2">Class C2</SelectItem>
+                                                <SelectItem value="D">Class D (Pay)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2 flex items-end gap-2">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox id="mssWhiteCard" />
+                                            <Label htmlFor="mssWhiteCard" className="text-sm font-normal cursor-pointer">
+                                                MSS White Card Holder
+                                            </Label>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="referredFrom">Referred From</Label>
+                                        <Input id="referredFrom" placeholder="e.g., Barangay Health Center, LGU" />
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Personal Information */}
                             <div className="space-y-4">
                                 <h3 className="font-semibold flex items-center gap-2 text-lg">
@@ -505,6 +584,40 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                                         placeholder="Any additional information or special instructions"
                                         rows={2}
                                     />
+                                </div>
+                            </div>
+
+                            {/* Consent Forms */}
+                            <div className="space-y-4">
+                                <h3 className="font-semibold flex items-center gap-2 text-lg">
+                                    <FileText className="h-5 w-5" />
+                                    Consent Forms
+                                </h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id="consentTreatment" />
+                                        <Label htmlFor="consentTreatment" className="text-sm font-normal cursor-pointer">
+                                            Consent for Medical Treatment and Procedures *
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id="consentDataPrivacy" />
+                                        <Label htmlFor="consentDataPrivacy" className="text-sm font-normal cursor-pointer">
+                                            Data Privacy Act (RA 10173) Consent — Authorization to collect and process personal data *
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id="consentPhilHealth" />
+                                        <Label htmlFor="consentPhilHealth" className="text-sm font-normal cursor-pointer">
+                                            PhilHealth Benefit Availment Authorization (if applicable)
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id="consentTeaching" />
+                                        <Label htmlFor="consentTeaching" className="text-sm font-normal cursor-pointer">
+                                            Consent for Teaching Hospital Activities (student observation, case presentation)
+                                        </Label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -32,8 +32,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   IconBed,
   IconSearch,
@@ -53,7 +51,6 @@ import {
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { differenceInDays, parseISO } from "date-fns"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -518,7 +515,7 @@ export default function BedsPage() {
                 </div>
                 <h3 className="text-lg font-medium">No beds found</h3>
                 <p className="text-muted-foreground max-w-sm mt-1">
-                  We couldn't find any beds matching your current filters. Try adjusting your search criteria.
+                  We couldn&apos;t find any beds matching your current filters. Try adjusting your search criteria.
                 </p>
                 <Button 
                   variant="outline" 

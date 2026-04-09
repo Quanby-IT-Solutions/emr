@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { UserRole } from '@/lib/generated/prisma/enums'
+import { UserRole } from '@/lib/auth/roles'
 
 interface User {
   id: string

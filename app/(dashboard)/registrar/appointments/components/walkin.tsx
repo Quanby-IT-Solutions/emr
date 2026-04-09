@@ -10,10 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { useState } from "react"
 import { 
   User, 
-  Phone, 
-  Calendar, 
   Stethoscope,
-  FileText,
   CreditCard,
   Save,
   X,

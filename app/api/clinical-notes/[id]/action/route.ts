@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/src/generated/client/client';
 
 const prisma = new PrismaClient();
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const noteId = params.id;
+    const { id } = await params;
+    const noteId = id;
     const body = await request.json();
     const { action, staffId, comment, content } = body;
 
@@ -47,16 +48,7 @@ export async function POST(
         updatedNote = await prisma.clinicalNote.update({
           where: { id: noteId },
           data: {
-            status: 'NEEDS_CORRECTION',
-          },
-        });
-
-        // Create comment
-        await prisma.clinicalNoteComment.create({
-          data: {
-            noteId,
-            createdBy: staffId,
-            comment,
+            status: 'DRAFT',
           },
         });
         break;
@@ -74,7 +66,7 @@ export async function POST(
           where: { id: noteId },
           data: {
             content,
-            status: 'PENDING_COSIGN',
+            status: 'DRAFT',
           },
         });
         break;
