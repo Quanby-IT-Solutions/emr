@@ -50,7 +50,7 @@ export function AppSidebar({ role, userName = "User", userEmail = "user@example.
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navItems} />
+        <NavMain items={navItems} role={role} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      { source: "/biller/ready", destination: "/biller/charges", permanent: true },
+      { source: "/biller/generate", destination: "/biller/invoices", permanent: false },
+    ]
+  },
 };
 
 export default nextConfig;
