@@ -25,13 +25,17 @@ export function NavMain({
   return (
     <SidebarGroup>
       <SidebarGroupContent>
-        <SidebarMenu>
+        <SidebarMenu className="gap-1.5">
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} asChild>
+              <SidebarMenuButton 
+                tooltip={item.title} 
+                asChild
+                className="group h-10 transition-all duration-200 hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
+              >
                 <Link href={item.url}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  {item.icon && <item.icon className="h-5 w-5 opacity-70 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100 group-hover:text-primary" />}
+                  <span className="font-medium text-[13px]">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
