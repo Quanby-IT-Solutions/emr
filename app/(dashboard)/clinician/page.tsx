@@ -23,18 +23,18 @@ import { toast } from "sonner"
 // --- Mock Data ---
 
 const scheduleItems = [
-  { id: "s1", time: "08:00", patientName: "John Doe", mrn: "MRN-001", visitType: "OPD" as const, status: "Completed" as const },
-  { id: "s2", time: "09:30", patientName: "Maria Garcia", mrn: "MRN-007", visitType: "ER" as const, status: "In Progress" as const },
-  { id: "s3", time: "10:00", patientName: "James Lee", mrn: "MRN-012", visitType: "OPD" as const, status: "Checked-In" as const },
-  { id: "s4", time: "11:30", patientName: "Sarah Kim", mrn: "MRN-015", visitType: "IPD" as const, status: "Scheduled" as const },
-  { id: "s5", time: "13:00", patientName: "Ahmed Hassan", mrn: "MRN-018", visitType: "OPD" as const, status: "Scheduled" as const },
-  { id: "s6", time: "14:30", patientName: "Emily Chen", mrn: "MRN-022", visitType: "ER" as const, status: "Scheduled" as const },
+  { id: "1", time: "08:00", patientName: "John Doe", mrn: "MRN-001", visitType: "OPD" as const, status: "Completed" as const },
+  { id: "4", time: "09:30", patientName: "Maria Garcia", mrn: "MRN-007", visitType: "ER" as const, status: "In Progress" as const },
+  { id: "5", time: "10:00", patientName: "James Lee", mrn: "MRN-012", visitType: "OPD" as const, status: "Checked-In" as const },
+  { id: "7", time: "11:30", patientName: "Sarah Kim", mrn: "MRN-015", visitType: "IPD" as const, status: "Scheduled" as const },
+  { id: "8", time: "13:00", patientName: "Ahmed Hassan", mrn: "MRN-018", visitType: "OPD" as const, status: "Scheduled" as const },
+  { id: "9", time: "14:30", patientName: "Emily Chen", mrn: "MRN-022", visitType: "ER" as const, status: "Scheduled" as const },
 ]
 
 const activeInpatients = [
-  { id: "ip1", patientName: "John Doe", mrn: "MRN-001", roomBed: "Room 301-A", admissionDate: "2026-04-01", diagnosis: "Type 2 DM" },
-  { id: "ip2", patientName: "Robert Chen", mrn: "MRN-009", roomBed: "ICU Bed 4", admissionDate: "2026-03-28", diagnosis: "Sepsis" },
-  { id: "ip3", patientName: "Linda Park", mrn: "MRN-011", roomBed: "Room 205-B", admissionDate: "2026-04-03", diagnosis: "CHF Exacerbation" },
+  { id: "1", patientName: "John Doe", mrn: "MRN-001", roomBed: "Room 301-A", admissionDate: "2026-04-01", diagnosis: "Type 2 DM" },
+  { id: "3", patientName: "Robert Chen", mrn: "MRN-009", roomBed: "ICU Bed 4", admissionDate: "2026-03-28", diagnosis: "Sepsis" },
+  { id: "6", patientName: "Linda Park", mrn: "MRN-011", roomBed: "Room 205-B", admissionDate: "2026-04-03", diagnosis: "CHF Exacerbation" },
 ]
 
 const criticalAlerts = [

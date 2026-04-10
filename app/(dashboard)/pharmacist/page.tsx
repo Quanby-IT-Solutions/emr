@@ -1,3 +1,6 @@
+"use client"
+
+import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -6,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { IconPill, IconFileCheck, IconAlertCircle, IconClipboard } from "@tabler/icons-react"
 
 export default function PharmacistDashboard() {
+  const router = useRouter()
+
   return (
     <ProtectedRoute requiredRole={UserRole.PHARMACIST}>
       <DashboardLayout role={UserRole.PHARMACIST}>
@@ -18,7 +23,10 @@ export default function PharmacistDashboard() {
           </div>
 
           <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-4 lg:px-6">
-            <Card>
+            <Card
+              className="cursor-pointer transition hover:border-primary/50 hover:bg-muted/30"
+              onClick={() => router.push("/pharmacist/verification")}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
                 <IconPill className="h-4 w-4 text-muted-foreground" />
@@ -29,7 +37,10 @@ export default function PharmacistDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className="cursor-pointer transition hover:border-primary/50 hover:bg-muted/30"
+              onClick={() => router.push("/pharmacist/approved")}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Approved Orders</CardTitle>
                 <IconFileCheck className="h-4 w-4 text-muted-foreground" />
@@ -40,7 +51,10 @@ export default function PharmacistDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className="cursor-pointer transition hover:border-primary/50 hover:bg-muted/30"
+              onClick={() => router.push("/pharmacist/flagged")}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Flagged Orders</CardTitle>
                 <IconAlertCircle className="h-4 w-4 text-muted-foreground" />
@@ -51,7 +65,10 @@ export default function PharmacistDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card
+              className="cursor-pointer transition hover:border-primary/50 hover:bg-muted/30"
+              onClick={() => router.push("/pharmacist/inventory")}
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Inventory Alerts</CardTitle>
                 <IconClipboard className="h-4 w-4 text-muted-foreground" />
@@ -69,10 +86,13 @@ export default function PharmacistDashboard() {
                 <CardTitle>Quick Actions</CardTitle>
                 <CardDescription>Common pharmacy tasks</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-2 md:grid-cols-3">
-                <Button className="w-full">Verify Orders</Button>
-                <Button className="w-full" variant="outline">Check Inventory</Button>
-                <Button className="w-full" variant="outline">View Flagged</Button>
+              <CardContent className="grid gap-2 md:grid-cols-3 lg:grid-cols-6">
+                <Button className="w-full" variant="outline" onClick={() => router.push("/pharmacist/orders")}>Medication Orders</Button>
+                <Button className="w-full" onClick={() => router.push("/pharmacist/verification")}>Verify Orders</Button>
+                <Button className="w-full" variant="outline" onClick={() => router.push("/pharmacist/approved")}>Approved Queue</Button>
+                <Button className="w-full" variant="outline" onClick={() => router.push("/pharmacist/inventory")}>Check Inventory</Button>
+                <Button className="w-full" variant="outline" onClick={() => router.push("/pharmacist/flagged")}>View Flagged</Button>
+                <Button className="w-full" variant="outline" onClick={() => router.push("/pharmacist/patients")}>Patient Profiles</Button>
               </CardContent>
             </Card>
           </div>

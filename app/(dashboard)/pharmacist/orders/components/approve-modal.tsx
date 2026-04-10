@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 interface ApproveModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onConfirm: (orderId: number) => void
   order?: {
     id: number
     patient: string
@@ -16,7 +17,13 @@ interface ApproveModalProps {
   }
 }
 
-export function ApproveModal({ open, onOpenChange, order }: ApproveModalProps) {
+export function ApproveModal({ open, onOpenChange, onConfirm, order }: ApproveModalProps) {
+  function handleConfirm() {
+    if (!order) return
+    onConfirm(order.id)
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
@@ -40,7 +47,7 @@ export function ApproveModal({ open, onOpenChange, order }: ApproveModalProps) {
         </div>
 
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Confirm Approval</Button>
+          <Button onClick={handleConfirm}>Confirm Approval</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

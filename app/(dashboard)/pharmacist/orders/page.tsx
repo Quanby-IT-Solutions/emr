@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -21,6 +22,7 @@ interface Order {
   medication: string
   prescriber: string
   status: string
+  flagReason?: string
   orderDate?: string
   dosage?: string
   frequency?: string
@@ -98,6 +100,7 @@ const mockOrders: Order[] = [
 ]
 
 export default function PharmacyOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>(mockOrders)
   const [approveOpen, setApproveOpen] = useState(false)
   const [flagOpen, setFlagOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | undefined>(undefined)
@@ -130,7 +133,40 @@ export default function PharmacyOrdersPage() {
     setFlagOpen(true)
   }
 
-  const filteredOrders = mockOrders.filter(order => {
+  function handleApprove(orderId: number) {
+    setOrders((current) =>
+      current.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: "Approved",
+              verifiedBy: "Current Pharmacist",
+              verifiedDate: new Date().toISOString().slice(0, 10),
+              approvedBy: "Current Pharmacist",
+              approvedDate: new Date().toISOString().slice(0, 10),
+            }
+          : order
+      )
+    )
+    toast.success("Order approved")
+  }
+
+  function handleFlag(orderId: number, reason: string) {
+    setOrders((current) =>
+      current.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: "Flagged",
+              flagReason: reason,
+            }
+          : order
+      )
+    )
+    toast.warning("Order flagged for review", { description: reason })
+  }
+
+  const filteredOrders = orders.filter(order => {
     const matchesSearch = order.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.medication.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.prescriber.toLowerCase().includes(searchTerm.toLowerCase())
@@ -400,8 +436,18 @@ export default function PharmacyOrdersPage() {
           </div>
         </div>
 
-        <ApproveModal open={approveOpen} onOpenChange={setApproveOpen} order={selectedOrder} />
-        <FlagModal open={flagOpen} onOpenChange={setFlagOpen} order={selectedOrder} />
+        <ApproveModal
+          open={approveOpen}
+          onOpenChange={setApproveOpen}
+          onConfirm={handleApprove}
+          order={selectedOrder}
+        />
+        <FlagModal
+          open={flagOpen}
+          onOpenChange={setFlagOpen}
+          onConfirm={handleFlag}
+          order={selectedOrder}
+        />
       </DashboardLayout>
     </ProtectedRoute>
   )
