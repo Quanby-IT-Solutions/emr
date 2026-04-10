@@ -33,7 +33,7 @@ export function AccessConfirmationDialog({
 }: AccessConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-lg">
+      <AlertDialogContent className="max-w-2xl!">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <div className="rounded-full bg-red-100 p-2">

@@ -150,25 +150,22 @@ export default function BreakGlassPage() {
   const [justification, setJustification] = useState("")
   const [acknowledged, setAcknowledged] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [accessLog, setAccessLog] = useState<AccessLogEntry[]>([])
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([])
+  const [accessLog, setAccessLog] = useState<AccessLogEntry[]>(() => loadLog())
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(() => loadSessions())
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const [, setTick] = useState(0)
-
-  // Load persisted data on mount
-  useEffect(() => {
-    setAccessLog(loadLog())
-    setActiveSessions(loadSessions())
-  }, [])
 
   // Tick every second to update active session countdowns
   useEffect(() => {
     if (activeSessions.length === 0) return
     const interval = setInterval(() => {
+      const currentNow = Date.now()
       const updated = activeSessions.filter((s) => s.expiresAt > Date.now())
       if (updated.length !== activeSessions.length) {
         setActiveSessions(updated)
         saveSessions(updated)
       }
+      setNowMs(currentNow)
       setTick((t) => t + 1)
     }, 1000)
     return () => clearInterval(interval)
@@ -183,10 +180,28 @@ export default function BreakGlassPage() {
     )
   }, [search])
 
-  const isValid = Boolean(selectedPatient && reason && justification.trim().length >= 50 && acknowledged)
+  const validationState = {
+    patientSelected: Boolean(selectedPatient),
+    reasonSelected: Boolean(reason),
+    justificationValid: justification.trim().length >= 50,
+    acknowledgmentChecked: acknowledged,
+  }
+
+  const isValid =
+    validationState.patientSelected &&
+    validationState.reasonSelected &&
+    validationState.justificationValid &&
+    validationState.acknowledgmentChecked
+
+  const missingRequirements = [
+    !validationState.patientSelected ? "Select a patient" : null,
+    !validationState.reasonSelected ? "Choose a reason" : null,
+    !validationState.justificationValid ? "Enter at least 50 characters of justification" : null,
+    !validationState.acknowledgmentChecked ? "Acknowledge audited access" : null,
+  ].filter(Boolean) as string[]
 
   const isSessionActive = (patientId: string) =>
-    activeSessions.some((s) => s.patientId === patientId && s.expiresAt > Date.now())
+    activeSessions.some((s) => s.patientId === patientId && s.expiresAt > nowMs)
 
   const resetForm = () => {
     setSearch("")
@@ -255,6 +270,16 @@ export default function BreakGlassPage() {
     router.push(`/clinician/chart?patientId=${patientId}`)
   }
 
+  const handleRequestAccessClick = () => {
+    if (!isValid) {
+      toast.error("Complete required fields before requesting access", {
+        description: missingRequirements.join(" • "),
+      })
+      return
+    }
+    setConfirmOpen(true)
+  }
+
   return (
     <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
       <DashboardLayout role={UserRole.CLINICIAN}>
@@ -301,7 +326,7 @@ export default function BreakGlassPage() {
                         <Badge className="bg-red-100 text-red-800 border-red-300">ACTIVE</Badge>
                         <span className="font-medium">{session.patientName}</span>
                         <span className="text-sm text-muted-foreground">
-                          Expires in {formatTimeRemaining(session.expiresAt - Date.now())}
+                          Expires in {formatTimeRemaining(session.expiresAt - nowMs)}
                         </span>
                       </div>
                       <Button
@@ -419,13 +444,21 @@ export default function BreakGlassPage() {
                 </div>
 
                 <Button
-                  className="h-12 bg-red-600 text-white hover:bg-red-700"
-                  disabled={!isValid}
-                  onClick={() => setConfirmOpen(true)}
+                  className={`h-12 text-white ${
+                    isValid
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-red-400 hover:bg-red-500"
+                  }`}
+                  onClick={handleRequestAccessClick}
                 >
                   <IconShieldLock className="mr-2 h-4 w-4" />
                   Request Emergency Access
                 </Button>
+                {!isValid && (
+                  <p className="text-xs text-muted-foreground">
+                    Complete all required fields to continue.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
