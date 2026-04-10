@@ -4,7 +4,13 @@
  */
 
 export const currency = (n: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n)
+  new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(n)
+
+export const sampleHospitalBillingProfile = {
+  name: "Metro Manila Medical Center",
+  address: "Quezon City, Philippines",
+  vatRegTin: "000-123-456-000",
+} as const
 
 export const sampleCharges = [
   {
@@ -123,6 +129,90 @@ export const sampleInvoices = [
     status: "Draft" as const,
   },
 ] as const
+
+type SoaChargeLine = {
+  description: string
+  amount: number
+}
+
+type SoaDeductionLine = {
+  description: string
+  amount: number
+}
+
+export type SampleSoa = {
+  invoiceId: (typeof sampleInvoices)[number]["id"]
+  roomNo: string
+  admissionDate: string
+  dischargeDate: string
+  chargeLines: SoaChargeLine[]
+  deductionLines: SoaDeductionLine[]
+  vatRate: number
+  zeroRatedVat: number
+}
+
+export const sampleSoaByInvoiceId: Record<string, SampleSoa> = {
+  "inv-10492": {
+    invoiceId: "inv-10492",
+    roomNo: "ER-Obs-03",
+    admissionDate: "2026-04-02",
+    dischargeDate: "2026-04-02",
+    chargeLines: [
+      { description: "Emergency consult / triage", amount: 185.0 },
+      { description: "Laboratory / diagnostics", amount: 62.0 },
+    ],
+    deductionLines: [
+      { description: "PhilHealth benefit (case rate)", amount: 0 },
+      { description: "HMO / Insurance coverage", amount: 0 },
+    ],
+    vatRate: 0.12,
+    zeroRatedVat: 0,
+  },
+  "inv-10493": {
+    invoiceId: "inv-10493",
+    roomNo: "402-B",
+    admissionDate: "2026-04-05",
+    dischargeDate: "2026-04-09",
+    chargeLines: [
+      { description: "Hospital charges — Room & board (4 days @ 2,500)", amount: 10000.0 },
+      { description: "Hospital charges — Laboratory / X-Ray", amount: 4500.0 },
+      { description: "Hospital charges — Medicines / Pharmacy", amount: 8200.0 },
+      { description: "Hospital charges — Medical supplies", amount: 1300.0 },
+      { description: "Professional fees — Attending physician", amount: 5000.0 },
+    ],
+    deductionLines: [
+      { description: "PhilHealth benefit (case rate)", amount: 8500.0 },
+      { description: "Senior Citizen / PWD discount", amount: 3200.0 },
+      { description: "HMO / Insurance coverage", amount: 10000.0 },
+    ],
+    vatRate: 0.12,
+    zeroRatedVat: 0,
+  },
+  "inv-10494": {
+    invoiceId: "inv-10494",
+    roomNo: "ER-11",
+    admissionDate: "2026-04-07",
+    dischargeDate: "2026-04-07",
+    chargeLines: [{ description: "ER physician professional fee", amount: 420.0 }],
+    deductionLines: [{ description: "Charity organization support", amount: 100.0 }],
+    vatRate: 0.12,
+    zeroRatedVat: 0,
+  },
+  "inv-10495": {
+    invoiceId: "inv-10495",
+    roomNo: "OPD-03",
+    admissionDate: "2026-04-08",
+    dischargeDate: "2026-04-08",
+    chargeLines: [{ description: "OPD consultation", amount: 96.0 }],
+    deductionLines: [],
+    vatRate: 0.12,
+    zeroRatedVat: 0,
+  },
+}
+
+export function getSoaForInvoice(invoiceId: string): SampleSoa | null {
+  return sampleSoaByInvoiceId[invoiceId] ?? null
+}
 
 export const samplePayments = [
   {

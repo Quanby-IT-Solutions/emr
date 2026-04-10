@@ -2,7 +2,11 @@
 
 import * as React from "react"
 import type { BillerPaymentRow } from "@/lib/biller/sample-data"
-import { currency } from "@/lib/biller/sample-data"
+import {
+  currency,
+  getSoaForInvoice,
+  sampleHospitalBillingProfile,
+} from "@/lib/biller/sample-data"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -27,6 +31,12 @@ export function PaymentReceiptSheet({
   const printRef = React.useRef<HTMLDivElement>(null)
   const invalid =
     payment?.status === "Voided" || payment?.status === "Reversed"
+  const soa = payment ? getSoaForInvoice(payment.invoiceId) : null
+  const gross = soa ? soa.chargeLines.reduce((s, c) => s + c.amount, 0) : payment?.amount ?? 0
+  const totalDeductions = soa
+    ? soa.deductionLines.reduce((s, d) => s + d.amount, 0)
+    : 0
+  const netDue = Math.max(gross - totalDeductions, 0)
 
   const handlePrint = () => {
     if (invalid) return
@@ -56,11 +66,11 @@ export function PaymentReceiptSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Payment receipt</SheetTitle>
+          <SheetTitle>Official Receipt (OR)</SheetTitle>
           <SheetDescription>
-            Receipt generated after payment is accepted. Posted payments are not removed from the
-            record—use void or reverse adjustments per policy (full flows when the ledger is
-            connected).
+            Philippine-style OR preview issued after payment posting. Posted payments are not
+            removed from the record—use void or reverse adjustments per policy (full flows when the
+            ledger is connected).
           </SheetDescription>
         </SheetHeader>
 
@@ -77,10 +87,17 @@ export function PaymentReceiptSheet({
               className={`rounded-lg border bg-card p-6 text-card-foreground shadow-sm ${invalid ? "opacity-60" : ""}`}
             >
               <p className="text-center text-sm font-semibold tracking-wide uppercase">
-                Sample Hospital
+                {sampleHospitalBillingProfile.name}
               </p>
-              <p className="text-muted-foreground text-center text-xs">Payment receipt</p>
-              <p className="mt-4 text-center font-mono text-lg font-bold">{payment.receiptId}</p>
+              <p className="text-muted-foreground text-center text-xs">
+                {sampleHospitalBillingProfile.address}
+              </p>
+              <p className="text-muted-foreground text-center text-xs">
+                VAT Reg TIN: {sampleHospitalBillingProfile.vatRegTin}
+              </p>
+              <p className="mt-4 text-center font-mono text-lg font-bold">
+                OR No. {payment.receiptId}
+              </p>
               <table className="mt-4 w-full text-sm">
                 <tbody>
                   <tr>
@@ -102,8 +119,40 @@ export function PaymentReceiptSheet({
                     <td className="py-1.5">{payment.method}</td>
                   </tr>
                   <tr>
+                    <td className="text-muted-foreground py-1.5">VATable sales</td>
+                    <td className="py-1.5">{currency(gross)}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-muted-foreground py-1.5">VAT (12%)</td>
+                    <td className="py-1.5">{currency(gross * 0.12)}</td>
+                  </tr>
+                  {soa?.deductionLines?.length ? (
+                    <>
+                      <tr>
+                        <td className="pt-3 font-medium">Deductions &amp; discounts</td>
+                        <td />
+                      </tr>
+                      {soa.deductionLines.map((d, idx) => (
+                        <tr key={`${d.description}-${idx}`}>
+                          <td className="text-muted-foreground py-1.5">{d.description}</td>
+                          <td className="py-1.5 text-right">({currency(d.amount)})</td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td className="py-1.5 font-medium">Total deductions</td>
+                        <td className="py-1.5 text-right font-medium">
+                          ({currency(totalDeductions)})
+                        </td>
+                      </tr>
+                    </>
+                  ) : null}
+                  <tr>
                     <td className="text-muted-foreground py-1.5">Applied to invoice</td>
                     <td className="py-1.5 font-mono text-xs">{payment.invoiceId}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-muted-foreground py-1.5">Net amount due (SOA)</td>
+                    <td className="py-1.5">{currency(netDue)}</td>
                   </tr>
                   <tr>
                     <td className="text-muted-foreground py-1.5">Payment ref.</td>
