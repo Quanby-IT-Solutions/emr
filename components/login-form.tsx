@@ -58,7 +58,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to EMR System</CardTitle>
+          <CardTitle>Login to QHealth EMR</CardTitle>
           <CardDescription>
             Enter your credentials to access the system
           </CardDescription>

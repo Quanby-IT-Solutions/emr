@@ -158,7 +158,7 @@ export default function PatientSearchPage() {
 
         {/* Patient Detail Dialog */}
         <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl!">
             <DialogHeader><DialogTitle>Patient Record — {selectedPatient?.name}</DialogTitle></DialogHeader>
             {selectedPatient && (
               <div className="space-y-4">

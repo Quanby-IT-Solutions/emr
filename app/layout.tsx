@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EMR System",
-  description: "Electronic Medical Records System",
+  title: "QHealth EMR",
+  description: "QHealth Electronic Medical Records System",
 };
 
 export default function RootLayout({

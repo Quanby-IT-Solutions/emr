@@ -43,14 +43,14 @@ export function AppSidebar({ role, userName = "User", userEmail = "user@example.
             >
               <Link href="/">
                 <IconHeartbeat className="!size-5" />
-                <span className="text-base font-semibold">EMR System</span>
+                <span className="text-base font-semibold">QHealth EMR</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navItems} role={role} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
