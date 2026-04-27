@@ -127,9 +127,7 @@ export default function Page() {
           {/* Logo & Brand */}
           <div className="animate-in fade-in slide-in-from-top-8 duration-700">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-primary to-emerald-600 shadow-lg shadow-primary/20">
-                <IconActivityHeartbeat className="h-7 w-7 text-white" />
-              </div>
+              <img src="/new-logo.png" alt="QHealth Logo" className="h-14 w-auto object-contain" />
               <div className="space-y-0.5">
                 <h1 className="text-2xl font-bold tracking-tight text-zinc-50">QHealth EMR</h1>
                 <p className="text-sm font-medium text-zinc-400">Enterprise Medical Platform</p>
@@ -202,9 +200,7 @@ export default function Page() {
         <div className="relative z-10 mx-auto w-full max-w-[440px] duration-500 animate-in fade-in zoom-in-95">
           {/* Mobile Logo */}
           <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-600 shadow-md">
-              <IconActivityHeartbeat className="h-6 w-6 text-white" />
-            </div>
+            <img src="/new-logo.png" alt="QHealth Logo" className="h-10 w-auto object-contain" />
             <div>
               <span className="text-xl font-bold tracking-tight">QHealth</span>
               <p className="text-xs font-medium text-muted-foreground">Enterprise Medical</p>
