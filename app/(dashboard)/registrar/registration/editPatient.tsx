@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { PatientRecord } from "./dummyregistration"
+import { PatientRecord } from "@/lib/api/patients-client"
 import { useState } from "react"
 import { 
     CalendarIcon, 

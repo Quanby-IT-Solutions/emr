@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -19,6 +20,7 @@ import {
   IconBed,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { useAuth } from "@/lib/auth/context"
 
 // --- Mock Data ---
 
@@ -67,6 +69,30 @@ const statusBadge = (status: "Scheduled" | "Checked-In" | "In Progress" | "Compl
 
 export default function ClinicianDashboard() {
   const router = useRouter()
+  const { user } = useAuth()
+  const [draftNoteCount, setDraftNoteCount] = useState<number | null>(null)
+  const [activePatientCount, setActivePatientCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!user?.staffId) return
+    fetch(`/api/clinical-notes?authorId=${user.staffId}&status=DRAFT`)
+      .then((r) => r.json())
+      .then((json) => {
+        const notes = Array.isArray(json?.data) ? json.data : []
+        setDraftNoteCount(notes.length)
+      })
+      .catch(() => {})
+    fetch('/api/patients?withEncounters=true')
+      .then((r) => r.json())
+      .then((json) => {
+        const pts = Array.isArray(json?.data) ? json.data : []
+        const active = pts.filter((p: any) =>
+          (p.encounters ?? []).some((e: any) => e.status === 'ACTIVE')
+        )
+        setActivePatientCount(active.length)
+      })
+      .catch(() => {})
+  }, [user?.staffId])
 
   return (
     <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
@@ -84,12 +110,12 @@ export default function ClinicianDashboard() {
           <div className="grid gap-4 px-4 md:grid-cols-3 lg:grid-cols-5 lg:px-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Today&apos;s Patients</CardTitle>
+                <CardTitle className="text-sm font-medium">Active Patients</CardTitle>
                 <IconUsers className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">16</div>
-                <p className="text-xs text-muted-foreground">Scheduled for today</p>
+                <div className="text-2xl font-bold">{activePatientCount ?? '—'}</div>
+                <p className="text-xs text-muted-foreground">With active encounters</p>
               </CardContent>
             </Card>
 
@@ -99,7 +125,7 @@ export default function ClinicianDashboard() {
                 <IconFileCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">5</div>
+                <div className="text-2xl font-bold">—</div>
                 <p className="text-xs text-muted-foreground">Awaiting review</p>
               </CardContent>
             </Card>
@@ -110,7 +136,7 @@ export default function ClinicianDashboard() {
                 <IconPencil className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">3</div>
+                <div className="text-2xl font-bold">{draftNoteCount ?? '—'}</div>
                 <p className="text-xs text-muted-foreground">Require signature</p>
               </CardContent>
             </Card>

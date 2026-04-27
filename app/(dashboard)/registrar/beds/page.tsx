@@ -51,6 +51,8 @@ import {
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { bedsClient, type ApiBed } from "@/lib/api/beds-client"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,118 +103,6 @@ interface Location {
   activeEncounter?: Encounter | null
 }
 
-// --- Mock Data ---
-
-const MOCK_DEPARTMENTS: Department[] = [
-  { id: "dept-er", name: "Emergency Room", type: "CLINICAL" },
-  { id: "dept-icu", name: "Intensive Care Unit", type: "CLINICAL" },
-  { id: "dept-med", name: "General Medicine", type: "CLINICAL" },
-  { id: "dept-ped", name: "Pediatrics", type: "CLINICAL" },
-]
-
-const MOCK_BEDS: Location[] = [
-  {
-    id: "loc-1",
-    departmentId: "dept-er",
-    unit: "ER-A",
-    roomNumber: "101",
-    bedNumber: "1",
-    status: "OCCUPIED",
-    department: MOCK_DEPARTMENTS[0],
-    activeEncounter: {
-      id: "enc-1",
-      status: "ACTIVE",
-      startDateTime: "2025-12-03T08:30:00",
-      consultant: "Dr. Sarah Smith",
-      patient: {
-        id: "pat-1",
-        mrn: "MRN-1001",
-        firstName: "John",
-        lastName: "Doe",
-        gender: "Male",
-        dateOfBirth: "1980-01-15",
-      },
-    },
-  },
-  {
-    id: "loc-2",
-    departmentId: "dept-er",
-    unit: "ER-A",
-    roomNumber: "102",
-    bedNumber: "1",
-    status: "AVAILABLE",
-    department: MOCK_DEPARTMENTS[0],
-  },
-  {
-    id: "loc-3",
-    departmentId: "dept-icu",
-    unit: "ICU-West",
-    roomNumber: "201",
-    bedNumber: "A",
-    status: "CLEANING",
-    department: MOCK_DEPARTMENTS[1],
-  },
-  {
-    id: "loc-4",
-    departmentId: "dept-icu",
-    unit: "ICU-West",
-    roomNumber: "202",
-    bedNumber: "A",
-    status: "AVAILABLE",
-    department: MOCK_DEPARTMENTS[1],
-  },
-  {
-    id: "loc-5",
-    departmentId: "dept-med",
-    unit: "3North",
-    roomNumber: "305",
-    bedNumber: "1",
-    status: "OCCUPIED",
-    department: MOCK_DEPARTMENTS[2],
-    activeEncounter: {
-      id: "enc-2",
-      status: "ACTIVE",
-      startDateTime: "2025-11-20T14:15:00", // Older date to show LOS
-      consultant: "Dr. James Wilson",
-      patient: {
-        id: "pat-2",
-        mrn: "MRN-2045",
-        firstName: "Alice",
-        lastName: "Smith",
-        gender: "Female",
-        dateOfBirth: "1992-05-20",
-      },
-    },
-  },
-  {
-    id: "loc-6",
-    departmentId: "dept-med",
-    unit: "3North",
-    roomNumber: "305",
-    bedNumber: "2",
-    status: "AVAILABLE",
-    department: MOCK_DEPARTMENTS[2],
-  },
-  {
-    id: "loc-7",
-    departmentId: "dept-ped",
-    unit: "4South",
-    roomNumber: "410",
-    bedNumber: "1",
-    status: "OUT_OF_SERVICE",
-    department: MOCK_DEPARTMENTS[3],
-  },
-  {
-    id: "loc-8",
-    departmentId: "dept-ped",
-    unit: "4South",
-    roomNumber: "411",
-    bedNumber: "1",
-    status: "AVAILABLE",
-    department: MOCK_DEPARTMENTS[3],
-  },
-]
-
 function calculateLOS(startDate: string) {
   const start = new Date(startDate)
   const now = new Date()
@@ -222,24 +112,45 @@ function calculateLOS(startDate: string) {
 }
 
 export default function BedsPage() {
-  // State
-  const [beds, setBeds] = useState<Location[]>(MOCK_BEDS)
+  const queryClient = useQueryClient()
+
+  const { data: beds = [], isLoading: bedsLoading } = useQuery({
+    queryKey: ["beds"],
+    queryFn: () => bedsClient.list(),
+  })
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments"],
+    queryFn: () => bedsClient.listDepartments(),
+  })
+
+  const assignMutation = useMutation({
+    mutationFn: (vars: { bedId: string; mrn: string; encounterId?: string; notes?: string }) =>
+      bedsClient.assign(vars),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["beds"] })
+      setIsAssignOpen(false)
+      toast.success(`Patient assigned to ${selectedBed?.roomNumber}-${selectedBed?.bedNumber}`)
+      setAssignForm({ mrn: "", encounterId: "", consultant: "", notes: "" })
+    },
+    onError: (err: Error) => toast.error(`Assignment failed: ${err.message}`),
+  })
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  
+
   // Assignment Dialog State
   const [isAssignOpen, setIsAssignOpen] = useState(false)
   const [isDiscardOpen, setIsDiscardOpen] = useState(false)
-  const [selectedBed, setSelectedBed] = useState<Location | null>(null)
+  const [selectedBed, setSelectedBed] = useState<ApiBed | null>(null)
   const [assignForm, setAssignForm] = useState({
     mrn: "",
     encounterId: "",
     consultant: "",
     notes: "",
   })
-  const [isAssigning, setIsAssigning] = useState(false)
 
   // Filter Logic
   const filteredBeds = useMemo(() => {
@@ -277,7 +188,7 @@ export default function BedsPage() {
   }, [filteredBeds])
 
   // Handlers
-  const handleAssignClick = (bed: Location) => {
+  const handleAssignClick = (bed: ApiBed) => {
     setSelectedBed(bed)
     setAssignForm({ mrn: "", encounterId: "", consultant: "", notes: "" })
     setIsAssignOpen(true)
@@ -303,45 +214,17 @@ export default function BedsPage() {
     setAssignForm({ mrn: "", encounterId: "", consultant: "", notes: "" })
   }
 
-  const handleAssignSubmit = async () => {
+  const handleAssignSubmit = () => {
     if (!assignForm.mrn || !selectedBed) {
       toast.error("Please enter a Patient MRN")
       return
     }
-    
-    setIsAssigning(true)
-
-    // Create new encounter with current timestamp
-    const newEncounter: Encounter = {
-      id: assignForm.encounterId || `enc-${Date.now()}`,
-      status: "ACTIVE",
-      startDateTime: new Date().toISOString(),
-      consultant: assignForm.consultant || "Dr. Unassigned",
-      patient: {
-        id: `pat-${Date.now()}`,
-        mrn: assignForm.mrn,
-        firstName: "New", // Mock data for new patient
-        lastName: "Patient",
-        gender: "Unknown",
-        dateOfBirth: "2000-01-01",
-      }
-    }
-
-    // Update beds state
-    setBeds(prevBeds => prevBeds.map(bed => {
-      if (bed.id === selectedBed.id) {
-        return {
-          ...bed,
-          status: "OCCUPIED",
-          activeEncounter: newEncounter
-        }
-      }
-      return bed
-    }))
-    
-    setIsAssigning(false)
-    setIsAssignOpen(false)
-    toast.success(`Patient assigned to ${selectedBed.roomNumber}-${selectedBed.bedNumber}`)
+    assignMutation.mutate({
+      bedId: selectedBed.id,
+      mrn: assignForm.mrn,
+      encounterId: assignForm.encounterId || undefined,
+      notes: assignForm.notes || undefined,
+    })
   }
 
   const getStatusStyles = (status: LocationStatus | null) => {
@@ -396,7 +279,7 @@ export default function BedsPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+              <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ["beds"] })}>
                 <IconRefresh className="h-4 w-4 mr-2" />
                 Refresh Data
               </Button>
@@ -475,7 +358,7 @@ export default function BedsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Departments</SelectItem>
-                          {MOCK_DEPARTMENTS.map((dept) => (
+                          {departments.map((dept) => (
                             <SelectItem key={dept.id} value={dept.id}>
                               {dept.name}
                             </SelectItem>
@@ -508,7 +391,11 @@ export default function BedsPage() {
 
           {/* Content Area */}
           <div className="px-4 lg:px-6 flex-1">
-            {filteredBeds.length === 0 ? (
+            {bedsLoading ? (
+              <div className="flex items-center justify-center h-[400px] text-muted-foreground">
+                Loading beds...
+              </div>
+            ) : filteredBeds.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[400px] text-center border rounded-lg bg-muted/20 border-dashed">
                 <div className="bg-background p-4 rounded-full shadow-sm mb-4">
                   <IconSearch className="h-8 w-8 text-muted-foreground" />
@@ -799,8 +686,8 @@ export default function BedsPage() {
                 <Button variant="outline" onClick={handleAssignCancel}>
                   Cancel
                 </Button>
-                <Button onClick={handleAssignSubmit} disabled={isAssigning}>
-                  {isAssigning ? "Assigning..." : "Confirm Assignment"}
+                <Button onClick={handleAssignSubmit} disabled={assignMutation.isPending}>
+                  {assignMutation.isPending ? "Assigning..." : "Confirm Assignment"}
                 </Button>
               </DialogFooter>
             </DialogContent>

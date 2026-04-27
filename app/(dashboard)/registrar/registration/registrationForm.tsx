@@ -11,14 +11,13 @@ import { Dialog, DialogContent, DialogFooter, DialogDescription, DialogHeader, D
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState } from "react"
-import { 
-    CalendarIcon, 
-    User, 
-    Phone, 
-    Mail, 
-    MapPin, 
+import {
+    CalendarIcon,
+    User,
+    Phone,
+    Mail,
+    MapPin,
     AlertCircle,
-    Save,
     UserPlus,
     X,
     Heart,
@@ -29,6 +28,8 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { patientsClient } from "@/lib/api/patients-client"
 
 interface RegistrationFormProps {
     open: boolean
@@ -36,29 +37,48 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) {
+    const queryClient = useQueryClient()
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [gender, setGender] = useState("")
     const [dateOfBirth, setDateOfBirth] = useState<Date>()
+    const [contactPhone, setContactPhone] = useState("")
+    const [email, setEmail] = useState("")
     const [hasInsurance, setHasInsurance] = useState(false)
+
+    const registerMutation = useMutation({
+        mutationFn: () =>
+            patientsClient.create({
+                firstName,
+                lastName,
+                dateOfBirth: dateOfBirth ? format(dateOfBirth, "yyyy-MM-dd") : "",
+                gender: gender || undefined,
+                contactPhone: contactPhone || undefined,
+                email: email || undefined,
+            }),
+        onSuccess: (patient) => {
+            queryClient.invalidateQueries({ queryKey: ["patients"] })
+            toast.success(`Patient registered successfully — ${patient.mrn}`)
+            setFirstName("")
+            setLastName("")
+            setGender("")
+            setDateOfBirth(undefined)
+            setContactPhone("")
+            setEmail("")
+            onOpenChange(false)
+        },
+        onError: (err: Error) => {
+            toast.error(`Registration failed: ${err.message}`)
+        },
+    })
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        const form = e.target as HTMLFormElement
-        const formData = new FormData(form)
-        const patientData = Object.fromEntries(formData.entries())
-        // Store in localStorage as a simple persistence mechanism
-        const existing = JSON.parse(localStorage.getItem("pgh-registered-patients") ?? "[]")
-        const hospitalNumber = `PGH-${new Date().getFullYear()}-${String(existing.length + 1).padStart(5, "0")}`
-        existing.push({ ...patientData, hospitalNumber, registeredAt: new Date().toISOString(), status: "active" })
-        localStorage.setItem("pgh-registered-patients", JSON.stringify(existing))
-        toast.success(`Patient registered successfully — ${hospitalNumber}`)
-        onOpenChange(false)
-    }
-
-    const handleSaveAsDraft = () => {
-        const drafts = JSON.parse(localStorage.getItem("pgh-registration-drafts") ?? "[]")
-        drafts.push({ savedAt: new Date().toISOString(), dateOfBirth: dateOfBirth?.toISOString() })
-        localStorage.setItem("pgh-registration-drafts", JSON.stringify(drafts))
-        toast.info("Registration saved as draft")
-        onOpenChange(false)
+        if (!firstName || !lastName || !dateOfBirth) {
+            toast.error("Please fill in all required fields")
+            return
+        }
+        registerMutation.mutate()
     }
 
     return (
@@ -159,11 +179,11 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                                 <div className="grid gap-4 md:grid-cols-3">
                                     <div className="space-y-2">
                                         <Label htmlFor="lastName">Last Name *</Label>
-                                        <Input id="lastName" placeholder="Dela Cruz" required />
+                                        <Input id="lastName" placeholder="Dela Cruz" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName">First Name *</Label>
-                                        <Input id="firstName" placeholder="Juan" required />
+                                        <Input id="firstName" placeholder="Juan" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="middleName">Middle Name</Label>
@@ -175,7 +195,7 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="gender">Gender *</Label>
-                                        <Select required>
+                                        <Select required value={gender} onValueChange={setGender}>
                                             <SelectTrigger id="gender">
                                                 <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
@@ -246,19 +266,21 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="mobileNumber">Mobile Number *</Label>
-                                        <Input 
-                                            id="mobileNumber" 
+                                        <Input
+                                            id="mobileNumber"
                                             type="tel"
-                                            placeholder="+63 917 123 4567" 
-                                            required 
+                                            placeholder="+63 917 123 4567"
+                                            required
+                                            value={contactPhone}
+                                            onChange={(e) => setContactPhone(e.target.value)}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="landline">Landline</Label>
-                                        <Input 
-                                            id="landline" 
+                                        <Input
+                                            id="landline"
                                             type="tel"
-                                            placeholder="(02) 8123-4567" 
+                                            placeholder="(02) 8123-4567"
                                         />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
@@ -266,10 +288,12 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                                             <Mail className="inline h-4 w-4 mr-1" />
                                             Email Address
                                         </Label>
-                                        <Input 
-                                            id="email" 
+                                        <Input
+                                            id="email"
                                             type="email"
-                                            placeholder="juan.delacruz@email.com" 
+                                            placeholder="juan.delacruz@email.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -629,13 +653,9 @@ export function RegistrationForm({ open, onOpenChange }: RegistrationFormProps) 
                         <X className="mr-2 h-4 w-4" />
                         Cancel
                     </Button>
-                    <Button type="button" variant="secondary" onClick={handleSaveAsDraft}>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save as Draft
-                    </Button>
-                    <Button type="submit" form="registration-form">
+                    <Button type="submit" form="registration-form" disabled={registerMutation.isPending}>
                         <UserPlus className="mr-2 h-4 w-4" />
-                        Register Patient
+                        {registerMutation.isPending ? "Registering..." : "Register Patient"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

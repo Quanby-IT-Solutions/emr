@@ -102,8 +102,11 @@ const initialUserRequests: ITServiceRequest[] = [
 ]
 
 export default function ITSupportPage() {
-  const { user } = useAuth()
-  const role = (user?.role as UserRole) || UserRole.NURSE
+  const { user, isLoading } = useAuth()
+
+  if (isLoading || !user) return null
+
+  const role = user.role
 
   const [requests, setRequests] = useState<ITServiceRequest[]>(initialUserRequests)
   const [searchQuery, setSearchQuery] = useState("")
@@ -150,7 +153,7 @@ export default function ITSupportPage() {
       subject: newSubject,
       description: newDescription,
       requestingDepartment: getDepartmentForRole(role),
-      requestedBy: user?.username || "Current User",
+      requestedBy: user.username,
       status: "Received",
       priority: newPriority,
       assignedTechnician: null,

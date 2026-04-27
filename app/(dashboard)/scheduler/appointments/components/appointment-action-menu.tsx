@@ -3,7 +3,7 @@
 import { MoreHorizontal, Edit, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { AppointmentEntry } from "@/app/(dashboard)/dummy-data/dummy-appointments"
+import { AppointmentEntry } from "@/lib/api/appointments-client"
 
 interface AppointmentActionsMenuProps {
   appointment: AppointmentEntry

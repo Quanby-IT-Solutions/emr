@@ -1,12 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Combobox } from "@/components/ui/combo-box"
 import {
   Dialog,
@@ -16,36 +15,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { IconAlertTriangle } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 interface PlaceOrderDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onOrderPlaced?: () => void
 }
 
-const patientOptions = [
-  { value: "1", label: "John Doe (MRN-001)" },
-  { value: "2", label: "Jane Smith (MRN-002)" },
-  { value: "3", label: "Bob Wilson (MRN-003)" },
-]
-
-const allergyMap: Record<string, { substance: string; severity: string }[]> = {
-  "1": [
-    { substance: "Penicillin", severity: "SEVERE" },
-    { substance: "Peanuts", severity: "SEVERE" },
-  ],
-  "2": [{ substance: "Latex", severity: "MODERATE" }],
-  "3": [],
+interface PatientOption {
+  id: string
+  label: string
+  encounterId: string | null
 }
 
-type OrderType = "MEDICATION" | "LAB" | "IMAGING" | "ADMIT" | "DISCHARGE"
+type OrderType = "MEDICATION" | "LAB" | "IMAGING" | "ADMIT_INPATIENT" | "DISCHARGE"
 
-export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) {
-  const [selectedPatient, setSelectedPatient] = useState("")
+export function PlaceOrderDialog({ open, onOpenChange, onOrderPlaced }: PlaceOrderDialogProps) {
+  const [patients, setPatients] = useState<PatientOption[]>([])
+  const [selectedPatientId, setSelectedPatientId] = useState("")
   const [orderType, setOrderType] = useState<OrderType | "">("")
   const [priority, setPriority] = useState("ROUTINE")
   const [instructions, setInstructions] = useState("")
+  const [loading, setLoading] = useState(false)
 
   // Medication fields
   const [medication, setMedication] = useState("")
@@ -62,14 +54,32 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
   const [bodyPart, setBodyPart] = useState("")
   const [contrast, setContrast] = useState("")
 
-  // Admit/Discharge fields
+  // Admit / Discharge fields
   const [admitUnit, setAdmitUnit] = useState("")
   const [admitReason, setAdmitReason] = useState("")
 
-  const patientAllergies = selectedPatient ? (allergyMap[selectedPatient] ?? []) : []
+  useEffect(() => {
+    if (!open) return
+    fetch("/api/patients?withEncounters=true")
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const opts: PatientOption[] = (data ?? []).map((p: any) => {
+          const activeEnc = (p.encounters ?? []).find((e: any) => e.status === "ACTIVE")
+          return {
+            id: p.id,
+            label: `${p.firstName} ${p.lastName} (${p.mrn})`,
+            encounterId: activeEnc?.id ?? null,
+          }
+        })
+        setPatients(opts)
+      })
+      .catch(() => {})
+  }, [open])
+
+  const selectedPatient = patients.find((p) => p.id === selectedPatientId)
 
   const resetForm = () => {
-    setSelectedPatient("")
+    setSelectedPatientId("")
     setOrderType("")
     setPriority("ROUTINE")
     setInstructions("")
@@ -86,18 +96,80 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
     setAdmitReason("")
   }
 
-  const handleSubmit = () => {
-    if (!selectedPatient || !orderType) {
+  const buildDetails = (): Record<string, unknown> | null => {
+    switch (orderType) {
+      case "MEDICATION":
+        if (!medication || !dose || !route || !frequency) return null
+        return { orderType: "MEDICATION", medicationName: medication, dose, route, frequency }
+      case "LAB":
+        if (!labTest) return null
+        return { orderType: "LAB", testName: labTest, ...(specimen ? { specimen } : {}) }
+      case "IMAGING":
+        if (!imagingStudy) return null
+        return {
+          orderType: "IMAGING",
+          study: imagingStudy,
+          ...(bodyPart ? { bodyPart } : {}),
+          ...(contrast ? { contrast } : {}),
+        }
+      case "ADMIT_INPATIENT":
+        if (!admitUnit) return null
+        return { orderType: "ADMIT_INPATIENT", unit: admitUnit, ...(admitReason ? { reason: admitReason } : {}) }
+      case "DISCHARGE":
+        return { orderType: "DISCHARGE", ...(admitReason ? { instructions: admitReason } : {}) }
+      default:
+        return null
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!selectedPatientId || !orderType) {
       toast.error("Please select a patient and order type")
       return
     }
-    const patient = patientOptions.find((p) => p.value === selectedPatient)
-    toast.success(`Order placed successfully`, {
-      description: `${orderType} order for ${patient?.label}`,
-    })
-    resetForm()
-    onOpenChange(false)
+    if (!selectedPatient?.encounterId) {
+      toast.error("Selected patient has no active encounter")
+      return
+    }
+    const details = buildDetails()
+    if (!details) {
+      toast.error("Please fill in all required order fields")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/encounters/${selectedPatient.encounterId}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderType,
+          details,
+          priority,
+          ...(instructions ? { clinicalIndication: instructions } : {}),
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to place order")
+        return
+      }
+
+      toast.success("Order placed successfully", {
+        description: `${orderType} order for ${selectedPatient.label}`,
+      })
+      onOrderPlaced?.()
+      resetForm()
+      onOpenChange(false)
+    } catch {
+      toast.error("Failed to place order")
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const patientComboOptions = patients.map((p) => ({ value: p.id, label: p.label }))
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,9 +187,9 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
             <div className="space-y-2">
               <Label>Patient</Label>
               <Combobox
-                options={patientOptions}
-                value={selectedPatient}
-                onChange={setSelectedPatient}
+                options={patientComboOptions}
+                value={selectedPatientId}
+                onChange={setSelectedPatientId}
                 placeholder="Search patient..."
                 emptyMessage="No patients found."
               />
@@ -132,35 +204,18 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
                   <SelectItem value="MEDICATION">Medication</SelectItem>
                   <SelectItem value="LAB">Laboratory</SelectItem>
                   <SelectItem value="IMAGING">Imaging</SelectItem>
-                  <SelectItem value="ADMIT">Admit / Transfer</SelectItem>
+                  <SelectItem value="ADMIT_INPATIENT">Admit / Transfer</SelectItem>
                   <SelectItem value="DISCHARGE">Discharge</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Allergy Alert */}
-          {selectedPatient && patientAllergies.length > 0 && (
-            <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-300 rounded-md">
-              <IconAlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-red-800">Allergy Alert</p>
-                <div className="flex flex-wrap gap-1">
-                  {patientAllergies.map((a) => (
-                    <Badge
-                      key={a.substance}
-                      className={
-                        a.severity === "SEVERE"
-                          ? "bg-red-600 text-white"
-                          : "bg-amber-500 text-white"
-                      }
-                    >
-                      {a.substance} ({a.severity})
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
+          {/* No active encounter warning */}
+          {selectedPatientId && selectedPatient && !selectedPatient.encounterId && (
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-300 rounded px-3 py-2">
+              This patient has no active encounter. Orders require an active encounter.
+            </p>
           )}
 
           {/* Medication Fields */}
@@ -300,15 +355,15 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
                   <SelectContent>
                     <SelectItem value="NONE">Without Contrast</SelectItem>
                     <SelectItem value="WITH">With Contrast</SelectItem>
-                    <SelectItem value="BOTH">With & Without</SelectItem>
+                    <SelectItem value="BOTH">With &amp; Without</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
           )}
 
-          {/* Admit / Transfer Fields */}
-          {orderType === "ADMIT" && (
+          {/* Admit Fields */}
+          {orderType === "ADMIT_INPATIENT" && (
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Admitting Unit</Label>
@@ -380,11 +435,14 @@ export function PlaceOrderDialog({ open, onOpenChange }: PlaceOrderDialogProps) 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!selectedPatient || !orderType}>
-            Submit Order
+          <Button
+            onClick={handleSubmit}
+            disabled={!selectedPatientId || !orderType || loading}
+          >
+            {loading ? "Placing..." : "Submit Order"}
           </Button>
         </DialogFooter>
       </DialogContent>

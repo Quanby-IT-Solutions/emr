@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -33,250 +33,139 @@ import {
 } from "./components/verification-detail-sheet"
 
 // ---------------------------------------------------------------------------
-// Mock Data
+// API type (shape returned by /api/orders/pharmacy-queue)
 // ---------------------------------------------------------------------------
 
-const mockOrders: VerificationOrder[] = [
-  {
-    id: 1,
-    patient: "John Doe",
-    mrn: "MRN-001234",
-    age: 62,
-    weight: 78,
-    allergies: [{ substance: "Penicillin", severity: "Severe" }],
-    renalFunction: "Mild impairment",
-    eGFR: 55,
-    activeProblems: ["Hypertension", "Type 2 Diabetes", "CKD Stage 3a"],
-    medication: "Heparin Sodium",
-    dose: "5,000 units",
-    route: "IV",
-    frequency: "Every 12 hours",
-    indication: "DVT Prophylaxis",
-    prescriber: "Dr. Smith",
-    priority: "STAT",
-    orderTime: "2026-04-09 08:15",
-    isHighRisk: true,
-    isProspective: false,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      drugInteraction: "Minor",
-      drugInteractionDetail: "Concurrent aspirin — monitor for bleeding",
-      renalDosing: "Adjustment Needed",
-      renalDosingDetail: "eGFR 55 — consider dose reduction per protocol",
-    },
-  },
-  {
-    id: 2,
-    patient: "Jane Smith",
-    mrn: "MRN-002345",
-    age: 45,
-    weight: 65,
-    allergies: [],
-    renalFunction: "Normal",
-    eGFR: 95,
-    activeProblems: ["Hyperlipidemia"],
-    medication: "Atorvastatin",
-    dose: "40 mg",
-    route: "PO",
-    frequency: "Once daily at bedtime",
-    indication: "Hyperlipidemia",
-    prescriber: "Dr. Johnson",
-    priority: "Routine",
-    orderTime: "2026-04-09 09:30",
+interface PharmacyQueueOrder {
+  id: string
+  orderType: string
+  status: string
+  priority: string
+  clinicalIndication: string | null
+  createdAt: string
+  details: {
+    orderType: string
+    medicationName?: string
+    dose?: string
+    route?: string
+    frequency?: string
+  }
+  placer: { id: string; firstName: string; lastName: string; jobTitle: string | null }
+  encounter: {
+    patient: {
+      id: string
+      mrn: string
+      firstName: string
+      lastName: string
+      dateOfBirth: string
+      allergies: Array<{
+        substance: string
+        severity: string | null
+        status: string
+      }>
+      patientHistories: Array<{
+        entry: string
+        type: string
+        status: string
+      }>
+    }
+  }
+  clinicalChecks: {
+    allergyAlert: boolean
+    drugInteraction: boolean
+    renalDosing: boolean
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mapper: DB order → VerificationOrder
+// ---------------------------------------------------------------------------
+
+function calcAge(dob: string): number {
+  const birth = new Date(dob)
+  const now = new Date()
+  let age = now.getFullYear() - birth.getFullYear()
+  const m = now.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--
+  return age
+}
+
+function mapSeverity(s: string | null): "Mild" | "Moderate" | "Severe" {
+  switch (s) {
+    case "MODERATE": return "Moderate"
+    case "SEVERE": return "Severe"
+    default: return "Mild"
+  }
+}
+
+function mapPriority(p: string): "STAT" | "Urgent" | "Routine" {
+  if (p === "STAT") return "STAT"
+  if (p === "URGENT") return "Urgent"
+  return "Routine"
+}
+
+function toVerificationOrder(o: PharmacyQueueOrder): VerificationOrder {
+  const patient = o.encounter.patient
+  const allergies = (patient.allergies ?? [])
+    .filter((a) => a.status === "ACTIVE")
+    .map((a) => ({ substance: a.substance, severity: mapSeverity(a.severity) }))
+
+  const activeProblems = (patient.patientHistories ?? [])
+    .filter((h) => h.status === "ACTIVE")
+    .map((h) => h.entry)
+
+  const checks = o.clinicalChecks
+
+  return {
+    id: o.id,
+    patient: `${patient.firstName} ${patient.lastName}`,
+    mrn: patient.mrn,
+    age: calcAge(patient.dateOfBirth),
+    weight: 0,
+    allergies,
+    renalFunction: "Unknown",
+    eGFR: 0,
+    activeProblems,
+    medication: o.details.medicationName ?? "—",
+    dose: o.details.dose ?? "—",
+    route: o.details.route ?? "—",
+    frequency: o.details.frequency ?? "—",
+    indication: o.clinicalIndication ?? "",
+    prescriber: `${o.placer.firstName} ${o.placer.lastName}`,
+    priority: mapPriority(o.priority),
+    orderTime: new Date(o.createdAt).toLocaleString(),
     isHighRisk: false,
     isProspective: false,
     clinicalChecks: {
-      allergyCheck: "Pass",
+      allergyCheck: checks.allergyAlert ? "Warning" : "Pass",
       doseRangeCheck: "Pass",
-      drugInteraction: "None",
-      renalDosing: "N/A",
+      drugInteraction: checks.drugInteraction ? "Minor" : "None",
+      renalDosing: checks.renalDosing ? "Adjustment Needed" : "N/A",
     },
-  },
-  {
-    id: 3,
-    patient: "Bob Wilson",
-    mrn: "MRN-003456",
-    age: 71,
-    weight: 82,
-    allergies: [
-      { substance: "Sulfa", severity: "Moderate" },
-      { substance: "Codeine", severity: "Mild" },
-    ],
-    renalFunction: "Moderate impairment",
-    eGFR: 38,
-    activeProblems: ["Atrial Fibrillation", "CHF", "CKD Stage 3b"],
-    medication: "Warfarin Sodium",
-    dose: "5 mg",
-    route: "PO",
-    frequency: "Once daily",
-    indication: "Atrial Fibrillation — stroke prevention",
-    prescriber: "Dr. Davis",
-    priority: "Urgent",
-    orderTime: "2026-04-09 07:45",
-    isHighRisk: true,
-    isProspective: false,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Warning",
-      doseRangeDetail: "INR trending high — verify target range",
-      drugInteraction: "Major",
-      drugInteractionDetail: "Concurrent Amiodarone — increased bleeding risk",
-      renalDosing: "Adjustment Needed",
-      renalDosingDetail: "eGFR 38 — monitor coagulation closely",
-    },
-  },
-  {
-    id: 4,
-    patient: "Alice Brown",
-    mrn: "MRN-004567",
-    age: 56,
-    weight: 91,
-    allergies: [{ substance: "Latex", severity: "Severe" }],
-    renalFunction: "Normal",
-    eGFR: 88,
-    activeProblems: ["Type 2 Diabetes", "Obesity"],
-    medication: "Insulin Glargine",
-    dose: "30 units",
-    route: "SubQ",
-    frequency: "Once daily at bedtime",
-    indication: "Type 2 Diabetes — uncontrolled on oral agents",
-    prescriber: "Dr. Martinez",
-    priority: "Routine",
-    orderTime: "2026-04-09 10:00",
-    isHighRisk: true,
-    isProspective: false,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      doseRangeDetail: "Within range for body weight",
-      drugInteraction: "Minor",
-      drugInteractionDetail: "Metformin — beneficial combination",
-      renalDosing: "N/A",
-    },
-  },
-  {
-    id: 5,
-    patient: "Charlie Davis",
-    mrn: "MRN-005678",
-    age: 34,
-    weight: 68,
-    allergies: [],
-    renalFunction: "Normal",
-    eGFR: 110,
-    activeProblems: ["Appendectomy — scheduled"],
-    medication: "Cefazolin",
-    dose: "2 g",
-    route: "IV",
-    frequency: "Single dose — 30 min pre-op",
-    indication: "Surgical prophylaxis — appendectomy",
-    prescriber: "Dr. Wilson",
-    priority: "Routine",
-    orderTime: "2026-04-08 16:20",
-    isHighRisk: false,
-    isProspective: true,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      drugInteraction: "None",
-      renalDosing: "N/A",
-    },
-  },
-  {
-    id: 6,
-    patient: "Diana Evans",
-    mrn: "MRN-006789",
-    age: 29,
-    weight: 58,
-    allergies: [{ substance: "Aspirin", severity: "Moderate" }],
-    renalFunction: "Normal",
-    eGFR: 105,
-    activeProblems: ["Migraine", "Anxiety"],
-    medication: "Sumatriptan",
-    dose: "50 mg",
-    route: "PO",
-    frequency: "As needed — max 200 mg/day",
-    indication: "Acute migraine",
-    prescriber: "Dr. Thompson",
-    priority: "Urgent",
-    orderTime: "2026-04-09 11:10",
-    isHighRisk: false,
-    isProspective: false,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      drugInteraction: "Moderate",
-      drugInteractionDetail: "Concurrent SSRI (Sertraline) — serotonin syndrome risk",
-      renalDosing: "N/A",
-    },
-  },
-  {
-    id: 7,
-    patient: "Edward Kim",
-    mrn: "MRN-007890",
-    age: 68,
-    weight: 75,
-    allergies: [{ substance: "Iodine", severity: "Mild" }],
-    renalFunction: "Normal",
-    eGFR: 78,
-    activeProblems: ["Hypertension", "BPH"],
-    medication: "Amlodipine",
-    dose: "10 mg",
-    route: "PO",
-    frequency: "Once daily",
-    indication: "Hypertension",
-    prescriber: "Dr. Smith",
-    priority: "Routine",
-    orderTime: "2026-04-09 08:50",
-    isHighRisk: false,
-    isProspective: false,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      drugInteraction: "None",
-      renalDosing: "N/A",
-    },
-  },
-  {
-    id: 8,
-    patient: "Fiona Garcia",
-    mrn: "MRN-008901",
-    age: 48,
-    weight: 70,
-    allergies: [],
-    renalFunction: "Normal",
-    eGFR: 92,
-    activeProblems: ["Knee replacement — scheduled"],
-    medication: "Enoxaparin",
-    dose: "40 mg",
-    route: "SubQ",
-    frequency: "Once daily — start 12h post-op",
-    indication: "VTE prophylaxis — post total knee replacement",
-    prescriber: "Dr. Wilson",
-    priority: "Routine",
-    orderTime: "2026-04-08 14:30",
-    isHighRisk: true,
-    isProspective: true,
-    clinicalChecks: {
-      allergyCheck: "Pass",
-      doseRangeCheck: "Pass",
-      drugInteraction: "Minor",
-      drugInteractionDetail: "NSAIDs — monitor for bleeding",
-      renalDosing: "N/A",
-    },
-  },
-]
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Page Component
 // ---------------------------------------------------------------------------
 
 export default function VerificationPage() {
-  const [orders, setOrders] = useState(mockOrders)
+  const [orders, setOrders] = useState<VerificationOrder[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [selectedOrder, setSelectedOrder] = useState<VerificationOrder | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orders/pharmacy-queue")
+      if (!res.ok) return
+      const { data } = await res.json()
+      setOrders((data ?? []).map(toVerificationOrder))
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => { fetchOrders() }, [fetchOrders])
 
   // Derived counts
   const pendingCount = orders.length
@@ -307,16 +196,38 @@ export default function VerificationPage() {
     setSheetOpen(true)
   }
 
-  function handleVerify(orderId: number) {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId))
-    toast.success("Order verified successfully")
+  async function handleVerify(orderId: string) {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/verify`, { method: "POST" })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to verify order")
+        return
+      }
+      setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      toast.success("Order verified successfully")
+    } catch {
+      toast.error("Failed to verify order")
+    }
   }
 
-  function handleReturn(orderId: number, reason: string) {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId))
-    toast.success("Order returned to prescriber", {
-      description: reason,
-    })
+  async function handleReturn(orderId: string, reason: string) {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/return`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to return order")
+        return
+      }
+      setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      toast.success("Order returned to prescriber", { description: reason })
+    } catch {
+      toast.error("Failed to return order")
+    }
   }
 
   const priorityBadge = (priority: "STAT" | "Urgent" | "Routine") => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,19 +26,6 @@ export function VitalsForm({ open, onOpenChange, patientId, onComplete }: Vitals
   const [oxygenSaturation, setOxygenSaturation] = useState<string>('')
   const [painLevel, setPainLevel] = useState<number[]>([0])
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    // Auto-save to localStorage on change
-    const vitalsData = {
-      bpSystolic,
-      bpDiastolic,
-      heartRate,
-      temperature,
-      oxygenSaturation,
-      painLevel: painLevel[0]
-    }
-    localStorage.setItem(`vitals-draft-${patientId}`, JSON.stringify(vitalsData))
-  }, [bpSystolic, bpDiastolic, heartRate, temperature, oxygenSaturation, painLevel, patientId])
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -80,10 +67,6 @@ export function VitalsForm({ open, onOpenChange, patientId, onComplete }: Vitals
     }
 
     dispatch({ type: 'UPDATE_VITALS', payload: { id: patientId, vitals } })
-    
-    // Clear draft
-    localStorage.removeItem(`vitals-draft-${patientId}`)
-    
     onComplete()
     onOpenChange(false)
   }

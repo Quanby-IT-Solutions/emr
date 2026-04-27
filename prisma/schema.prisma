@@ -56,6 +56,7 @@ enum ClinicalNoteType {
   NURSING_NOTE
   DISCHARGE_SUMMARY
   CONSULT_NOTE
+  ADDENDUM
 }
 
 enum ClinicalNoteStatus {
@@ -281,8 +282,22 @@ model User {
   staff     Staff?
   patients  Patient[] // for portal users
   auditLogs AuditLog[]
+  sessions  Session[]
 
   @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 model Staff {
@@ -365,8 +380,9 @@ model Encounter {
   endDateTime          DateTime?
   currentLocationId    String?
   attendingProviderId  String?
-  dischargeDisposition String?
-  codingStatus         CodingStatus?
+  dischargeDisposition  String?
+  codingStatus          CodingStatus?
+  dischargeChecklist    Json?
 
   patient               Patient                @relation(fields: [patientId], references: [id])
   currentLocation       Location?              @relation(fields: [currentLocationId], references: [id])
@@ -381,6 +397,7 @@ model Encounter {
   chartDeficiencies     ChartDeficiency[]
   encounterCodings      EncounterCoding[]
 
+  @@index([patientId, status])
   @@map("encounters")
 }
 
@@ -401,21 +418,25 @@ model PatientTransfer {
 }
 
 model ClinicalNote {
-  id          String             @id @default(cuid())
-  encounterId String
-  authorId    String
-  noteType    ClinicalNoteType
-  title       String?
-  content     String?
-  status      ClinicalNoteStatus
-  isSensitive Boolean
-  signedAt    DateTime?
-  cosignerId  String?
+  id           String             @id @default(cuid())
+  encounterId  String
+  authorId     String
+  noteType     ClinicalNoteType
+  title        String?
+  content      String?
+  status       ClinicalNoteStatus
+  isSensitive  Boolean
+  signedAt     DateTime?
+  cosignerId   String?
+  parentNoteId String?
 
-  encounter Encounter @relation(fields: [encounterId], references: [id])
-  author    Staff     @relation("NoteAuthor", fields: [authorId], references: [id])
-  cosigner  Staff?    @relation("NoteCosigner", fields: [cosignerId], references: [id])
+  encounter Encounter     @relation(fields: [encounterId], references: [id])
+  author    Staff         @relation("NoteAuthor", fields: [authorId], references: [id])
+  cosigner  Staff?        @relation("NoteCosigner", fields: [cosignerId], references: [id])
+  parent    ClinicalNote? @relation("NoteAddendum", fields: [parentNoteId], references: [id])
+  addenda   ClinicalNote[] @relation("NoteAddendum")
 
+  @@index([parentNoteId])
   @@map("clinical_notes")
 }
 
@@ -437,6 +458,7 @@ model Order {
   imagingReports            ImagingReport[]
   orderVerifications        OrderVerification[]
 
+  @@index([encounterId, status, orderType])
   @@map("orders")
 }
 
@@ -453,6 +475,7 @@ model MedicationAdministration {
   nurse   Staff  @relation("AdminNurse", fields: [nurseId], references: [id])
   witness Staff? @relation("AdminWitness", fields: [witnessId], references: [id])
 
+  @@index([orderId, administrationTime])
   @@map("medication_administrations")
 }
 
@@ -522,6 +545,7 @@ model FlowsheetObservation {
   encounter Encounter @relation(fields: [encounterId], references: [id])
   recorder  Staff     @relation(fields: [recorderId], references: [id])
 
+  @@index([encounterId, recordedAt])
   @@map("flowsheet_observations")
 }
 
@@ -740,5 +764,7 @@ model AuditLog {
 
   user User? @relation(fields: [userId], references: [id])
 
+  @@index([userId, timestamp])
+  @@index([entityType, entityId])
   @@map("audit_logs")
 }

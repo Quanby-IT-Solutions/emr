@@ -60,7 +60,8 @@ export const ClinicalNoteType = {
   TRIAGE_NOTE: 'TRIAGE_NOTE',
   NURSING_NOTE: 'NURSING_NOTE',
   DISCHARGE_SUMMARY: 'DISCHARGE_SUMMARY',
-  CONSULT_NOTE: 'CONSULT_NOTE'
+  CONSULT_NOTE: 'CONSULT_NOTE',
+  ADDENDUM: 'ADDENDUM'
 } as const
 
 export type ClinicalNoteType = (typeof ClinicalNoteType)[keyof typeof ClinicalNoteType]

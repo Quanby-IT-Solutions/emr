@@ -32,14 +32,10 @@ export function RejectionDialog({
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/clinical-notes/${selectedNote.id}/action`, {
+      const response = await fetch(`/api/clinical-notes/${selectedNote.id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'reject',
-          staffId,
-          comment: rejectionComment,
-        }),
+        body: JSON.stringify({ comment: rejectionComment }),
       })
 
       if (response.ok) {

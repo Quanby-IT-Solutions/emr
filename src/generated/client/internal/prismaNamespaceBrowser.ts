@@ -52,6 +52,7 @@ export const ModelName = {
   Department: 'Department',
   Location: 'Location',
   User: 'User',
+  Session: 'Session',
   Staff: 'Staff',
   Patient: 'Patient',
   PatientInsurance: 'PatientInsurance',
@@ -145,6 +146,16 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
 export const StaffScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -200,7 +211,8 @@ export const EncounterScalarFieldEnum = {
   currentLocationId: 'currentLocationId',
   attendingProviderId: 'attendingProviderId',
   dischargeDisposition: 'dischargeDisposition',
-  codingStatus: 'codingStatus'
+  codingStatus: 'codingStatus',
+  dischargeChecklist: 'dischargeChecklist'
 } as const
 
 export type EncounterScalarFieldEnum = (typeof EncounterScalarFieldEnum)[keyof typeof EncounterScalarFieldEnum]
@@ -228,7 +240,8 @@ export const ClinicalNoteScalarFieldEnum = {
   status: 'status',
   isSensitive: 'isSensitive',
   signedAt: 'signedAt',
-  cosignerId: 'cosignerId'
+  cosignerId: 'cosignerId',
+  parentNoteId: 'parentNoteId'
 } as const
 
 export type ClinicalNoteScalarFieldEnum = (typeof ClinicalNoteScalarFieldEnum)[keyof typeof ClinicalNoteScalarFieldEnum]

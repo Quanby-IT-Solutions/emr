@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -11,13 +12,13 @@ import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { IconAlertTriangle } from "@tabler/icons-react"
-import type { LabOrder } from "@/app/(dashboard)/dummy-data/dummy-lab-orders"
+import type { ProcessingOrder, LabResultPayload } from "../types"
 
 interface ResultEntryModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  order: LabOrder | null
-  onSubmit: (orderId: string) => void
+  order: ProcessingOrder | null
+  onSubmit: (orderId: string, results: LabResultPayload[]) => void
 }
 
 // Default analytes by panel for result entry
@@ -72,6 +73,10 @@ const panelAnalytes: Record<string, { name: string; unit: string; referenceRange
 }
 
 export function ResultEntryModal({ open, onOpenChange, order, onSubmit }: ResultEntryModalProps) {
+  const [values, setValues] = useState<Record<string, string>>({})
+  const [criticals, setCriticals] = useState<Record<string, boolean>>({})
+  const [techNotes, setTechNotes] = useState("")
+
   if (!order) return null
 
   const analytes = panelAnalytes[order.testPanel] ?? [
@@ -79,13 +84,30 @@ export function ResultEntryModal({ open, onOpenChange, order, onSubmit }: Result
     { name: "Result 2", unit: "", referenceRange: "—" },
   ]
 
+  function handleSubmit() {
+    if (!order) return
+    const results: LabResultPayload[] = analytes.map((a) => ({
+      analyteName: a.name,
+      value: values[a.name] ?? "",
+      unit: a.unit || undefined,
+      referenceRange: a.referenceRange || undefined,
+      flag: criticals[a.name] ? "Critical" : undefined,
+    })).filter((r) => r.value.trim() !== "")
+
+    onSubmit(order.id, results)
+    setValues({})
+    setCriticals({})
+    setTechNotes("")
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Enter Lab Results</DialogTitle>
           <DialogDescription>
-            Enter test results for this order. Out-of-range values will be auto-flagged.
+            Enter test results for this order. Mark critical values as needed.
           </DialogDescription>
         </DialogHeader>
 
@@ -134,27 +156,28 @@ export function ResultEntryModal({ open, onOpenChange, order, onSubmit }: Result
                 <TableHead className="w-[120px]">Value</TableHead>
                 <TableHead className="w-[80px]">Unit</TableHead>
                 <TableHead className="w-[120px]">Reference Range</TableHead>
-                <TableHead className="w-[90px]">Flag</TableHead>
                 <TableHead className="w-[70px] text-center">Critical</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {analytes.map((analyte, idx) => (
-                <TableRow key={idx}>
+              {analytes.map((analyte) => (
+                <TableRow key={analyte.name}>
                   <TableCell className="font-medium">{analyte.name}</TableCell>
                   <TableCell>
                     <Input
                       className="h-8 w-full"
                       placeholder="Enter value"
+                      value={values[analyte.name] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [analyte.name]: e.target.value }))}
                     />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{analyte.unit}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{analyte.referenceRange}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="text-xs">Pending</Badge>
-                  </TableCell>
                   <TableCell className="text-center">
-                    <Checkbox />
+                    <Checkbox
+                      checked={criticals[analyte.name] ?? false}
+                      onCheckedChange={(v) => setCriticals((prev) => ({ ...prev, [analyte.name]: !!v }))}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -165,16 +188,18 @@ export function ResultEntryModal({ open, onOpenChange, order, onSubmit }: Result
         {/* Tech Notes */}
         <div className="space-y-2">
           <Label htmlFor="techNotes">Technologist Notes</Label>
-          <Textarea id="techNotes" placeholder="Add any notes about this test run..." rows={2} />
+          <Textarea
+            id="techNotes"
+            placeholder="Add any notes about this test run..."
+            rows={2}
+            value={techNotes}
+            onChange={(e) => setTechNotes(e.target.value)}
+          />
         </div>
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button variant="secondary">Save Draft</Button>
-          <Button onClick={() => {
-            onSubmit(order.id)
-            onOpenChange(false)
-          }}>
+          <Button onClick={handleSubmit}>
             Submit for Validation
           </Button>
         </DialogFooter>

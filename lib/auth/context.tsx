@@ -9,6 +9,11 @@ interface User {
   email: string
   role: UserRole
   isActive: boolean
+  staffId?: string
+  staffFirstName?: string
+  staffLastName?: string
+  staffJobTitle?: string
+  staffDepartment?: string
 }
 
 interface AuthContextType {
@@ -21,126 +26,55 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 const STORAGE_KEY = 'emr-user'
 
-const demoUsers: Record<string, User> = {
-  admin: {
-    id: 'demo-admin',
-    username: 'admin',
-    email: 'admin@emr.demo',
-    role: UserRole.SYSTEM_ADMIN,
-    isActive: true,
-  },
-  scheduler: {
-    id: 'demo-scheduler',
-    username: 'scheduler',
-    email: 'scheduler@emr.demo',
-    role: UserRole.SCHEDULER,
-    isActive: true,
-  },
-  registrar: {
-    id: 'demo-registrar',
-    username: 'registrar',
-    email: 'registrar@emr.demo',
-    role: UserRole.REGISTRAR,
-    isActive: true,
-  },
-  nurse: {
-    id: 'staff_nurse_1',
-    username: 'nurse',
-    email: 'nurse@emr.demo',
-    role: UserRole.NURSE,
-    isActive: true,
-  },
-  clinician: {
-    id: 'staff_doctor_1',
-    username: 'clinician',
-    email: 'clinician@emr.demo',
-    role: UserRole.CLINICIAN,
-    isActive: true,
-  },
-  pharmacist: {
-    id: 'demo-pharmacist',
-    username: 'pharmacist',
-    email: 'pharmacist@emr.demo',
-    role: UserRole.PHARMACIST,
-    isActive: true,
-  },
-  labtech: {
-    id: 'demo-labtech',
-    username: 'labtech',
-    email: 'labtech@emr.demo',
-    role: UserRole.LAB_TECH,
-    isActive: true,
-  },
-  himcoder: {
-    id: 'demo-himcoder',
-    username: 'himcoder',
-    email: 'himcoder@emr.demo',
-    role: UserRole.HIM_CODER,
-    isActive: true,
-  },
-  biller: {
-    id: 'demo-biller',
-    username: 'biller',
-    email: 'biller@emr.demo',
-    role: UserRole.BILLER,
-    isActive: true,
-  },
-  patient: {
-    id: 'demo-patient',
-    username: 'patient',
-    email: 'patient@emr.demo',
-    role: UserRole.PATIENT,
-    isActive: true,
-  },
-  auditor: {
-    id: 'demo-auditor',
-    username: 'auditor',
-    email: 'auditor@emr.demo',
-    role: UserRole.AUDITOR,
-    isActive: true,
-  },
-}
-
-export const DEMO_USERNAMES = Object.keys(demoUsers)
+export const DEMO_USERNAMES = [
+  'admin', 'scheduler', 'registrar', 'nurse', 'clinician',
+  'pharmacist', 'labtech', 'himcoder', 'biller', 'patient', 'auditor',
+]
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem(STORAGE_KEY)
-
-      if (storedUser) {
-        setUser(JSON.parse(storedUser))
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error)
-      localStorage.removeItem(STORAGE_KEY)
-    } finally {
-      setIsLoading(false)
-    }
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.data) {
+          setUser(json.data)
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data))
+        } else {
+          localStorage.removeItem(STORAGE_KEY)
+        }
+      })
+      .catch(() => {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY)
+          if (stored) setUser(JSON.parse(stored))
+        } catch {}
+      })
+      .finally(() => setIsLoading(false))
   }, [])
 
-  const login = async (username: string, _password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const normalizedUsername = username.trim().toLowerCase()
-      const demoUser = demoUsers[normalizedUsername]
-
-      if (!demoUser) {
-        return false
-      }
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(demoUser))
-      setUser(demoUser)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim().toLowerCase(), password }),
+      })
+      if (!res.ok) return false
+      const json = await res.json()
+      if (!json?.data) return false
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data))
+      setUser(json.data)
       return true
-    } catch (error) {
-      console.error('Login failed:', error)
+    } catch {
       return false
     }
   }
 
   const logout = () => {
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
     localStorage.removeItem(STORAGE_KEY)
     setUser(null)
   }

@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import type { ApiPatient } from "@/lib/api/patients-client"
 
-import { Patient } from "@/app/(dashboard)/dummy-data/dummy-patients"
+// Re-export as Patient for backward compatibility
+export type Patient = ApiPatient
 
 interface DataTableProps {
   data: Patient[]
@@ -33,7 +35,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
 
   const columns: ColumnDef<Patient>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "mrn",
       header: "Patient ID",
     },
     {
@@ -41,8 +43,9 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
       header: "First Name",
     },
     {
-      accessorKey: "middleName",
+      id: "middleName",
       header: "Middle Name",
+      cell: () => "",
     },
     {
       accessorKey: "lastName",
@@ -61,24 +64,16 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
       globalFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-    const searchValue = filterValue.toLowerCase().trim()
-    const patient = row.original
-
-    const fullName = [
-      patient.firstName,
-      patient.middleName,
-      patient.lastName
-    ]
-      .filter(Boolean) // remove undefined or empty strings
-      .join(" ")
-      .toLowerCase()
-
-    return (
-      patient.id.toLowerCase().includes(searchValue) ||
-      fullName.includes(searchValue)
-    )
-  },
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const searchValue = filterValue.toLowerCase().trim()
+      const patient = row.original
+      const fullName = [patient.firstName, patient.lastName].filter(Boolean).join(" ").toLowerCase()
+      return (
+        patient.mrn.toLowerCase().includes(searchValue) ||
+        patient.id.toLowerCase().includes(searchValue) ||
+        fullName.includes(searchValue)
+      )
+    },
     initialState: {
       pagination: {
         pageSize: 5,
@@ -86,30 +81,21 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     },
   })
 
-  // When a new patient is selected, navigate to the page containing that patient
   useEffect(() => {
     if (!selectedPatientId) return
-
     const timer = setTimeout(() => {
       const rows = table.getFilteredRowModel().rows
-      const selectedRowIndex = rows.findIndex(
-        (row) => row.original.id === selectedPatientId
-      )
-
+      const selectedRowIndex = rows.findIndex((row) => row.original.id === selectedPatientId)
       if (selectedRowIndex !== -1) {
         const pageSize = table.getState().pagination.pageSize
-        const targetPage = Math.floor(selectedRowIndex / pageSize)
-        table.setPageIndex(targetPage)
+        table.setPageIndex(Math.floor(selectedRowIndex / pageSize))
       }
     }, 0)
-
     return () => clearTimeout(timer)
   }, [selectedPatientId, table])
 
-
   const handleRowClick = (patient: Patient) => {
     if (selectedPatientId === patient.id) {
-      // Deselect if clicking the same row
       onPatientSelect(null)
     } else {
       onPatientSelect(patient)
@@ -120,7 +106,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     <div className="space-y-4">
       <div>
         <Input
-          placeholder="Search by name or ID..."
+          placeholder="Search by name or MRN..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="w-full"
@@ -136,10 +122,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -154,26 +137,20 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
                   onClick={() => handleRowClick(row.original)}
                   className={`cursor-pointer transition-colors duration-200 ease-linear ${
                     selectedPatientId === row.original.id
-                      ? 'bg-primary! text-primary-foreground! hover:bg-primary/90! hover:text-primary-foreground!'
-                      : ''
+                      ? "bg-primary! text-primary-foreground! hover:bg-primary/90! hover:text-primary-foreground!"
+                      : ""
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No patients found.
                 </TableCell>
               </TableRow>
@@ -182,7 +159,8 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
         </Table>
         <div className="flex items-center justify-between px-4 py-3 border-t">
           <div className="text-xs text-muted-foreground">
-            Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+            Showing{" "}
+            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
@@ -199,8 +177,7 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
               Previous
             </Button>
             <div className="text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
             </div>
             <Button
               variant="outline"
@@ -216,5 +193,3 @@ export function PatientDataTable({ data, onPatientSelect, selectedPatientId }: D
     </div>
   )
 }
-
-export type { Patient }

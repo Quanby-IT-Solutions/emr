@@ -25,7 +25,7 @@ import {
 import { toast } from "sonner"
 
 export interface VerificationOrder {
-  id: number
+  id: string
   patient: string
   mrn: string
   age: number
@@ -60,8 +60,8 @@ interface VerificationDetailSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   order: VerificationOrder | null
-  onVerify: (orderId: number) => void
-  onReturn: (orderId: number, reason: string) => void
+  onVerify: (orderId: string) => void
+  onReturn: (orderId: string, reason: string) => void
 }
 
 export function VerificationDetailSheet({
@@ -206,22 +206,30 @@ export function VerificationDetailSheet({
                   <span className="text-muted-foreground">MRN:</span>{" "}
                   <span className="font-medium">{order.mrn}</span>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Age:</span>{" "}
-                  <span className="font-medium">{order.age} yrs</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Weight:</span>{" "}
-                  <span className="font-medium">{order.weight} kg</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">eGFR:</span>{" "}
-                  <span className="font-medium">{order.eGFR} mL/min</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Renal:</span>{" "}
-                  <span className="font-medium">{order.renalFunction}</span>
-                </div>
+                {order.age > 0 && (
+                  <div>
+                    <span className="text-muted-foreground">Age:</span>{" "}
+                    <span className="font-medium">{order.age} yrs</span>
+                  </div>
+                )}
+                {order.weight > 0 && (
+                  <div>
+                    <span className="text-muted-foreground">Weight:</span>{" "}
+                    <span className="font-medium">{order.weight} kg</span>
+                  </div>
+                )}
+                {order.eGFR > 0 && (
+                  <div>
+                    <span className="text-muted-foreground">eGFR:</span>{" "}
+                    <span className="font-medium">{order.eGFR} mL/min</span>
+                  </div>
+                )}
+                {order.renalFunction && order.renalFunction !== "Unknown" && (
+                  <div>
+                    <span className="text-muted-foreground">Renal:</span>{" "}
+                    <span className="font-medium">{order.renalFunction}</span>
+                  </div>
+                )}
               </div>
 
               {/* Allergies */}
@@ -242,16 +250,18 @@ export function VerificationDetailSheet({
               </div>
 
               {/* Active Problems */}
-              <div>
-                <span className="text-sm text-muted-foreground">Active Problems:</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {order.activeProblems.map((p, i) => (
-                    <Badge key={i} variant="secondary">
-                      {p}
-                    </Badge>
-                  ))}
+              {order.activeProblems.length > 0 && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Active Problems:</span>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {order.activeProblems.map((p, i) => (
+                      <Badge key={i} variant="secondary">
+                        {p}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -281,10 +291,12 @@ export function VerificationDetailSheet({
                   <span className="text-muted-foreground">Frequency:</span>{" "}
                   <span className="font-medium">{order.frequency}</span>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Indication:</span>{" "}
-                  <span className="font-medium">{order.indication}</span>
-                </div>
+                {order.indication && (
+                  <div>
+                    <span className="text-muted-foreground">Indication:</span>{" "}
+                    <span className="font-medium">{order.indication}</span>
+                  </div>
+                )}
                 <div>
                   <span className="text-muted-foreground">Prescriber:</span>{" "}
                   <span className="font-medium">{order.prescriber}</span>

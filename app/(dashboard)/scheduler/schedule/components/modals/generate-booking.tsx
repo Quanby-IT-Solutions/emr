@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Patient } from "@/app/(dashboard)/scheduler/schedule/components/data-table-filtered"
+import type { ApiPatient as Patient } from "@/lib/api/patients-client"
 
 interface GenerateBookingModalProps {
   open: boolean
@@ -46,7 +46,7 @@ export function GenerateBookingModal({
             <Input 
               id="patientName" 
               name="patientName" 
-              value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.middleName} ${selectedPatient.lastName}` : ""} 
+              value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : ""}
               readOnly
             />
           </div>

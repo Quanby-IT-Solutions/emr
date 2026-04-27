@@ -1,85 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/src/generated/client/client'
-
-const prisma = new PrismaClient()
+import { type NextRequest } from 'next/server'
+import { ok, error } from '@/lib/api/respond'
+import * as bedsService from '@/lib/services/beds'
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-
-    const bed = await prisma.location.findUnique({
-      where: { id },
-      include: {
-        department: {
-          select: {
-            id: true,
-            name: true,
-            type: true
-          }
-        },
-        encounters: {
-          where: {
-            status: 'ACTIVE'
-          },
-          include: {
-            patient: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                mrn: true,
-                dateOfBirth: true
-              }
-            },
-            attendingProvider: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!bed) {
-      return NextResponse.json(
-        { success: false, error: 'Bed not found' },
-        { status: 404 }
-      )
-    }
-
-    // Transform to match expected format
-    const transformedBed = {
-      id: bed.id,
-      roomNumber: bed.roomNumber || 'N/A',
-      bedNumber: bed.bedNumber || 'N/A',
-      unit: bed.unit,
-      status: bed.status,
-      department: bed.department,
-      currentPatient: bed.encounters[0]?.patient || null,
-      activeEncounter: bed.encounters[0] || null
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: transformedBed
-    })
-
-  } catch (error) {
-    console.error('Error fetching bed details:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch bed details',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
+    const bed = await bedsService.getById(id)
+    if (!bed) return error('NOT_FOUND', 'Bed not found', { status: 404 })
+    return ok(bed)
+  } catch (err) {
+    console.error('[GET /api/beds/[id]]', err)
+    return error('INTERNAL_ERROR', 'Failed to fetch bed', { status: 500 })
   }
 }
 
@@ -91,38 +25,13 @@ export async function PATCH(
     const { id } = await params
     const body = await req.json()
     const { status } = body
-
-    // Validate status is a valid LocationStatus
-    const validStatuses = ['AVAILABLE', 'OCCUPIED', 'CLEANING', 'OUT_OF_SERVICE']
-    if (status && !validStatuses.includes(status)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid status value' },
-        { status: 400 }
-      )
-    }
-
-    const updatedBed = await prisma.location.update({
-      where: { id },
-      data: {
-        status
-      }
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Bed status updated successfully',
-      data: updatedBed
-    })
-
-  } catch (error) {
-    console.error('Error updating bed:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to update bed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
+    if (!status) return error('VALIDATION_ERROR', 'status is required', { status: 400 })
+    const bed = await bedsService.updateStatus(id, status)
+    return ok(bed)
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith('Invalid status'))
+      return error('VALIDATION_ERROR', err.message, { status: 400 })
+    console.error('[PATCH /api/beds/[id]]', err)
+    return error('INTERNAL_ERROR', 'Failed to update bed', { status: 500 })
   }
 }

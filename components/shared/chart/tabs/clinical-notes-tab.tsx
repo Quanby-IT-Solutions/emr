@@ -4,7 +4,7 @@ import { TabsContent } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { IconPlus, IconCheck, IconX, IconClock, IconAlertCircle } from '@tabler/icons-react'
+import { IconPlus, IconCheck, IconX, IconClock } from '@tabler/icons-react'
 import { UserRole } from "@/lib/auth/roles"
 import { ClinicalNoteDialog } from "../dialogs/clinical-note-dialog"
 import { RejectionDialog } from "../dialogs/rejection-dialog"
@@ -30,11 +30,10 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
 
   const fetchClinicalNotes = async () => {
     if (!activeEncounter) return
-    
     try {
-      const response = await fetch(`/api/clinical-notes?encounterId=${activeEncounter.id}`)
-      const data = await response.json()
-      setClinicalNotes(data.notes || [])
+      const response = await fetch(`/api/encounters/${activeEncounter.id}/clinical-notes`)
+      const json = await response.json()
+      setClinicalNotes(Array.isArray(json?.data) ? json.data : [])
     } catch (error) {
       console.error('Failed to fetch clinical notes:', error)
     }
@@ -43,23 +42,13 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
   useEffect(() => {
     fetchClinicalNotes()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeEncounter])
+  }, [activeEncounter?.id])
 
   const handleSignNote = async (noteId: string) => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/clinical-notes/${noteId}/action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'sign',
-          staffId,
-        }),
-      })
-
-      if (response.ok) {
-        fetchClinicalNotes()
-      }
+      const response = await fetch(`/api/clinical-notes/${noteId}/sign`, { method: 'POST' })
+      if (response.ok) fetchClinicalNotes()
     } catch (error) {
       console.error('Failed to sign note:', error)
     } finally {
@@ -79,26 +68,16 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
     })
   }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'DRAFT':
-        return <Badge variant="secondary">Draft</Badge>
-      case 'PENDING_COSIGN':
-        return <Badge className="bg-yellow-500">Pending Co-Sign</Badge>
-      case 'NEEDS_CORRECTION':
-        return <Badge variant="destructive">Needs Correction</Badge>
-      case 'SIGNED':
-        return <Badge className="bg-green-500">Signed</Badge>
-      default:
-        return <Badge variant="outline">{status}</Badge>
+      case 'DRAFT': return <Badge variant="secondary">Draft</Badge>
+      case 'SIGNED': return <Badge className="bg-green-500">Signed</Badge>
+      case 'AMENDED': return <Badge className="bg-purple-500">Amended</Badge>
+      default: return <Badge variant="outline">{status}</Badge>
     }
   }
 
@@ -109,9 +88,9 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Clinical Notes</CardTitle>
-              <CardDescription>Documentation requiring co-signature</CardDescription>
+              <CardDescription>Encounter documentation</CardDescription>
             </div>
-            {role === UserRole.NURSE && activeEncounter && (
+            {activeEncounter && (
               <Button onClick={() => setNoteDialogOpen(true)}>
                 <IconPlus className="h-4 w-4 mr-2" />
                 Create Note
@@ -127,10 +106,9 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
           ) : (
             <div className="space-y-4">
               {clinicalNotes.map((note: any) => (
-                <Card key={note.id} className={note.status === 'NEEDS_CORRECTION' ? 'border-red-500' : ''}>
+                <Card key={note.id}>
                   <CardContent className="pt-6">
                     <div className="space-y-3">
-                      {/* Header */}
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
@@ -141,44 +119,37 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
                         </div>
                       </div>
 
-                      {/* Content */}
                       <div className="p-3 bg-slate-50 rounded">
                         <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                       </div>
 
-                      {/* Metadata */}
                       <div className="text-xs text-muted-foreground space-y-1">
                         <p>Author: {note.author.firstName} {note.author.lastName} ({note.author.jobTitle})</p>
                         {note.cosigner && (
-                          <p>Co-Signer: Dr. {note.cosigner.firstName} {note.cosigner.lastName}</p>
+                          <p>Co-Signer: {note.cosigner.firstName} {note.cosigner.lastName}</p>
                         )}
                         {note.signedAt && (
                           <p>Signed: {formatDate(note.signedAt)}</p>
                         )}
                       </div>
 
-                      {/* Comments (Rejection Reasons) */}
-                      {note.comments && note.comments.length > 0 && (
+                      {note.addenda && note.addenda.length > 0 && (
                         <div className="border-t pt-3">
-                          <p className="font-semibold text-sm mb-2 flex items-center gap-2">
-                            <IconAlertCircle className="h-4 w-4 text-red-500" />
-                            Correction Requested:
-                          </p>
-                          {note.comments.map((comment: any) => (
-                            <div key={comment.id} className="p-2 bg-red-50 border border-red-200 rounded mb-2">
-                              <p className="text-sm text-red-900">{comment.comment}</p>
-                              <p className="text-xs text-red-700 mt-1">
-                                By: Dr. {comment.createdByStaff.firstName} {comment.createdByStaff.lastName} - {formatDate(comment.createdAt)}
+                          <p className="font-semibold text-sm mb-2">Addenda ({note.addenda.length})</p>
+                          {note.addenda.map((addendum: any) => (
+                            <div key={addendum.id} className="p-2 bg-slate-50 border rounded mb-2">
+                              <p className="text-sm">{addendum.content}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                By: {addendum.author.firstName} {addendum.author.lastName}
+                                {addendum.signedAt && ` - ${formatDate(addendum.signedAt)}`}
                               </p>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      {/* Actions */}
                       <div className="flex gap-2 pt-2">
-                        {/* Doctor Actions */}
-                        {role === UserRole.CLINICIAN && note.status === 'PENDING_COSIGN' && note.cosignerId === staffId && (
+                        {role === UserRole.CLINICIAN && note.status === 'DRAFT' && (
                           <>
                             <Button
                               size="sm"
@@ -200,16 +171,14 @@ export function ClinicalNotesTab({ patientData, role, staffId }: ClinicalNotesTa
                             </Button>
                           </>
                         )}
-
-                        {/* Nurse Actions */}
-                        {role === UserRole.NURSE && note.status === 'NEEDS_CORRECTION' && note.authorId === staffId && (
+                        {role === UserRole.NURSE && note.status === 'DRAFT' && note.authorId === staffId && (
                           <Button
                             size="sm"
                             onClick={() => openCorrectionDialog(note)}
                             disabled={loading}
                           >
                             <IconClock className="h-4 w-4 mr-1" />
-                            Correct & Resubmit
+                            Edit
                           </Button>
                         )}
                       </div>

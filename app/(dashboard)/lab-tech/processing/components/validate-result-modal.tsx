@@ -9,18 +9,18 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { IconAlertTriangle, IconArrowUpRight, IconShieldCheck } from "@tabler/icons-react"
-import type { LabOrder, LabAnalyte } from "@/app/(dashboard)/dummy-data/dummy-lab-orders"
+import type { ProcessingOrder, ProcessingAnalyte } from "../types"
 
 interface ValidateResultModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  order: LabOrder | null
+  order: ProcessingOrder | null
   onApprove: (orderId: string) => void
   onReject: (orderId: string) => void
 }
 
-// Simulated results for orders awaiting validation (since real entered data isn't persisted)
-const simulatedResults: Record<string, LabAnalyte[]> = {
+// Simulated results used when no results have been entered yet
+const simulatedResults: Record<string, ProcessingAnalyte[]> = {
   "Complete Blood Count (CBC)": [
     { id: "s1", name: "WBC", value: "11.8", unit: "x10³/µL", referenceRange: "4.5–11.0", flag: "Abnormal", previousValue: "9.5" },
     { id: "s2", name: "RBC", value: "4.7", unit: "x10⁶/µL", referenceRange: "4.5–5.5", flag: "Normal" },
@@ -66,9 +66,9 @@ export function ValidateResultModal({ open, onOpenChange, order, onApprove, onRe
   if (!order) return null
 
   const analytes = order.results?.analytes ?? simulatedResults[order.testPanel] ?? []
-  const hasCritical = analytes.some(a => a.flag === "Critical")
-  const hasAbnormal = analytes.some(a => a.flag === "Abnormal")
-  const hasDeltaCheck = analytes.some(a => a.previousValue)
+  const hasCritical = analytes.some((a) => a.flag === "Critical")
+  const hasAbnormal = analytes.some((a) => a.flag === "Abnormal")
+  const hasDeltaCheck = analytes.some((a) => a.previousValue)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,7 +99,7 @@ export function ValidateResultModal({ open, onOpenChange, order, onApprove, onRe
           <Separator />
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div><span className="text-muted-foreground">Panel:</span> <span className="font-medium">{order.testPanel}</span></div>
-            <div><span className="text-muted-foreground">Entered by:</span> <span className="font-medium">{order.results?.enteredBy ?? "Tech. R. Martinez"}</span></div>
+            <div><span className="text-muted-foreground">Entered by:</span> <span className="font-medium">{order.results?.enteredBy ?? "Lab Tech"}</span></div>
           </div>
         </div>
 
@@ -179,9 +179,9 @@ export function ValidateResultModal({ open, onOpenChange, order, onApprove, onRe
         {/* Summary */}
         <div className="flex items-center gap-4 text-sm">
           <span className="text-muted-foreground">Summary:</span>
-          <Badge variant="secondary">{analytes.filter(a => a.flag === "Normal").length} Normal</Badge>
-          {hasAbnormal && <Badge variant="warning">{analytes.filter(a => a.flag === "Abnormal").length} Abnormal</Badge>}
-          {hasCritical && <Badge variant="destructive">{analytes.filter(a => a.flag === "Critical").length} Critical</Badge>}
+          <Badge variant="secondary">{analytes.filter((a) => a.flag === "Normal").length} Normal</Badge>
+          {hasAbnormal && <Badge variant="warning">{analytes.filter((a) => a.flag === "Abnormal").length} Abnormal</Badge>}
+          {hasCritical && <Badge variant="destructive">{analytes.filter((a) => a.flag === "Critical").length} Critical</Badge>}
         </div>
 
         {/* Validation Notes */}

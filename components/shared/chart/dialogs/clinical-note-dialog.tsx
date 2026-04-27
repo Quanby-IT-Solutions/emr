@@ -35,17 +35,14 @@ export function ClinicalNoteDialog({
     
     setLoading(true)
     try {
-      const response = await fetch('/api/clinical-notes', {
+      const response = await fetch(`/api/encounters/${activeEncounter.id}/clinical-notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          encounterId: activeEncounter.id,
-          authorId: staffId,
           cosignerId: submitForCosign ? note.cosignerId : null,
           noteType: note.noteType,
           title: note.title,
           content: note.content,
-          submitForCosign,
         }),
       })
 

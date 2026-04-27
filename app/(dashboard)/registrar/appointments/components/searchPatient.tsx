@@ -1,12 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Search, RefreshCcw, FileText, AlertCircle } from "lucide-react"
+import { Search, RefreshCcw } from "lucide-react"
 
 interface SearchPatientProps {
   searchQuery: string
@@ -27,32 +25,6 @@ export function SearchPatient({
   setStatusFilter,
   onRefresh
 }: SearchPatientProps) {
-  const [patientHistory, setPatientHistory] = useState<any>(null)
-  const [loadingHistory, setLoadingHistory] = useState(false)
-
-  useEffect(() => {
-    // Fetch patient history when searching
-    if (searchQuery.length > 3) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoadingHistory(true)
-      
-      // Mock API call - check localStorage for existing history
-      setTimeout(() => {
-        const mockHistory = localStorage.getItem(`patient-history-${searchQuery}`)
-        if (mockHistory) {
-          setPatientHistory(JSON.parse(mockHistory))
-        } else {
-          setPatientHistory(null)
-        }
-        setLoadingHistory(false)
-      }, 500)
-    }
-  }, [searchQuery])
-
-  const handleViewHistory = () => {
-    window.open(`/registrar/patient-history/${searchQuery}`, '_blank')
-  }
-
   return (
     <div className="space-y-4">
       <Card>
@@ -127,34 +99,6 @@ export function SearchPatient({
         </CardContent>
       </Card>
 
-      {/* Patient History Banner */}
-      {searchQuery.length > 3 && !loadingHistory && (
-        patientHistory ? (
-          <Alert className="bg-blue-50 border-blue-200">
-            <FileText className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-blue-900">Patient has existing medical history</p>
-                <p className="text-sm text-blue-700">
-                  Last visit: {new Date(patientHistory.lastVisit).toLocaleDateString()}
-                </p>
-              </div>
-              <Button onClick={handleViewHistory} variant="outline" size="sm" className="border-blue-300 text-blue-700">
-                <FileText className="h-4 w-4 mr-2" />
-                View History
-              </Button>
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert className="bg-yellow-50 border-yellow-200">
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription>
-              <p className="font-semibold text-yellow-900">No existing medical history found</p>
-              <p className="text-sm text-yellow-700">New patient - history intake will be required during check-in</p>
-            </AlertDescription>
-          </Alert>
-        )
-      )}
     </div>
   )
 }

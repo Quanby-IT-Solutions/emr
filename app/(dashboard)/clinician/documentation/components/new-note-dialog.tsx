@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,11 +17,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Combobox } from "@/components/ui/combo-box"
 
 export type NoteTemplate =
-  | "H&P"
-  | "SOAP Progress Note"
-  | "Consultation"
-  | "Discharge Summary"
-  | "Telephone Encounter"
+  | "H_AND_P"
+  | "PROGRESS_NOTE"
+  | "CONSULT_NOTE"
+  | "DISCHARGE_SUMMARY"
+  | "NURSING_NOTE"
+
+const TEMPLATE_LABELS: Record<NoteTemplate, string> = {
+  H_AND_P: "H&P",
+  PROGRESS_NOTE: "SOAP Progress Note",
+  CONSULT_NOTE: "Consultation",
+  DISCHARGE_SUMMARY: "Discharge Summary",
+  NURSING_NOTE: "Nursing Note",
+}
 
 interface NewNoteDialogProps {
   open: boolean
@@ -33,93 +41,86 @@ interface NewNoteDialogProps {
     template: NoteTemplate
     sections: Array<{ title: string; content: string }>
     status: "Draft" | "Signed"
+    encounterId?: string
   }) => void
 }
 
-const patientOptions = [
-  { value: "1", label: "John Doe (MRN-001)" },
-  { value: "2", label: "Jane Smith (MRN-002)" },
-  { value: "3", label: "Bob Wilson (MRN-003)" },
-  { value: "4", label: "Maria Garcia (MRN-004)" },
-  { value: "5", label: "Emily Davis (MRN-011)" },
-]
-
-const patientMeta: Record<string, { name: string; mrn: string }> = {
-  "1": { name: "John Doe", mrn: "MRN-001" },
-  "2": { name: "Jane Smith", mrn: "MRN-002" },
-  "3": { name: "Bob Wilson", mrn: "MRN-003" },
-  "4": { name: "Maria Garcia", mrn: "MRN-004" },
-  "5": { name: "Emily Davis", mrn: "MRN-011" },
-}
-
 const templateSections: Record<NoteTemplate, string[]> = {
-  "H&P": [
-    "Chief Complaint",
-    "HPI",
-    "Review of Systems",
-    "Physical Exam",
-    "Assessment",
-    "Plan",
-  ],
-  "SOAP Progress Note": ["Subjective", "Objective", "Assessment", "Plan"],
-  Consultation: ["Reason for Consultation", "HPI", "Findings", "Recommendations"],
-  "Discharge Summary": [
-    "Admission Diagnosis",
-    "Hospital Course",
-    "Discharge Diagnosis",
-    "Discharge Medications",
-    "Follow-Up",
-    "Discharge Instructions",
-  ],
-  "Telephone Encounter": ["Reason for Call", "Discussion", "Plan"],
+  H_AND_P: ["Chief Complaint", "HPI", "Review of Systems", "Physical Exam", "Assessment", "Plan"],
+  PROGRESS_NOTE: ["Subjective", "Objective", "Assessment", "Plan"],
+  CONSULT_NOTE: ["Reason for Consultation", "HPI", "Findings", "Recommendations"],
+  DISCHARGE_SUMMARY: ["Admission Diagnosis", "Hospital Course", "Discharge Diagnosis", "Discharge Medications", "Follow-Up", "Discharge Instructions"],
+  NURSING_NOTE: ["Assessment", "Intervention", "Response", "Plan"],
 }
 
 export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogProps) {
-  const [selectedPatient, setSelectedPatient] = useState("")
+  const [patients, setPatients] = useState<any[]>([])
+  const [selectedPatientId, setSelectedPatientId] = useState("")
+  const [activeEncounterId, setActiveEncounterId] = useState<string | undefined>()
   const [template, setTemplate] = useState<NoteTemplate | "">("")
   const [sectionValues, setSectionValues] = useState<Record<string, string>>({})
 
-  const activeSections = useMemo(() => {
-    return template ? templateSections[template] : []
-  }, [template])
+  useEffect(() => {
+    if (!open) return
+    fetch('/api/patients?withEncounters=true')
+      .then((r) => r.json())
+      .then((json) => {
+        const list = Array.isArray(json?.data) ? json.data : []
+        setPatients(list)
+      })
+      .catch(() => {})
+  }, [open])
+
+  useEffect(() => {
+    if (!selectedPatientId) { setActiveEncounterId(undefined); return }
+    const patient = patients.find((p) => p.id === selectedPatientId)
+    const activeEnc = (patient?.encounters ?? []).find((e: any) => e.status === 'ACTIVE')
+    setActiveEncounterId(activeEnc?.id)
+  }, [selectedPatientId, patients])
+
+  const patientOptions = useMemo(
+    () => patients.map((p) => ({ value: p.id, label: `${p.firstName} ${p.lastName} (${p.mrn})` })),
+    [patients]
+  )
+
+  const activeSections = useMemo(() => (template ? templateSections[template] : []), [template])
 
   const resetForm = () => {
-    setSelectedPatient("")
+    setSelectedPatientId("")
+    setActiveEncounterId(undefined)
     setTemplate("")
     setSectionValues({})
   }
 
   const handleTemplateChange = (value: string) => {
-    const nextTemplate = value as NoteTemplate
-    setTemplate(nextTemplate)
+    const next = value as NoteTemplate
+    setTemplate(next)
     setSectionValues(
-      templateSections[nextTemplate].reduce<Record<string, string>>((acc, section) => {
-        acc[section] = ""
-        return acc
-      }, {})
+      templateSections[next].reduce<Record<string, string>>((acc, s) => { acc[s] = ""; return acc }, {})
     )
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      resetForm()
-    }
+    if (!nextOpen) resetForm()
     onOpenChange(nextOpen)
   }
 
   const handleSubmit = (status: "Draft" | "Signed") => {
-    if (!selectedPatient || !template) {
+    if (!selectedPatientId || !template) {
       toast.error("Please select a patient and template")
       return
     }
 
-    const meta = patientMeta[selectedPatient]
+    const patient = patients.find((p) => p.id === selectedPatientId)
+    if (!patient) return
+
     onCreate({
-      patientId: selectedPatient,
-      patientName: meta.name,
-      mrn: meta.mrn,
+      patientId: selectedPatientId,
+      patientName: `${patient.firstName} ${patient.lastName}`,
+      mrn: patient.mrn,
       template,
       status,
+      encounterId: activeEncounterId,
       sections: activeSections.map((title) => ({
         title,
         content: sectionValues[title]?.trim() || "No content entered.",
@@ -127,7 +128,7 @@ export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogPro
     })
 
     toast.success(status === "Draft" ? "Note saved as draft" : "Note signed successfully", {
-      description: `${template} for ${meta.name}`,
+      description: `${TEMPLATE_LABELS[template]} for ${patient.firstName} ${patient.lastName}`,
     })
 
     resetForm()
@@ -150,11 +151,14 @@ export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogPro
               <Label>Patient</Label>
               <Combobox
                 options={patientOptions}
-                value={selectedPatient}
-                onChange={setSelectedPatient}
+                value={selectedPatientId}
+                onChange={setSelectedPatientId}
                 placeholder="Search patient..."
                 emptyMessage="No patients found."
               />
+              {selectedPatientId && !activeEncounterId && (
+                <p className="text-xs text-amber-600">No active encounter found for this patient</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Template</Label>
@@ -163,9 +167,9 @@ export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogPro
                   <SelectValue placeholder="Select template" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(templateSections).map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
+                  {(Object.keys(templateSections) as NoteTemplate[]).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {TEMPLATE_LABELS[key]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -188,10 +192,7 @@ export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogPro
                     rows={3}
                     value={sectionValues[section] ?? ""}
                     onChange={(event) =>
-                      setSectionValues((current) => ({
-                        ...current,
-                        [section]: event.target.value,
-                      }))
+                      setSectionValues((current) => ({ ...current, [section]: event.target.value }))
                     }
                     placeholder={`Enter ${section.toLowerCase()}...`}
                   />
@@ -205,7 +206,7 @@ export function NewNoteDialog({ open, onOpenChange, onCreate }: NewNoteDialogPro
           <Button variant="outline" onClick={() => handleSubmit("Draft")}>
             Save as Draft
           </Button>
-          <Button onClick={() => handleSubmit("Signed")}>
+          <Button onClick={() => handleSubmit("Signed")} disabled={!activeEncounterId}>
             Sign Note
           </Button>
         </DialogFooter>
