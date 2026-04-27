@@ -9,6 +9,7 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth/context"
+import { ROLE_LABELS } from "@/lib/auth/roles"
 
 import {
   Avatar,
@@ -40,8 +41,17 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { logout } = useAuth()
+  const { user: authUser, logout } = useAuth()
   const router = useRouter()
+
+  // Use real auth data when available, fall back to props
+  const displayName = authUser
+    ? (ROLE_LABELS[authUser.role] ?? authUser.username)
+    : user.name
+  const displayEmail = authUser?.email ?? user.email
+  const initials = authUser
+    ? authUser.username.slice(0, 2).toUpperCase()
+    : user.name.slice(0, 2).toUpperCase()
 
   const handleLogout = async () => {
     await logout()
@@ -58,13 +68,13 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-accent transition-colors duration-200"
             >
               <Avatar className="h-9 w-9 rounded-xl border border-border shadow-sm">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">Q</AvatarFallback>
+                <AvatarImage src={user.avatar} alt={displayName} />
+                <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
+                <span className="truncate font-semibold">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs font-medium">
-                  {user.email}
+                  {displayEmail}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4 text-muted-foreground" />
@@ -79,13 +89,13 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-3 px-2 py-2.5 text-left text-sm">
                 <Avatar className="h-9 w-9 rounded-xl border border-border shadow-sm">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">Q</AvatarFallback>
+                  <AvatarImage src={user.avatar} alt={displayName} />
+                  <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate font-semibold">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs font-medium">
-                    {user.email}
+                    {displayEmail}
                   </span>
                 </div>
               </div>

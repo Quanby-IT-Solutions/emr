@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { IconActivityHeartbeat } from "@tabler/icons-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -43,9 +42,7 @@ export function AppSidebar({ role, userName = "User", userEmail = "user@example.
               className="data-[slot=sidebar-menu-button]:!p-2 hover:bg-transparent"
             >
               <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-emerald-600 shadow-md shadow-primary/20 border border-white/10 group-hover:scale-105 transition-transform duration-300">
-                  <IconActivityHeartbeat className="h-5 w-5 text-white" />
-                </div>
+                <img src="/new-logo.png" alt="QHealth Logo" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform duration-300" />
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-bold tracking-tight text-foreground text-sm">QHealth</span>
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Enterprise</span>
