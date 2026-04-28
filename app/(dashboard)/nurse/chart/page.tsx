@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -9,176 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { PatientChartTabs } from "@/components/shared/chart/patient-chart-tabs";
 import { IconUser, IconAlertCircle, IconHeart } from '@tabler/icons-react';
-import { nursePatientChart } from '../../dummy-data/dummy-nurse-patient';
-
-// Same mock data as clinician
-// const mockPatientData: Record<string, any> = {
-//   "1": {
-//     patient: {
-//       id: "1",
-//       mrn: "MRN-001",
-//       firstName: "John",
-//       lastName: "Doe",
-//       dateOfBirth: "1985-03-15",
-//       gender: "Male",
-//       contactPhone: "+1-555-0123",
-//       email: "john.doe@email.com",
-//       allergies: [
-//         {
-//           id: "a1",
-//           substance: "Penicillin",
-//           reaction: "Severe rash and hives",
-//           severity: "SEVERE",
-//           status: "ACTIVE"
-//         },
-//         {
-//           id: "a2",
-//           substance: "Peanuts",
-//           reaction: "Anaphylaxis",
-//           severity: "SEVERE",
-//           status: "ACTIVE"
-//         }
-//       ],
-//       encounters: [
-//         {
-//           id: "e1",
-//           type: "INPATIENT",
-//           status: "ACTIVE",
-//           startDateTime: "2025-11-01T08:00:00",
-//           attendingProvider: {
-//             firstName: "Sarah",
-//             lastName: "Johnson",
-//             jobTitle: "Attending Physician"
-//           },
-//           currentLocation: {
-//             unit: "Medical Ward",
-//             roomNumber: "301",
-//             bedNumber: "A"
-//           },
-//           _count: {
-//             clinicalNotes: 5,
-//             orders: 12
-//           }
-//         }
-//       ],
-//       patientHistories: [
-//         {
-//           id: "h1",
-//           type: "MEDICAL_HISTORY",
-//           entry: "Type 2 Diabetes Mellitus",
-//           icd10Code: "E11.9",
-//           status: "ACTIVE",
-//           onsetDate: "2020-01-01"
-//         }
-//       ]
-//     },
-//     recentOrders: [
-//       {
-//         id: "o1",
-//         orderType: "MEDICATION",
-//         status: "VERIFIED",
-//         priority: "ROUTINE",
-//         createdAt: "2025-11-02T09:00:00",
-//         placer: {
-//           firstName: "Sarah",
-//           lastName: "Johnson"
-//         }
-//       }
-//     ]
-//   },
-//   "2": {
-//     patient: {
-//       id: "2",
-//       mrn: "MRN-002",
-//       firstName: "Jane",
-//       lastName: "Smith",
-//       dateOfBirth: "1992-07-22",
-//       gender: "Female",
-//       contactPhone: "+1-555-0456",
-//       email: "jane.smith@email.com",
-//       allergies: [
-//         {
-//           id: "a3",
-//           substance: "Latex",
-//           reaction: "Contact dermatitis",
-//           severity: "MODERATE",
-//           status: "ACTIVE"
-//         }
-//       ],
-//       encounters: [
-//         {
-//           id: "e4",
-//           type: "OUTPATIENT",
-//           status: "PLANNED",
-//           startDateTime: "2025-10-25T14:00:00",
-//           attendingProvider: {
-//             firstName: "David",
-//             lastName: "Martinez",
-//             jobTitle: "OB/GYN"
-//           },
-//           currentLocation: null,
-//           _count: {
-//             clinicalNotes: 0,
-//             orders: 2
-//           }
-//         }
-//       ],
-//       patientHistories: [
-//         {
-//           id: "h5",
-//           type: "MEDICAL_HISTORY",
-//           entry: "Asthma",
-//           icd10Code: "J45.909",
-//           status: "ACTIVE",
-//           onsetDate: "2005-05-01"
-//         }
-//       ]
-//     },
-//     recentOrders: []
-//   },
-//   "3": {
-//     patient: {
-//       id: "3",
-//       mrn: "MRN-003",
-//       firstName: "Bob",
-//       lastName: "Wilson",
-//       dateOfBirth: "1978-11-30",
-//       gender: "Male",
-//       contactPhone: "+1-555-0789",
-//       email: "bob.wilson@email.com",
-//       allergies: [],
-//       encounters: [
-//         {
-//           id: "e6",
-//           type: "EMERGENCY",
-//           status: "DISCHARGED",
-//           startDateTime: "2025-10-15T03:00:00",
-//           attendingProvider: {
-//             firstName: "Lisa",
-//             lastName: "Park",
-//             jobTitle: "Emergency Medicine"
-//           },
-//           currentLocation: null,
-//           _count: {
-//             clinicalNotes: 4,
-//             orders: 10
-//           }
-//         }
-//       ],
-//       patientHistories: [
-//         {
-//           id: "h7",
-//           type: "MEDICAL_HISTORY",
-//           entry: "Chronic Kidney Disease Stage 3",
-//           icd10Code: "N18.3",
-//           status: "ACTIVE",
-//           onsetDate: "2022-03-01"
-//         }
-//       ]
-//     },
-//     recentOrders: []
-//   }
-// };
+import { useAuth } from '@/lib/auth/context';
 
 export default function NurseChartPage() {
   return (
@@ -191,9 +22,27 @@ export default function NurseChartPage() {
 function NurseChartContent() {
   const searchParams = useSearchParams();
   const patientId = searchParams.get('patientId');
-  const mockPatientData = nursePatientChart;
-  
-  const data = patientId ? mockPatientData[patientId] : null;
+  const { user } = useAuth();
+
+  const [chartData, setChartData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!patientId) return;
+    setLoading(true);
+    setNotFound(false);
+    fetch(`/api/patients/${patientId}/chart`)
+      .then((r) => {
+        if (r.status === 404) { setNotFound(true); return null; }
+        return r.json();
+      })
+      .then((json) => {
+        if (json?.data) setChartData(json.data);
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [patientId]);
 
   const calculateAge = (dob: string) => {
     const today = new Date();
@@ -234,7 +83,19 @@ function NurseChartContent() {
     );
   }
 
-  if (!data) {
+  if (loading) {
+    return (
+      <ProtectedRoute requiredRole={UserRole.NURSE}>
+        <DashboardLayout role={UserRole.NURSE}>
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <p className="text-muted-foreground">Loading patient chart...</p>
+          </div>
+        </DashboardLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  if (notFound || (!loading && !chartData)) {
     return (
       <ProtectedRoute requiredRole={UserRole.NURSE}>
         <DashboardLayout role={UserRole.NURSE}>
@@ -255,8 +116,9 @@ function NurseChartContent() {
     );
   }
 
-  // Mock staff ID - in production, get from auth context
-  const mockStaffId = "staff_nurse_1";
+  if (!chartData) return null;
+
+  const staffId = user?.staffId ?? '';
 
   return (
     <ProtectedRoute requiredRole={UserRole.NURSE}>
@@ -270,7 +132,6 @@ function NurseChartContent() {
           </div>
 
           <div className="px-4 lg:px-6 space-y-6">
-            {/* Patient Demographics */}
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -280,11 +141,11 @@ function NurseChartContent() {
                     </div>
                     <div>
                       <CardTitle className="text-2xl">
-                        {data.patient.firstName} {data.patient.lastName}
+                        {chartData.patient.firstName} {chartData.patient.lastName}
                       </CardTitle>
                       <CardDescription>
-                        MRN: {data.patient.mrn} | Age: {calculateAge(data.patient.dateOfBirth)} | 
-                        Gender: {data.patient.gender || 'N/A'}
+                        MRN: {chartData.patient.mrn} | Age: {calculateAge(chartData.patient.dateOfBirth)} |{' '}
+                        Gender: {chartData.patient.gender || 'N/A'}
                       </CardDescription>
                     </div>
                   </div>
@@ -298,17 +159,17 @@ function NurseChartContent() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Date of Birth</p>
-                    <p className="font-medium">{formatDate(data.patient.dateOfBirth)}</p>
+                    <p className="font-medium">{formatDate(chartData.patient.dateOfBirth)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Contact Phone</p>
-                    <p className="font-medium">{data.patient.contactPhone || 'N/A'}</p>
+                    <p className="font-medium">{chartData.patient.contactPhone || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Current Location</p>
                     <p className="font-medium">
-                      {data.patient.encounters[0]?.currentLocation 
-                        ? `${data.patient.encounters[0].currentLocation.unit} - Room ${data.patient.encounters[0].currentLocation.roomNumber}`
+                      {chartData.patient.encounters[0]?.currentLocation
+                        ? `${chartData.patient.encounters[0].currentLocation.unit} - Room ${chartData.patient.encounters[0].currentLocation.roomNumber}`
                         : 'N/A'}
                     </p>
                   </div>
@@ -316,18 +177,17 @@ function NurseChartContent() {
               </CardContent>
             </Card>
 
-            {/* Critical Alerts */}
-            {data.patient.allergies.length > 0 && (
+            {chartData.patient.allergies.length > 0 && (
               <Card className="border-red-500">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-red-600">
                     <IconAlertCircle className="h-5 w-5" />
-                    ALLERGY ALERT - {data.patient.allergies.length} Active Allergy(ies)
+                    ALLERGY ALERT - {chartData.patient.allergies.length} Active Allergy(ies)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {data.patient.allergies.map((allergy: any) => (
+                    {chartData.patient.allergies.map((allergy: any) => (
                       <div key={allergy.id} className="flex items-center justify-between p-3 bg-red-50 rounded border border-red-200">
                         <div>
                           <p className="font-semibold text-red-900 text-lg">{allergy.substance}</p>
@@ -343,11 +203,10 @@ function NurseChartContent() {
               </Card>
             )}
 
-            {/* Tabs Component */}
-            <PatientChartTabs 
-              patientData={data} 
+            <PatientChartTabs
+              patientData={chartData}
               role={UserRole.NURSE}
-              staffId={mockStaffId}
+              staffId={staffId}
             />
           </div>
         </div>

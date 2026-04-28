@@ -7,13 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import type { LabOrder, SpecimenCondition } from "@/app/(dashboard)/dummy-data/dummy-lab-orders"
+import type { ProcessingOrder } from "../types"
 
 interface CollectSpecimenModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  order: LabOrder | null
-  onConfirm: (orderId: string, data: { collectedAt: string; collectedBy: string; specimenCondition: SpecimenCondition }) => void
+  order: ProcessingOrder | null
+  onConfirm: (orderId: string, data: { collectedAt: string; collectedBy: string; specimenCondition: string }) => void
 }
 
 export function CollectSpecimenModal({ open, onOpenChange, order, onConfirm }: CollectSpecimenModalProps) {

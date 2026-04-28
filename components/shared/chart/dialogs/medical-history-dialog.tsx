@@ -30,16 +30,13 @@ export function MedicalHistoryDialog({
   const handleAdd = async () => {
     setLoading(true)
     try {
-      // Mock implementation - replace with actual API call
-      const response = await fetch('/api/medical-history', {
+      const response = await fetch(`/api/patients/${patientId}/history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          patientId,
           type: history.type,
           entry: history.entry,
           icd10Code: history.icd10Code,
-          addedBy: staffId,
         }),
       })
 

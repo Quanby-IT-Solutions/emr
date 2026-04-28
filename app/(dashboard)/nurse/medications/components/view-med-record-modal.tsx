@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, User, FileText, Stethoscope, ClipboardList }
 import { PatientInfoCard } from "./view-components/patient-info-card"
 import { MedRecordCalendarView, CalendarMedication, CalendarAdministration } from "./view-components/med-record-calendar-view"
 import { MedicationAdminCard } from "./view-components/medication-admin-card"
-import { MedicationProfile } from "@/app/(dashboard)/dummy-data/dummy-medication-admin"
+import { MedicationProfile } from "@/lib/api/medications-client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MedicationOrdersCard } from "./view-components/medication-orders"
 import { MedicationOrderDetails } from "./view-components/med-order-details"

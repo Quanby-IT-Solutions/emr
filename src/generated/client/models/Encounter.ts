@@ -63,6 +63,7 @@ export type EncounterCountAggregateOutputType = {
   attendingProviderId: number
   dischargeDisposition: number
   codingStatus: number
+  dischargeChecklist: number
   _all: number
 }
 
@@ -107,6 +108,7 @@ export type EncounterCountAggregateInputType = {
   attendingProviderId?: true
   dischargeDisposition?: true
   codingStatus?: true
+  dischargeChecklist?: true
   _all?: true
 }
 
@@ -194,6 +196,7 @@ export type EncounterGroupByOutputType = {
   attendingProviderId: string | null
   dischargeDisposition: string | null
   codingStatus: $Enums.CodingStatus | null
+  dischargeChecklist: runtime.JsonValue | null
   _count: EncounterCountAggregateOutputType | null
   _min: EncounterMinAggregateOutputType | null
   _max: EncounterMaxAggregateOutputType | null
@@ -229,6 +232,7 @@ export type EncounterWhereInput = {
   attendingProviderId?: Prisma.StringNullableFilter<"Encounter"> | string | null
   dischargeDisposition?: Prisma.StringNullableFilter<"Encounter"> | string | null
   codingStatus?: Prisma.EnumCodingStatusNullableFilter<"Encounter"> | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.JsonNullableFilter<"Encounter">
   patient?: Prisma.XOR<Prisma.PatientScalarRelationFilter, Prisma.PatientWhereInput>
   currentLocation?: Prisma.XOR<Prisma.LocationNullableScalarRelationFilter, Prisma.LocationWhereInput> | null
   attendingProvider?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
@@ -255,6 +259,7 @@ export type EncounterOrderByWithRelationInput = {
   attendingProviderId?: Prisma.SortOrderInput | Prisma.SortOrder
   dischargeDisposition?: Prisma.SortOrderInput | Prisma.SortOrder
   codingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  dischargeChecklist?: Prisma.SortOrderInput | Prisma.SortOrder
   patient?: Prisma.PatientOrderByWithRelationInput
   currentLocation?: Prisma.LocationOrderByWithRelationInput
   attendingProvider?: Prisma.StaffOrderByWithRelationInput
@@ -284,6 +289,7 @@ export type EncounterWhereUniqueInput = Prisma.AtLeast<{
   attendingProviderId?: Prisma.StringNullableFilter<"Encounter"> | string | null
   dischargeDisposition?: Prisma.StringNullableFilter<"Encounter"> | string | null
   codingStatus?: Prisma.EnumCodingStatusNullableFilter<"Encounter"> | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.JsonNullableFilter<"Encounter">
   patient?: Prisma.XOR<Prisma.PatientScalarRelationFilter, Prisma.PatientWhereInput>
   currentLocation?: Prisma.XOR<Prisma.LocationNullableScalarRelationFilter, Prisma.LocationWhereInput> | null
   attendingProvider?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
@@ -310,6 +316,7 @@ export type EncounterOrderByWithAggregationInput = {
   attendingProviderId?: Prisma.SortOrderInput | Prisma.SortOrder
   dischargeDisposition?: Prisma.SortOrderInput | Prisma.SortOrder
   codingStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  dischargeChecklist?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.EncounterCountOrderByAggregateInput
   _max?: Prisma.EncounterMaxOrderByAggregateInput
   _min?: Prisma.EncounterMinOrderByAggregateInput
@@ -330,6 +337,7 @@ export type EncounterScalarWhereWithAggregatesInput = {
   attendingProviderId?: Prisma.StringNullableWithAggregatesFilter<"Encounter"> | string | null
   dischargeDisposition?: Prisma.StringNullableWithAggregatesFilter<"Encounter"> | string | null
   codingStatus?: Prisma.EnumCodingStatusNullableWithAggregatesFilter<"Encounter"> | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.JsonNullableWithAggregatesFilter<"Encounter">
 }
 
 export type EncounterCreateInput = {
@@ -341,6 +349,7 @@ export type EncounterCreateInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -367,6 +376,7 @@ export type EncounterUncheckedCreateInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -387,6 +397,7 @@ export type EncounterUpdateInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -413,6 +424,7 @@ export type EncounterUncheckedUpdateInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -436,6 +448,7 @@ export type EncounterCreateManyInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterUpdateManyMutationInput = {
@@ -447,6 +460,7 @@ export type EncounterUpdateManyMutationInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterUncheckedUpdateManyInput = {
@@ -461,6 +475,7 @@ export type EncounterUncheckedUpdateManyInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterListRelationFilter = {
@@ -485,6 +500,7 @@ export type EncounterCountOrderByAggregateInput = {
   attendingProviderId?: Prisma.SortOrder
   dischargeDisposition?: Prisma.SortOrder
   codingStatus?: Prisma.SortOrder
+  dischargeChecklist?: Prisma.SortOrder
 }
 
 export type EncounterMaxOrderByAggregateInput = {
@@ -806,6 +822,7 @@ export type EncounterCreateWithoutCurrentLocationInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
   patientTransfers?: Prisma.PatientTransferCreateNestedManyWithoutEncounterInput
@@ -830,6 +847,7 @@ export type EncounterUncheckedCreateWithoutCurrentLocationInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -882,6 +900,7 @@ export type EncounterScalarWhereInput = {
   attendingProviderId?: Prisma.StringNullableFilter<"Encounter"> | string | null
   dischargeDisposition?: Prisma.StringNullableFilter<"Encounter"> | string | null
   codingStatus?: Prisma.EnumCodingStatusNullableFilter<"Encounter"> | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.JsonNullableFilter<"Encounter">
 }
 
 export type EncounterCreateWithoutAttendingProviderInput = {
@@ -893,6 +912,7 @@ export type EncounterCreateWithoutAttendingProviderInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   patientTransfers?: Prisma.PatientTransferCreateNestedManyWithoutEncounterInput
@@ -917,6 +937,7 @@ export type EncounterUncheckedCreateWithoutAttendingProviderInput = {
   currentLocationId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -963,6 +984,7 @@ export type EncounterCreateWithoutPatientInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
   patientTransfers?: Prisma.PatientTransferCreateNestedManyWithoutEncounterInput
@@ -987,6 +1009,7 @@ export type EncounterUncheckedCreateWithoutPatientInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1033,6 +1056,7 @@ export type EncounterCreateWithoutPatientTransfersInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1058,6 +1082,7 @@ export type EncounterUncheckedCreateWithoutPatientTransfersInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
   carePlans?: Prisma.CarePlanUncheckedCreateNestedManyWithoutEncounterInput
@@ -1093,6 +1118,7 @@ export type EncounterUpdateWithoutPatientTransfersInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1118,6 +1144,7 @@ export type EncounterUncheckedUpdateWithoutPatientTransfersInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
   carePlans?: Prisma.CarePlanUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1137,6 +1164,7 @@ export type EncounterCreateWithoutClinicalNotesInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1162,6 +1190,7 @@ export type EncounterUncheckedCreateWithoutClinicalNotesInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
   carePlans?: Prisma.CarePlanUncheckedCreateNestedManyWithoutEncounterInput
@@ -1197,6 +1226,7 @@ export type EncounterUpdateWithoutClinicalNotesInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1222,6 +1252,7 @@ export type EncounterUncheckedUpdateWithoutClinicalNotesInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
   carePlans?: Prisma.CarePlanUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1241,6 +1272,7 @@ export type EncounterCreateWithoutOrdersInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1266,6 +1298,7 @@ export type EncounterUncheckedCreateWithoutOrdersInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   carePlans?: Prisma.CarePlanUncheckedCreateNestedManyWithoutEncounterInput
@@ -1301,6 +1334,7 @@ export type EncounterUpdateWithoutOrdersInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1326,6 +1360,7 @@ export type EncounterUncheckedUpdateWithoutOrdersInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   carePlans?: Prisma.CarePlanUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1345,6 +1380,7 @@ export type EncounterCreateWithoutCarePlansInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1370,6 +1406,7 @@ export type EncounterUncheckedCreateWithoutCarePlansInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1405,6 +1442,7 @@ export type EncounterUpdateWithoutCarePlansInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1430,6 +1468,7 @@ export type EncounterUncheckedUpdateWithoutCarePlansInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1449,6 +1488,7 @@ export type EncounterCreateWithoutFlowsheetObservationsInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1474,6 +1514,7 @@ export type EncounterUncheckedCreateWithoutFlowsheetObservationsInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1509,6 +1550,7 @@ export type EncounterUpdateWithoutFlowsheetObservationsInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1534,6 +1576,7 @@ export type EncounterUncheckedUpdateWithoutFlowsheetObservationsInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1553,6 +1596,7 @@ export type EncounterCreateWithoutAppointmentsInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1578,6 +1622,7 @@ export type EncounterUncheckedCreateWithoutAppointmentsInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1613,6 +1658,7 @@ export type EncounterUpdateWithoutAppointmentsInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1638,6 +1684,7 @@ export type EncounterUncheckedUpdateWithoutAppointmentsInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1657,6 +1704,7 @@ export type EncounterCreateWithoutInvoicesInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1682,6 +1730,7 @@ export type EncounterUncheckedCreateWithoutInvoicesInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1717,6 +1766,7 @@ export type EncounterUpdateWithoutInvoicesInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1742,6 +1792,7 @@ export type EncounterUncheckedUpdateWithoutInvoicesInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1761,6 +1812,7 @@ export type EncounterCreateWithoutChartDeficienciesInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1786,6 +1838,7 @@ export type EncounterUncheckedCreateWithoutChartDeficienciesInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1821,6 +1874,7 @@ export type EncounterUpdateWithoutChartDeficienciesInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1846,6 +1900,7 @@ export type EncounterUncheckedUpdateWithoutChartDeficienciesInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1865,6 +1920,7 @@ export type EncounterCreateWithoutEncounterCodingsInput = {
   endDateTime?: Date | string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient: Prisma.PatientCreateNestedOneWithoutEncountersInput
   currentLocation?: Prisma.LocationCreateNestedOneWithoutEncountersInput
   attendingProvider?: Prisma.StaffCreateNestedOneWithoutEncountersInput
@@ -1890,6 +1946,7 @@ export type EncounterUncheckedCreateWithoutEncounterCodingsInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedCreateNestedManyWithoutEncounterInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutEncounterInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutEncounterInput
@@ -1925,6 +1982,7 @@ export type EncounterUpdateWithoutEncounterCodingsInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
@@ -1950,6 +2008,7 @@ export type EncounterUncheckedUpdateWithoutEncounterCodingsInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -1971,6 +2030,7 @@ export type EncounterCreateManyCurrentLocationInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterUpdateWithoutCurrentLocationInput = {
@@ -1982,6 +2042,7 @@ export type EncounterUpdateWithoutCurrentLocationInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
   patientTransfers?: Prisma.PatientTransferUpdateManyWithoutEncounterNestedInput
@@ -2006,6 +2067,7 @@ export type EncounterUncheckedUpdateWithoutCurrentLocationInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -2028,6 +2090,7 @@ export type EncounterUncheckedUpdateManyWithoutCurrentLocationInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterCreateManyAttendingProviderInput = {
@@ -2041,6 +2104,7 @@ export type EncounterCreateManyAttendingProviderInput = {
   currentLocationId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterUpdateWithoutAttendingProviderInput = {
@@ -2052,6 +2116,7 @@ export type EncounterUpdateWithoutAttendingProviderInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patient?: Prisma.PatientUpdateOneRequiredWithoutEncountersNestedInput
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   patientTransfers?: Prisma.PatientTransferUpdateManyWithoutEncounterNestedInput
@@ -2076,6 +2141,7 @@ export type EncounterUncheckedUpdateWithoutAttendingProviderInput = {
   currentLocationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -2098,6 +2164,7 @@ export type EncounterUncheckedUpdateManyWithoutAttendingProviderInput = {
   currentLocationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterCreateManyPatientInput = {
@@ -2111,6 +2178,7 @@ export type EncounterCreateManyPatientInput = {
   attendingProviderId?: string | null
   dischargeDisposition?: string | null
   codingStatus?: $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type EncounterUpdateWithoutPatientInput = {
@@ -2122,6 +2190,7 @@ export type EncounterUpdateWithoutPatientInput = {
   endDateTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   currentLocation?: Prisma.LocationUpdateOneWithoutEncountersNestedInput
   attendingProvider?: Prisma.StaffUpdateOneWithoutEncountersNestedInput
   patientTransfers?: Prisma.PatientTransferUpdateManyWithoutEncounterNestedInput
@@ -2146,6 +2215,7 @@ export type EncounterUncheckedUpdateWithoutPatientInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   patientTransfers?: Prisma.PatientTransferUncheckedUpdateManyWithoutEncounterNestedInput
   clinicalNotes?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutEncounterNestedInput
@@ -2168,6 +2238,7 @@ export type EncounterUncheckedUpdateManyWithoutPatientInput = {
   attendingProviderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dischargeDisposition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   codingStatus?: Prisma.NullableEnumCodingStatusFieldUpdateOperationsInput | $Enums.CodingStatus | null
+  dischargeChecklist?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -2285,6 +2356,7 @@ export type EncounterSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   attendingProviderId?: boolean
   dischargeDisposition?: boolean
   codingStatus?: boolean
+  dischargeChecklist?: boolean
   patient?: boolean | Prisma.PatientDefaultArgs<ExtArgs>
   currentLocation?: boolean | Prisma.Encounter$currentLocationArgs<ExtArgs>
   attendingProvider?: boolean | Prisma.Encounter$attendingProviderArgs<ExtArgs>
@@ -2312,6 +2384,7 @@ export type EncounterSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   attendingProviderId?: boolean
   dischargeDisposition?: boolean
   codingStatus?: boolean
+  dischargeChecklist?: boolean
   patient?: boolean | Prisma.PatientDefaultArgs<ExtArgs>
   currentLocation?: boolean | Prisma.Encounter$currentLocationArgs<ExtArgs>
   attendingProvider?: boolean | Prisma.Encounter$attendingProviderArgs<ExtArgs>
@@ -2329,6 +2402,7 @@ export type EncounterSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   attendingProviderId?: boolean
   dischargeDisposition?: boolean
   codingStatus?: boolean
+  dischargeChecklist?: boolean
   patient?: boolean | Prisma.PatientDefaultArgs<ExtArgs>
   currentLocation?: boolean | Prisma.Encounter$currentLocationArgs<ExtArgs>
   attendingProvider?: boolean | Prisma.Encounter$attendingProviderArgs<ExtArgs>
@@ -2346,9 +2420,10 @@ export type EncounterSelectScalar = {
   attendingProviderId?: boolean
   dischargeDisposition?: boolean
   codingStatus?: boolean
+  dischargeChecklist?: boolean
 }
 
-export type EncounterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "patientId" | "type" | "status" | "startDateTime" | "admissionDateTime" | "endDateTime" | "currentLocationId" | "attendingProviderId" | "dischargeDisposition" | "codingStatus", ExtArgs["result"]["encounter"]>
+export type EncounterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "patientId" | "type" | "status" | "startDateTime" | "admissionDateTime" | "endDateTime" | "currentLocationId" | "attendingProviderId" | "dischargeDisposition" | "codingStatus" | "dischargeChecklist", ExtArgs["result"]["encounter"]>
 export type EncounterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   patient?: boolean | Prisma.PatientDefaultArgs<ExtArgs>
   currentLocation?: boolean | Prisma.Encounter$currentLocationArgs<ExtArgs>
@@ -2403,6 +2478,7 @@ export type $EncounterPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     attendingProviderId: string | null
     dischargeDisposition: string | null
     codingStatus: $Enums.CodingStatus | null
+    dischargeChecklist: runtime.JsonValue | null
   }, ExtArgs["result"]["encounter"]>
   composites: {}
 }
@@ -2849,6 +2925,7 @@ export interface EncounterFieldRefs {
   readonly attendingProviderId: Prisma.FieldRef<"Encounter", 'String'>
   readonly dischargeDisposition: Prisma.FieldRef<"Encounter", 'String'>
   readonly codingStatus: Prisma.FieldRef<"Encounter", 'CodingStatus'>
+  readonly dischargeChecklist: Prisma.FieldRef<"Encounter", 'Json'>
 }
     
 

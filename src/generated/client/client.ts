@@ -64,6 +64,11 @@ export type Location = Prisma.LocationModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
  * Model Staff
  * 
  */

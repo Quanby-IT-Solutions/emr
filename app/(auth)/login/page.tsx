@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { DEMO_USERNAMES, useAuth } from "@/lib/auth/context"
+import { useAuth } from "@/lib/auth/context"
 import { UserRole } from "@/lib/auth/roles"
 import { cn } from "@/lib/utils"
 import {
@@ -90,11 +90,13 @@ export default function Page() {
       const success = await login(username, password)
 
       if (success) {
-        router.push("/dashboard")
+        const lowerUser = username.trim().toLowerCase()
+        const matched = roles.find((r) => r.username === lowerUser)
+        router.push(matched?.path ?? '/')
         return
       }
 
-      setError(`Invalid username. Try: ${DEMO_USERNAMES.slice(0, 4).join(", ")}, …`)
+      setError("Invalid credentials.")
     } finally {
       setIsLoading(false)
     }
@@ -103,7 +105,7 @@ export default function Page() {
   const handleQuickAccess = async (quickUsername: string, path: string) => {
     setError("")
     setIsLoading(true)
-    const success = await login(quickUsername, "")
+    const success = await login(quickUsername, "demo123")
     if (success) {
       router.push(path)
     } else {

@@ -30,11 +30,12 @@ export interface ClinicalNote {
   id: string
   date: string
   patientId?: string
-  patientName: string
-  mrn: string
+  patientName?: string
+  mrn?: string
   noteType: string
-  status: "Draft" | "Signed" | "Cosigned" | "Amended"
+  status: "Draft" | "Signed" | "Amended"
   author: string
+  authorId?: string
   isTrainee: boolean
   signedBy?: string
   signedAt?: string
@@ -55,7 +56,6 @@ interface NoteDetailSheetProps {
 const statusClass: Record<ClinicalNote["status"], string> = {
   Draft: "bg-yellow-100 text-yellow-800 border-yellow-300",
   Signed: "bg-blue-100 text-blue-800 border-blue-300",
-  Cosigned: "bg-green-100 text-green-800 border-green-300",
   Amended: "bg-purple-100 text-purple-800 border-purple-300",
 }
 
@@ -73,7 +73,7 @@ export function NoteDetailSheet({
     return null
   }
 
-  const canCosign = note.isTrainee && note.status !== "Cosigned"
+  const canCosign = note.isTrainee && note.status !== "Signed"
 
   const handleSaveAddendum = () => {
     if (!addendumText.trim()) {
@@ -102,7 +102,7 @@ export function NoteDetailSheet({
             <div>
               <SheetTitle>{note.noteType}</SheetTitle>
               <SheetDescription>
-                {note.patientName} | {note.mrn} | {note.date}
+                {note.patientName ? `${note.patientName} | ` : ''}{note.mrn ? `${note.mrn} | ` : ''}{note.date}
               </SheetDescription>
             </div>
             <Badge className={statusClass[note.status]}>{note.status}</Badge>

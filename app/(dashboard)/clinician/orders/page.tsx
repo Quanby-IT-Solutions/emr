@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -15,56 +15,86 @@ import { IconPlus, IconSearch } from "@tabler/icons-react"
 import { PlaceOrderDialog } from "./components/place-order-dialog"
 import { OrderSetSection } from "./components/order-set-section"
 
-type OrderType = "Medication" | "Lab" | "Imaging" | "Admit" | "Discharge"
-type OrderStatus = "Placed" | "In Progress" | "Completed" | "Cancelled"
-type OrderPriority = "Routine" | "Urgent" | "STAT"
-
-interface Order {
-  id: number
-  patient: string
-  type: OrderType
-  item: string
-  status: OrderStatus
-  priority: OrderPriority
-  orderedBy: string
-  date: string
+interface ApiOrder {
+  id: string
+  orderType: string
+  status: string
+  priority: string
+  details: Record<string, unknown>
+  clinicalIndication: string | null
+  createdAt: string
+  placer: { id: string; firstName: string; lastName: string }
+  encounter: {
+    id: string
+    patient: { id: string; mrn: string; firstName: string; lastName: string }
+  }
 }
 
-const mockOrders: Order[] = [
-  { id: 1, patient: "John Doe (MRN-001)", type: "Medication", item: "Metformin 500mg PO BID", status: "Placed", priority: "Routine", orderedBy: "Dr. Sarah Johnson", date: "2025-11-07" },
-  { id: 2, patient: "John Doe (MRN-001)", type: "Lab", item: "HbA1c", status: "In Progress", priority: "Routine", orderedBy: "Dr. Sarah Johnson", date: "2025-11-07" },
-  { id: 3, patient: "John Doe (MRN-001)", type: "Lab", item: "Basic Metabolic Panel", status: "Completed", priority: "STAT", orderedBy: "Dr. Sarah Johnson", date: "2025-11-06" },
-  { id: 4, patient: "John Doe (MRN-001)", type: "Medication", item: "Lisinopril 10mg PO Daily", status: "Placed", priority: "Routine", orderedBy: "Dr. Sarah Johnson", date: "2025-11-06" },
-  { id: 5, patient: "Jane Smith (MRN-002)", type: "Imaging", item: "Chest X-Ray PA/Lat", status: "Completed", priority: "Routine", orderedBy: "Dr. David Martinez", date: "2025-11-05" },
-  { id: 6, patient: "Jane Smith (MRN-002)", type: "Medication", item: "Albuterol MDI 2 puffs PRN", status: "Placed", priority: "Routine", orderedBy: "Dr. David Martinez", date: "2025-11-07" },
-  { id: 7, patient: "Bob Wilson (MRN-003)", type: "Lab", item: "CBC with Differential", status: "Completed", priority: "STAT", orderedBy: "Dr. Lisa Park", date: "2025-11-04" },
-  { id: 8, patient: "Bob Wilson (MRN-003)", type: "Lab", item: "Comprehensive Metabolic Panel", status: "Completed", priority: "STAT", orderedBy: "Dr. Lisa Park", date: "2025-11-04" },
-  { id: 9, patient: "Bob Wilson (MRN-003)", type: "Imaging", item: "CT Abdomen/Pelvis w/ Contrast", status: "In Progress", priority: "Urgent", orderedBy: "Dr. Lisa Park", date: "2025-11-05" },
-  { id: 10, patient: "Bob Wilson (MRN-003)", type: "Discharge", item: "Discharge to Home", status: "Placed", priority: "Routine", orderedBy: "Dr. Lisa Park", date: "2025-11-07" },
-  { id: 11, patient: "John Doe (MRN-001)", type: "Medication", item: "Aspirin 81mg PO Daily", status: "Cancelled", priority: "Routine", orderedBy: "Dr. Sarah Johnson", date: "2025-11-03" },
-  { id: 12, patient: "Jane Smith (MRN-002)", type: "Lab", item: "Ferritin Level", status: "Placed", priority: "Routine", orderedBy: "Dr. David Martinez", date: "2025-11-07" },
-  { id: 13, patient: "John Doe (MRN-001)", type: "Admit", item: "Admit to Medical Ward - Rm 301A", status: "Completed", priority: "Urgent", orderedBy: "Dr. Sarah Johnson", date: "2025-11-01" },
-  { id: 14, patient: "Jane Smith (MRN-002)", type: "Medication", item: "Ferrous Sulfate 325mg PO Daily", status: "In Progress", priority: "Routine", orderedBy: "Dr. David Martinez", date: "2025-11-06" },
-]
-
-const typeBadgeClass: Record<OrderType, string> = {
-  Medication: "bg-green-100 text-green-800 border-green-300",
-  Lab: "bg-blue-100 text-blue-800 border-blue-300",
-  Imaging: "bg-purple-100 text-purple-800 border-purple-300",
-  Admit: "bg-orange-100 text-orange-800 border-orange-300",
-  Discharge: "bg-gray-100 text-gray-800 border-gray-300",
+function getItemDescription(order: ApiOrder): string {
+  const d = order.details
+  switch (order.orderType) {
+    case "MEDICATION":
+      return `${d.medicationName} ${d.dose} ${d.route} ${d.frequency}`
+    case "LAB":
+      return String(d.testName)
+    case "IMAGING":
+      return d.bodyPart ? `${d.study} - ${d.bodyPart}` : String(d.study)
+    case "PROCEDURE":
+      return String(d.procedureName)
+    case "NURSING":
+      return String(d.instruction)
+    case "ADMIT_INPATIENT":
+      return `Admit to ${d.unit}`
+    case "REFERRAL":
+      return `Referral to ${d.specialty}`
+    case "DISCHARGE":
+      return "Discharge"
+    default:
+      return order.orderType
+  }
 }
 
-const statusBadgeClass: Record<OrderStatus, string> = {
-  Placed: "bg-blue-100 text-blue-800 border-blue-300",
-  "In Progress": "bg-yellow-100 text-yellow-800 border-yellow-300",
-  Completed: "bg-green-100 text-green-800 border-green-300",
-  Cancelled: "bg-red-100 text-red-800 border-red-300",
+const typeBadgeClass: Record<string, string> = {
+  MEDICATION: "bg-green-100 text-green-800 border-green-300",
+  LAB: "bg-blue-100 text-blue-800 border-blue-300",
+  IMAGING: "bg-purple-100 text-purple-800 border-purple-300",
+  PROCEDURE: "bg-orange-100 text-orange-800 border-orange-300",
+  NURSING: "bg-teal-100 text-teal-800 border-teal-300",
+  ADMIT_INPATIENT: "bg-orange-100 text-orange-800 border-orange-300",
+  REFERRAL: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  DISCHARGE: "bg-gray-100 text-gray-800 border-gray-300",
 }
 
-const priorityBadgeClass: Record<OrderPriority, string> = {
-  Routine: "bg-gray-100 text-gray-800 border-gray-300",
-  Urgent: "bg-yellow-100 text-yellow-800 border-yellow-300",
+const typeLabel: Record<string, string> = {
+  MEDICATION: "Medication",
+  LAB: "Lab",
+  IMAGING: "Imaging",
+  PROCEDURE: "Procedure",
+  NURSING: "Nursing",
+  ADMIT_INPATIENT: "Admit",
+  REFERRAL: "Referral",
+  DISCHARGE: "Discharge",
+}
+
+const statusBadgeClass: Record<string, string> = {
+  PLACED: "bg-blue-100 text-blue-800 border-blue-300",
+  VERIFIED: "bg-purple-100 text-purple-800 border-purple-300",
+  IN_PROGRESS: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  COMPLETED: "bg-green-100 text-green-800 border-green-300",
+  CANCELLED: "bg-red-100 text-red-800 border-red-300",
+}
+
+const statusLabel: Record<string, string> = {
+  PLACED: "Placed",
+  VERIFIED: "Verified",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+}
+
+const priorityBadgeClass: Record<string, string> = {
+  ROUTINE: "bg-gray-100 text-gray-800 border-gray-300",
+  URGENT: "bg-yellow-100 text-yellow-800 border-yellow-300",
   STAT: "bg-red-100 text-red-800 border-red-300",
 }
 
@@ -73,33 +103,49 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
+  const [orders, setOrders] = useState<ApiOrder[]>([])
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orders")
+      if (!res.ok) return
+      const { data } = await res.json()
+      setOrders(data ?? [])
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => { fetchOrders() }, [fetchOrders])
 
   const filteredOrders = useMemo(() => {
-    return mockOrders.filter((order) => {
-      // Tab filter
-      if (activeTab === "medications" && order.type !== "Medication") return false
-      if (activeTab === "lab" && order.type !== "Lab") return false
-      if (activeTab === "imaging" && order.type !== "Imaging") return false
-      if (activeTab === "admit-discharge" && order.type !== "Admit" && order.type !== "Discharge") return false
-      if (activeTab === "active" && (order.status === "Completed" || order.status === "Cancelled")) return false
-      if (activeTab === "completed" && order.status !== "Completed") return false
+    return orders.filter((order) => {
+      if (activeTab === "medications" && order.orderType !== "MEDICATION") return false
+      if (activeTab === "lab" && order.orderType !== "LAB") return false
+      if (activeTab === "imaging" && order.orderType !== "IMAGING") return false
+      if (
+        activeTab === "admit-discharge" &&
+        order.orderType !== "ADMIT_INPATIENT" &&
+        order.orderType !== "DISCHARGE"
+      )
+        return false
+      if (activeTab === "active" && (order.status === "COMPLETED" || order.status === "CANCELLED"))
+        return false
+      if (activeTab === "completed" && order.status !== "COMPLETED") return false
 
-      // Status filter
       if (statusFilter !== "all" && order.status !== statusFilter) return false
 
-      // Search
       if (search) {
         const q = search.toLowerCase()
-        return (
-          order.patient.toLowerCase().includes(q) ||
-          order.item.toLowerCase().includes(q) ||
-          order.orderedBy.toLowerCase().includes(q)
-        )
+        const patientName =
+          `${order.encounter.patient.firstName} ${order.encounter.patient.lastName}`.toLowerCase()
+        const item = getItemDescription(order).toLowerCase()
+        const orderedBy =
+          `${order.placer.firstName} ${order.placer.lastName}`.toLowerCase()
+        return patientName.includes(q) || item.includes(q) || orderedBy.includes(q)
       }
 
       return true
     })
-  }, [activeTab, statusFilter, search])
+  }, [activeTab, statusFilter, search, orders])
 
   return (
     <ProtectedRoute requiredRole={UserRole.CLINICIAN}>
@@ -130,7 +176,6 @@ export default function OrdersPage() {
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
 
-              {/* Shared filter bar */}
               <div className="flex items-center gap-4 mt-4">
                 <div className="relative flex-1 max-w-sm">
                   <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -147,15 +192,15 @@ export default function OrdersPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="Placed">Placed</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                    <SelectItem value="PLACED">Placed</SelectItem>
+                    <SelectItem value="VERIFIED">Verified</SelectItem>
+                    <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* All tab views share the same table */}
               {["all", "medications", "lab", "imaging", "admit-discharge", "active", "completed"].map(
                 (tab) => (
                   <TabsContent key={tab} value={tab}>
@@ -176,26 +221,58 @@ export default function OrdersPage() {
                           <TableBody>
                             {filteredOrders.length === 0 ? (
                               <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                                <TableCell
+                                  colSpan={7}
+                                  className="text-center text-muted-foreground py-8"
+                                >
                                   No orders found
                                 </TableCell>
                               </TableRow>
                             ) : (
                               filteredOrders.map((order) => (
                                 <TableRow key={order.id}>
-                                  <TableCell className="font-medium">{order.patient}</TableCell>
-                                  <TableCell>
-                                    <Badge className={typeBadgeClass[order.type]}>{order.type}</Badge>
-                                  </TableCell>
-                                  <TableCell>{order.item}</TableCell>
-                                  <TableCell className="text-muted-foreground">{order.orderedBy}</TableCell>
-                                  <TableCell>
-                                    <Badge className={priorityBadgeClass[order.priority]}>{order.priority}</Badge>
+                                  <TableCell className="font-medium">
+                                    {order.encounter.patient.firstName}{" "}
+                                    {order.encounter.patient.lastName} (
+                                    {order.encounter.patient.mrn})
                                   </TableCell>
                                   <TableCell>
-                                    <Badge className={statusBadgeClass[order.status]}>{order.status}</Badge>
+                                    <Badge
+                                      className={
+                                        typeBadgeClass[order.orderType] ??
+                                        "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {typeLabel[order.orderType] ?? order.orderType}
+                                    </Badge>
                                   </TableCell>
-                                  <TableCell className="text-muted-foreground">{order.date}</TableCell>
+                                  <TableCell>{getItemDescription(order)}</TableCell>
+                                  <TableCell className="text-muted-foreground">
+                                    Dr. {order.placer.firstName} {order.placer.lastName}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      className={
+                                        priorityBadgeClass[order.priority] ??
+                                        "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {order.priority}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      className={
+                                        statusBadgeClass[order.status] ??
+                                        "bg-gray-100 text-gray-800"
+                                      }
+                                    >
+                                      {statusLabel[order.status] ?? order.status}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-muted-foreground">
+                                    {new Date(order.createdAt).toLocaleDateString()}
+                                  </TableCell>
                                 </TableRow>
                               ))
                             )}
@@ -208,11 +285,14 @@ export default function OrdersPage() {
               )}
             </Tabs>
 
-            {/* Order Sets */}
             <OrderSetSection />
           </div>
         </div>
-        <PlaceOrderDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+        <PlaceOrderDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onOrderPlaced={fetchOrders}
+        />
       </DashboardLayout>
     </ProtectedRoute>
   )

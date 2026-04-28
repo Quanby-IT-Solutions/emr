@@ -1,128 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/src/generated/client/client'
-
-const prisma = new PrismaClient()
+import { type NextRequest } from 'next/server'
+import { ok, error } from '@/lib/api/respond'
+import { requireRole } from '@/lib/auth/guard'
+import { UserRole } from '@/src/generated/client/enums'
+import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'
+import * as bedsService from '@/lib/services/beds'
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await requireRole(req, [UserRole.REGISTRAR, UserRole.NURSE, UserRole.SYSTEM_ADMIN])
     const body = await req.json()
-    const { bedId, patientId, encounterId, assignedBy, notes } = body
+    const { bedId, mrn, patientId, encounterId, notes } = body
 
-    // Validate required fields
-    if (!bedId || !patientId || !encounterId) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Missing required fields: bedId, patientId, encounterId' 
-        },
-        { status: 400 }
-      )
-    }
+    if (!bedId) return error('VALIDATION_ERROR', 'bedId is required', { status: 400 })
+    if (!mrn && !patientId) return error('VALIDATION_ERROR', 'mrn or patientId is required', { status: 400 })
 
-    // Check if bed is available
-    const bed = await prisma.location.findUnique({
-      where: { id: bedId },
-      include: {
-        department: true
-      }
+    const result = await bedsService.assign({
+      bedId,
+      mrn,
+      patientId,
+      encounterId,
+      assignedById: user.userId,
+      notes,
     })
 
-    if (!bed) {
-      return NextResponse.json(
-        { success: false, error: 'Bed not found' },
-        { status: 404 }
-      )
+    return ok(result)
+  } catch (err) {
+    if (err instanceof UnauthorizedError) return error('UNAUTHORIZED', err.message, { status: 401 })
+    if (err instanceof ForbiddenError) return error('FORBIDDEN', err.message, { status: 403 })
+    if (err instanceof Error) {
+      const msg = err.message
+      if (msg.includes('not found')) return error('NOT_FOUND', msg, { status: 404 })
+      if (msg.includes('not available')) return error('CONFLICT', msg, { status: 409 })
+      if (msg.includes('required')) return error('VALIDATION_ERROR', msg, { status: 400 })
     }
-
-    if (bed.status !== 'AVAILABLE') {
-      return NextResponse.json(
-        { success: false, error: `Bed is not available. Current status: ${bed.status}` },
-        { status: 409 }
-      )
-    }
-
-    // Check if encounter exists
-    const encounter = await prisma.encounter.findUnique({
-      where: { id: encounterId }
-    })
-
-    if (!encounter) {
-      return NextResponse.json(
-        { success: false, error: 'Encounter not found' },
-        { status: 404 }
-      )
-    }
-
-    // Use transaction to ensure data consistency
-    const result = await prisma.$transaction(async (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => {
-      // Update bed status to OCCUPIED
-      const updatedBed = await tx.location.update({
-        where: { id: bedId },
-        data: {
-          status: 'OCCUPIED'
-        }
-      })
-
-      // Update encounter with bed assignment
-      const updatedEncounter = await tx.encounter.update({
-        where: { id: encounterId },
-        data: {
-          currentLocationId: bedId
-        }
-      })
-
-      // Create patient transfer record (using existing schema fields only)
-      await tx.patientTransfer.create({
-        data: {
-          encounterId,
-          fromLocationId: null, // New admission
-          toLocationId: bedId,
-          transferDateTime: new Date(),
-          transportStaffId: assignedBy || null
-        }
-      })
-
-      // Create audit log entry
-      await tx.auditLog.create({
-        data: {
-          userId: assignedBy || null,
-          actionType: 'CREATE', // Using existing enum value
-          entityType: 'BED_ASSIGNMENT',
-          entityId: bedId,
-          details: {
-            patientId,
-            encounterId,
-            bedNumber: bed.bedNumber,
-            roomNumber: bed.roomNumber,
-            unit: bed.unit,
-            departmentName: bed.department?.name || 'Unknown',
-            notes: notes || 'Bed assignment during admission'
-          },
-          timestamp: new Date()
-        }
-      })
-
-      return { 
-        bed: updatedBed, 
-        encounter: updatedEncounter 
-      }
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Patient successfully assigned to bed',
-      data: result
-    })
-
-  } catch (error) {
-    console.error('Error assigning bed:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to assign bed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
+    console.error('[POST /api/beds/assign]', err)
+    return error('INTERNAL_ERROR', 'Failed to assign bed', { status: 500 })
   }
 }

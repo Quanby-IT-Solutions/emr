@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { useState, useMemo, useCallback } from "react"
 import { PatientDataTable } from "@/app/(dashboard)/scheduler/schedule/components/data-table-filtered"
-import { Patient, PatientEntry } from "@/app/(dashboard)/dummy-data/dummy-patients"
+import type { Patient } from "@/app/(dashboard)/scheduler/schedule/components/data-table-filtered"
 import { Departments, mockWeeklyAvailability } from "@/app/(dashboard)/dummy-data/dummy-providers"
 import { ConfirmBookingModal } from "./components/modals/confirm-booking"
 import { CreateNewPatientModal } from "./components/modals/create-new-patient"
@@ -18,93 +18,115 @@ import { Combobox } from "@/components/ui/combo-box"
 import { Input } from "@/components/ui/input"
 import { CirclePlus } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { patientsClient } from "@/lib/api/patients-client"
+import { appointmentsClient } from "@/lib/api/appointments-client"
+import { toast } from "sonner"
 
 export default function ScheduleAppointmentPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date())
+  const queryClient = useQueryClient()
 
+  const [date, setDate] = useState<Date | undefined>(new Date())
   const [open, setOpen] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>(undefined)
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined)
   const [selectedDeptLocation, setSelectedDeptLocation] = useState<string | undefined>(undefined)
   const [selectedOfficeLocation, setSelectedOfficeLocation] = useState<string | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
-
   const [openNewPatient, setOpenNewPatient] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [purpose, setPurpose] = useState<string | undefined>("")
   const [telephone, setTelephone] = useState<string | undefined>("")
   const [openGenerateDetails, setOpenGenerateDetails] = useState(false)
 
-  // Patient list state
-  const [patients, setPatients] = useState<Patient[]>(PatientEntry)
+  const { data: patients = [], isLoading } = useQuery({
+    queryKey: ["patients"],
+    queryFn: () => patientsClient.list(),
+  })
 
-  // Handlers
-  const handleBookClick = () => { 
-    setOpen(true) 
-  }
-  
-  const handleCreateNewPatient = () => { 
-    setOpenNewPatient(true) 
-  }
-  
-  const handleConfirmBooking = () => { 
-    setOpen(false) 
-    setOpenGenerateDetails(true) 
-  }
-  
-  const handlePatientSelect = (patient: Patient | null) => { 
-    setSelectedPatient(patient) 
+  const bookMutation = useMutation({
+    mutationFn: (vars: { patientId: string; providerName?: string; startTime: string; appointmentType?: string }) =>
+      appointmentsClient.create(vars),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      toast.success("Appointment booked successfully")
+      setOpen(false)
+      setOpenGenerateDetails(true)
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to book appointment: ${err.message}`)
+    },
+  })
+
+  const createPatientMutation = useMutation({
+    mutationFn: (data: { firstName: string; lastName: string; dateOfBirth: string; gender?: string; contactPhone?: string }) =>
+      patientsClient.create(data),
+    onSuccess: (newPatient) => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] })
+      setSelectedPatient(newPatient)
+      setOpenNewPatient(false)
+      toast.success(`Patient registered — ${newPatient.mrn}`)
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to create patient: ${err.message}`)
+    },
+  })
+
+  const handleBookClick = () => {
+    setOpen(true)
   }
 
-  // Handle creating new patient
-  const handleCreatePatient = useCallback((patientData: {
-    firstName: string
-    middleName?: string
-    lastName: string
-    address?: string
-    birthday?: string
-    age?: number
-    phone?: string
-    telephone?: string
-    email?: string
-    emergencyName?: string
-    emergencyNumber?: string
-    emergencyRelation?: string
-    emergencyRelationOther?: string
-  }) => {
-    // Generate new patient ID
-    const newId = `P${String(patients.length + 1).padStart(3, '0')}`
-    
-    // Create new patient object matching the Patient interface
-    const newPatient: Patient = {
-      id: newId,
-      firstName: patientData.firstName,
-      middleName: patientData.middleName || "",
-      lastName: patientData.lastName,
-      mobileNumber: patientData.phone || "",
-      birthday: patientData.birthday || "",
-      age: patientData.age || 0,
+  const handleCreateNewPatient = () => {
+    setOpenNewPatient(true)
+  }
+
+  const handleConfirmBooking = () => {
+    if (!selectedPatient || !date) return
+    const startTime = new Date(date)
+    if (selectedTime) {
+      const [time, meridiem] = selectedTime.split(" ")
+      const [hours, minutes] = time.split(":").map(Number)
+      let h = hours
+      if (meridiem === "PM" && hours !== 12) h += 12
+      if (meridiem === "AM" && hours === 12) h = 0
+      startTime.setHours(h, minutes, 0, 0)
     }
-    
-    // Add to patient list
-    setPatients(prev => [...prev, newPatient])
-    
-    // Automatically select the new patient
-    setSelectedPatient(newPatient)
-    setOpenNewPatient(false)
-  }, [patients.length])
+    bookMutation.mutate({
+      patientId: selectedPatient.id,
+      providerName: selectedProvider,
+      startTime: startTime.toISOString(),
+      appointmentType: purpose || undefined,
+    })
+  }
 
-  // Check if booking is valid
-  const isBookingValid = useMemo(() => {
-    return !!(selectedPatient && selectedProvider && date && selectedTime)
-  }, [selectedPatient, selectedProvider, date, selectedTime])
+  const handlePatientSelect = (patient: Patient | null) => {
+    setSelectedPatient(patient)
+  }
 
-  // Appointment Details - Available Options
-  
-  const availableDepartments = useMemo(() => 
-    Departments.map((d) => d.department), 
-    []
+  const handleCreatePatient = useCallback(
+    (patientData: {
+      firstName: string
+      middleName?: string
+      lastName: string
+      birthday?: string
+      phone?: string
+    }) => {
+      createPatientMutation.mutate({
+        firstName: patientData.firstName,
+        lastName: patientData.lastName,
+        dateOfBirth: patientData.birthday || "2000-01-01",
+        contactPhone: patientData.phone,
+      })
+    },
+    [createPatientMutation]
   )
+
+  const isBookingValid = useMemo(
+    () => !!(selectedPatient && selectedProvider && date && selectedTime),
+    [selectedPatient, selectedProvider, date, selectedTime]
+  )
+
+  const availableDepartments = useMemo(() => Departments.map((d) => d.department), [])
 
   const availableProviders = useMemo(() => {
     if (!selectedDepartment) return Departments.flatMap((d) => d.providers)
@@ -112,35 +134,24 @@ export default function ScheduleAppointmentPage() {
     return dept?.providers || []
   }, [selectedDepartment])
 
-  // Get available time slots based on selected provider and date
   const availableTimeSlots = useMemo(() => {
     if (!selectedProvider || !date) return []
-    
-    // Get day of week from selected date
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
     const dayOfWeek = dayNames[date.getDay()]
-    
-    // Get time slots for this provider on this day
     const providerSchedule = mockWeeklyAvailability[selectedProvider]
     if (!providerSchedule) return []
-    
     return providerSchedule[dayOfWeek] || []
   }, [selectedProvider, date])
 
-  // Appointment Detail Handlers
   const handleDepartmentChange = (dept: string) => {
     if (!dept) {
       setSelectedDepartment(undefined)
       setSelectedDeptLocation(undefined)
       return
     }
-    
     setSelectedDepartment(dept)
-    
     const deptData = Departments.find((d) => d.department === dept)
     setSelectedDeptLocation(deptData?.clinicLocation)
-
-    // If current provider doesn't belong to this department, clear it
     if (selectedProvider) {
       const providerStillValid = deptData?.providers.some((p) => p.name === selectedProvider)
       if (!providerStillValid) {
@@ -156,10 +167,7 @@ export default function ScheduleAppointmentPage() {
       setSelectedOfficeLocation(undefined)
       return
     }
-    
     setSelectedProvider(providerName)
-    
-    // Find the provider and fill in ALL related fields
     for (const dept of Departments) {
       const provider = dept.providers.find((p) => p.name === providerName)
       if (provider) {
@@ -187,9 +195,9 @@ export default function ScheduleAppointmentPage() {
                   <CardTitle>Patient Information</CardTitle>
                   <CardDescription>Search or create patient</CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" 
+                <Button
+                  variant="outline"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                   onClick={handleCreateNewPatient}
                 >
                   <CirclePlus className="h-4 w-4" />
@@ -197,11 +205,15 @@ export default function ScheduleAppointmentPage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <PatientDataTable 
-                  data={patients} 
-                  onPatientSelect={handlePatientSelect} 
-                  selectedPatientId={selectedPatient?.id || null} 
-                />
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">Loading patients...</p>
+                ) : (
+                  <PatientDataTable
+                    data={patients}
+                    onPatientSelect={handlePatientSelect}
+                    selectedPatientId={selectedPatient?.id || null}
+                  />
+                )}
               </CardContent>
             </Card>
 
@@ -218,36 +230,35 @@ export default function ScheduleAppointmentPage() {
                       <Label className="font-semibold">Health Provider Details</Label>
                       <div className="space-y-1 m-1">
                         <Label>Specialty/Department</Label>
-                          <Combobox 
-                            options={availableDepartments.map((d) => ({ value: d, label: d }))} 
-                            value={selectedDepartment} 
-                            onChange={handleDepartmentChange} 
-                            placeholder="Select department" 
-                          />
+                        <Combobox
+                          options={availableDepartments.map((d) => ({ value: d, label: d }))}
+                          value={selectedDepartment}
+                          onChange={handleDepartmentChange}
+                          placeholder="Select department"
+                        />
                       </div>
                       <div className="space-y-1 m-1">
                         <Label>Department Location</Label>
-                          <Input
-                            type="text"
-                            value={selectedDeptLocation || ""}
-                            readOnly
-                            className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
-                            placeholder="Department Building"
-                          />
+                        <Input
+                          type="text"
+                          value={selectedDeptLocation || ""}
+                          readOnly
+                          className="w-full border rounded-md px-2 p-2 bg-muted text-sm"
+                          placeholder="Department Building"
+                        />
                       </div>
                     </div>
-                      
+
                     <div className="grid gap-4">
                       <div className="space-y-1 m-1">
                         <Label>Physician</Label>
-                        <Combobox 
-                          options={availableProviders.map((p) => ({ value: p.name, label: p.name }))} 
-                          value={selectedProvider} 
-                          onChange={handleProviderChange} 
-                          placeholder="Select provider" 
+                        <Combobox
+                          options={availableProviders.map((p) => ({ value: p.name, label: p.name }))}
+                          value={selectedProvider}
+                          onChange={handleProviderChange}
+                          placeholder="Select provider"
                         />
                       </div>
-
                       <div className="space-y-1 m-1">
                         <Label>Office Location</Label>
                         <Input
@@ -259,41 +270,35 @@ export default function ScheduleAppointmentPage() {
                         />
                       </div>
                     </div>
-                  </div>                  
-                  
-                  
+                  </div>
+
                   <div className="grid gap-1 m-4">
                     <Separator className="my-2" />
-                    <Label htmlFor="appointmentPurpose" className="font-semibold mt-3 mb-3">Purpose of Appointment</Label>
-                    <textarea 
-                      id="appointmentPurpose" 
-                      rows={15} 
-                      maxLength={600} 
-                      value={purpose} 
-                      onChange={(e) => setPurpose(e.target.value)} 
-                      className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full" 
-                      placeholder="Briefly describe the purpose" 
+                    <Label htmlFor="appointmentPurpose" className="font-semibold mt-3 mb-3">
+                      Purpose of Appointment
+                    </Label>
+                    <textarea
+                      id="appointmentPurpose"
+                      rows={15}
+                      maxLength={600}
+                      value={purpose}
+                      onChange={(e) => setPurpose(e.target.value)}
+                      className="border rounded-md p-2 resize-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-xs text-sm h-full"
+                      placeholder="Briefly describe the purpose"
                     />
                     <p className="text-xs text-muted-foreground">Maximum 600 characters</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
-            
+
             <Card>
               <CardHeader>
-                <CardTitle>
-                  Schedule
-                </CardTitle>
+                <CardTitle>Schedule</CardTitle>
                 <CardDescription>Select date and time</CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-[2fr_2fr] gap-4">
-                <Calendar 
-                  mode="single" 
-                  selected={date} 
-                  onSelect={setDate} 
-                  className="rounded-md border" 
-                />
+                <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border" />
                 <div className="space-y-2">
                   <Label>Available Time Slots:</Label>
                   {!selectedProvider ? (
@@ -302,15 +307,20 @@ export default function ScheduleAppointmentPage() {
                     </div>
                   ) : availableTimeSlots.length === 0 ? (
                     <div className="flex items-center justify-center text-sm text-muted-foreground rounded-md p-4">
-                      No available time slots for {date?.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                      No available time slots for{" "}
+                      {date?.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-1">
                       {availableTimeSlots.map((slot) => (
-                        <Button 
-                          key={slot} 
-                          variant={selectedTime === slot ? "default" : "outline"} 
-                          onClick={() => setSelectedTime(slot)} 
+                        <Button
+                          key={slot}
+                          variant={selectedTime === slot ? "default" : "outline"}
+                          onClick={() => setSelectedTime(slot)}
                           size="sm"
                         >
                           {slot}
@@ -325,11 +335,8 @@ export default function ScheduleAppointmentPage() {
 
           <div className="px-4 lg:px-6">
             <div className="flex gap-2">
-              <Button 
-                onClick={handleBookClick} 
-                disabled={!isBookingValid}
-              >
-                Book Appointment
+              <Button onClick={handleBookClick} disabled={!isBookingValid || bookMutation.isPending}>
+                {bookMutation.isPending ? "Booking..." : "Book Appointment"}
               </Button>
               <Button variant="outline">Cancel</Button>
             </div>
@@ -343,39 +350,39 @@ export default function ScheduleAppointmentPage() {
             )}
           </div>
 
-          <ConfirmBookingModal 
-            open={open} 
-            onOpenChange={setOpen} 
-            selectedPatient={selectedPatient} 
-            selectedProvider={selectedProvider} 
-            selectedDepartment={selectedDepartment} 
-            selectedDeptLocation={selectedDeptLocation} 
+          <ConfirmBookingModal
+            open={open}
+            onOpenChange={setOpen}
+            selectedPatient={selectedPatient}
+            selectedProvider={selectedProvider}
+            selectedDepartment={selectedDepartment}
+            selectedDeptLocation={selectedDeptLocation}
             selectedOfficeLocation={selectedOfficeLocation}
-            date={date} 
-            selectedTime={selectedTime} 
-            purpose={purpose} 
-            telephone={telephone} 
-            onTelephoneChange={setTelephone} 
-            onPurposeChange={setPurpose} 
-            onConfirm={handleConfirmBooking} 
+            date={date}
+            selectedTime={selectedTime}
+            purpose={purpose}
+            telephone={telephone}
+            onTelephoneChange={setTelephone}
+            onPurposeChange={setPurpose}
+            onConfirm={handleConfirmBooking}
           />
 
-          <GenerateBookingModal 
-            open={openGenerateDetails} 
-            onOpenChange={setOpenGenerateDetails} 
-            selectedPatient={selectedPatient} 
-            selectedProvider={selectedProvider} 
-            selectedDepartment={selectedDepartment} 
-            selectedDeptLocation={selectedDeptLocation} 
+          <GenerateBookingModal
+            open={openGenerateDetails}
+            onOpenChange={setOpenGenerateDetails}
+            selectedPatient={selectedPatient}
+            selectedProvider={selectedProvider}
+            selectedDepartment={selectedDepartment}
+            selectedDeptLocation={selectedDeptLocation}
             selectedOfficeLocation={selectedOfficeLocation}
-            date={date} 
-            selectedTime={selectedTime} 
-            purpose={purpose} 
+            date={date}
+            selectedTime={selectedTime}
+            purpose={purpose}
           />
 
-          <CreateNewPatientModal 
-            open={openNewPatient} 
-            onOpenChange={setOpenNewPatient} 
+          <CreateNewPatientModal
+            open={openNewPatient}
+            onOpenChange={setOpenNewPatient}
             onCreate={handleCreatePatient}
           />
         </div>

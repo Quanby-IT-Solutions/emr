@@ -34,17 +34,17 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 }
 
 export const ROLE_DASHBOARD_ROUTES: Record<UserRole, string> = {
-  [UserRole.SYSTEM_ADMIN]: '/dashboard/admin',
+  [UserRole.SYSTEM_ADMIN]: '/admin',
   [UserRole.AUDITOR]: '/auditor',
-  [UserRole.CLINICIAN]: '/dashboard/clinician',
-  [UserRole.PHARMACIST]: '/dashboard/pharmacist',
-  [UserRole.NURSE]: '/dashboard/nurse',
-  [UserRole.LAB_TECH]: '/dashboard/lab-tech',
-  [UserRole.HIM_CODER]: '/dashboard/admin',
-  [UserRole.BILLER]: '/dashboard/biller',
-  [UserRole.REGISTRAR]: '/dashboard/admin',
-  [UserRole.SCHEDULER]: '/dashboard/admin',
-  [UserRole.PATIENT]: '/dashboard/patient',
+  [UserRole.CLINICIAN]: '/clinician',
+  [UserRole.PHARMACIST]: '/pharmacist',
+  [UserRole.NURSE]: '/nurse',
+  [UserRole.LAB_TECH]: '/lab-tech',
+  [UserRole.HIM_CODER]: '/him-coder',
+  [UserRole.BILLER]: '/biller',
+  [UserRole.REGISTRAR]: '/registrar',
+  [UserRole.SCHEDULER]: '/scheduler',
+  [UserRole.PATIENT]: '/patient',
 }
 
 export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {

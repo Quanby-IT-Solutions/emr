@@ -1,11 +1,6 @@
 "use client"
 
-import {
-  chargesForEncounter,
-  currency,
-  sampleInvoices,
-  subtotalForEncounter,
-} from "@/lib/biller/sample-data"
+import { currency } from "@/lib/biller/sample-data"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,28 +20,65 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type SampleInvoice = (typeof sampleInvoices)[number]
+export interface InvoiceLineItemDTO {
+  id: string
+  description: string | null
+  quantity: number
+  unitPriceInCents: number
+  totalPriceInCents: number
+  chargeMasterItem: { id: string; itemCode: string; description: string | null }
+}
+
+export interface InvoiceDTO {
+  id: string
+  status: string
+  totalAmountInCents: number
+  amountPaidInCents: number
+  issueDate: string | null
+  dueDate: string | null
+  patient: { id: string; mrn: string; firstName: string; lastName: string }
+  encounter: { id: string; type: string; status: string } | null
+  invoiceLineItems: InvoiceLineItemDTO[]
+}
 
 type InvoiceDetailSheetProps = {
-  invoice: SampleInvoice | null
+  invoice: InvoiceDTO | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-/** Optional tax rate for preview (facility rules apply in production). */
 const DEMO_TAX_RATE = 0
+
+function statusVariant(status: string) {
+  switch (status) {
+    case "PAID": return "secondary" as const
+    case "PARTIALLY_PAID": return "warning" as const
+    case "ISSUED": return "default" as const
+    default: return "outline" as const
+  }
+}
+
+function statusLabel(status: string) {
+  switch (status) {
+    case "PARTIALLY_PAID": return "Partial"
+    case "PAID": return "Paid"
+    case "ISSUED": return "Issued"
+    default: return "Draft"
+  }
+}
 
 export function InvoiceDetailSheet({
   invoice,
   open,
   onOpenChange,
 }: InvoiceDetailSheetProps) {
-  const lines = invoice ? chargesForEncounter(invoice.encounterId) : []
-  const subtotal = invoice ? subtotalForEncounter(invoice.encounterId) : 0
+  const subtotalCents = invoice
+    ? invoice.invoiceLineItems.reduce((s, l) => s + l.totalPriceInCents, 0)
+    : 0
+  const subtotal = subtotalCents / 100
   const tax = Math.round(subtotal * DEMO_TAX_RATE * 100) / 100
   const withTax = subtotal + tax
-  const subtotalMatchesInvoice =
-    invoice && Math.abs(subtotal - invoice.total) < 0.01
+  const balance = invoice ? (invoice.totalAmountInCents - invoice.amountPaidInCents) / 100 : 0
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -55,7 +87,7 @@ export function InvoiceDetailSheet({
           <SheetTitle>Consolidated invoice</SheetTitle>
           <SheetDescription>
             One statement for the visit with every charge line. Charges are grouped by encounter.
-            Tax follows facility rules—this preview uses {DEMO_TAX_RATE * 100}%.
+            Tax follows facility rules-this preview uses {DEMO_TAX_RATE * 100}%.
           </SheetDescription>
         </SheetHeader>
 
@@ -63,56 +95,59 @@ export function InvoiceDetailSheet({
           <div className="flex flex-1 flex-col gap-4 px-4">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="font-mono font-semibold">{invoice.id}</span>
-              <Badge variant="outline">{invoice.status}</Badge>
-              <span className="text-muted-foreground">{invoice.issued}</span>
+              <Badge variant={statusVariant(invoice.status)}>{statusLabel(invoice.status)}</Badge>
+              {invoice.issueDate ? (
+                <span className="text-muted-foreground">
+                  {new Date(invoice.issueDate).toLocaleDateString()}
+                </span>
+              ) : null}
             </div>
             <div className="text-sm">
-              <p className="font-medium">{invoice.patient}</p>
+              <p className="font-medium">
+                {invoice.patient.firstName} {invoice.patient.lastName}
+              </p>
               <p className="text-muted-foreground font-mono text-xs">
-                MRN {invoice.mrn} · {invoice.encounterId}
+                MRN {invoice.patient.mrn}
+                {invoice.encounter ? ` · ${invoice.encounter.id}` : ""}
               </p>
             </div>
-
-            {!subtotalMatchesInvoice ? (
-              <p className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:text-amber-100">
-                Preview: line subtotal {currency(subtotal)} differs from invoice total{" "}
-                {currency(invoice.total)}. In production, totals are enforced when charges and
-                invoices post.
-              </p>
-            ) : null}
 
             <div>
               <p className="mb-2 text-sm font-medium">Charge lines</p>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Service</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">Unit</TableHead>
-                    <TableHead className="text-right">Line</TableHead>
-                    <TableHead className="text-xs">Suggested from</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lines.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="max-w-[200px] whitespace-normal text-xs">
-                        {row.service}
-                      </TableCell>
-                      <TableCell className="text-right">{row.qty}</TableCell>
-                      <TableCell className="text-right text-xs">
-                        {currency(row.unitPrice)}
-                      </TableCell>
-                      <TableCell className="text-right text-xs font-medium">
-                        {currency(row.qty * row.unitPrice)}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {row.suggestedFrom}
-                      </TableCell>
+              {invoice.invoiceLineItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No line items on this invoice.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Service</TableHead>
+                      <TableHead className="text-right">Qty</TableHead>
+                      <TableHead className="text-right">Unit</TableHead>
+                      <TableHead className="text-right">Line</TableHead>
+                      <TableHead className="text-xs">Code</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {invoice.invoiceLineItems.map((line) => (
+                      <TableRow key={line.id}>
+                        <TableCell className="max-w-[200px] whitespace-normal text-xs">
+                          {line.description ?? line.chargeMasterItem.description ?? "-"}
+                        </TableCell>
+                        <TableCell className="text-right">{line.quantity}</TableCell>
+                        <TableCell className="text-right text-xs">
+                          {currency(line.unitPriceInCents / 100)}
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-medium">
+                          {currency(line.totalPriceInCents / 100)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs font-mono">
+                          {line.chargeMasterItem.itemCode}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </div>
 
             <div className="space-y-1 rounded-lg border bg-muted/30 p-4 text-sm">
@@ -126,11 +161,11 @@ export function InvoiceDetailSheet({
               </div>
               <div className="flex justify-between border-t pt-2 font-semibold">
                 <span>Invoice total</span>
-                <span>{currency(withTax)}</span>
+                <span>{currency(invoice.totalAmountInCents / 100)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground text-xs">
                 <span>Balance due</span>
-                <span>{invoice.balance > 0 ? currency(invoice.balance) : "—"}</span>
+                <span>{balance > 0 ? currency(balance) : "-"}</span>
               </div>
             </div>
           </div>

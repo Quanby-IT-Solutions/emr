@@ -17,69 +17,6 @@ import {
   IconBriefcase,
 } from "@tabler/icons-react"
 
-const STAFF_PROFILES: Record<string, { firstName: string; lastName: string; jobTitle: string; department: string }> = {
-  "demo-admin": {
-    firstName: "Admin",
-    lastName: "User",
-    jobTitle: "System Administrator",
-    department: "Information Technology",
-  },
-  "demo-scheduler": {
-    firstName: "Maria",
-    lastName: "Santos",
-    jobTitle: "Appointment Scheduler",
-    department: "Front Office",
-  },
-  "demo-registrar": {
-    firstName: "Jose",
-    lastName: "Reyes",
-    jobTitle: "Registrar",
-    department: "Records Management",
-  },
-  "staff_nurse_1": {
-    firstName: "Ana",
-    lastName: "Garcia",
-    jobTitle: "Staff Nurse",
-    department: "Emergency Department",
-  },
-  "staff_doctor_1": {
-    firstName: "Carlos",
-    lastName: "Mendoza",
-    jobTitle: "Attending Physician",
-    department: "Internal Medicine",
-  },
-  "demo-pharmacist": {
-    firstName: "Luisa",
-    lastName: "Cruz",
-    jobTitle: "Clinical Pharmacist",
-    department: "Pharmacy",
-  },
-  "demo-labtech": {
-    firstName: "Pedro",
-    lastName: "Ramos",
-    jobTitle: "Medical Laboratory Technician",
-    department: "Clinical Laboratory",
-  },
-  "demo-himcoder": {
-    firstName: "Rosa",
-    lastName: "Lim",
-    jobTitle: "HIM Coder",
-    department: "Health Information Management",
-  },
-  "demo-biller": {
-    firstName: "Diego",
-    lastName: "Fernandez",
-    jobTitle: "Medical Biller",
-    department: "Billing & Collections",
-  },
-  "demo-auditor": {
-    firstName: "Elena",
-    lastName: "Torres",
-    jobTitle: "Compliance Auditor",
-    department: "Quality Assurance",
-  },
-}
-
 const PATIENT_PROFILE = {
   firstName: "Juan",
   lastName: "Dela Cruz",
@@ -121,7 +58,9 @@ export default function ProfilePage() {
   const isPatient = user.role === UserRole.PATIENT
   const isStaff = !isPatient
 
-  const staffInfo = isStaff ? STAFF_PROFILES[user.id] : null
+  const staffInfo = isStaff && user.staffFirstName
+    ? { firstName: user.staffFirstName, lastName: user.staffLastName ?? '', jobTitle: user.staffJobTitle ?? '', department: user.staffDepartment ?? '' }
+    : null
   const patientInfo = isPatient ? PATIENT_PROFILE : null
 
   const getInitials = (first: string, last: string) =>

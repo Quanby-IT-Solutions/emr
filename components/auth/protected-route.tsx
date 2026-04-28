@@ -1,7 +1,10 @@
 "use client"
 
-import { UserRole } from '@/lib/auth/roles'
-import { ReactNode } from 'react'
+import { useEffect, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+import { useAuth } from '@/lib/auth/context'
+import { UserRole, hasRole } from '@/lib/auth/roles'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -11,13 +14,9 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({
   children,
-  requiredRole: _requiredRole,
-  fallbackPath: _fallbackPath = '/login'
+  requiredRole,
+  fallbackPath = '/login',
 }: ProtectedRouteProps) {
-  // TEMPORARY: Bypass authentication for testing
-  return <>{children}</>
-
-  /* COMMENTED OUT FOR TESTING
   const { user, isLoading } = useAuth()
   const router = useRouter()
 
@@ -52,5 +51,4 @@ export function ProtectedRoute({
   }
 
   return <>{children}</>
-  */
 }

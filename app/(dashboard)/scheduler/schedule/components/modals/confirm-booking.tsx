@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Patient } from "@/app/(dashboard)/dummy-data/dummy-patients"
+import type { ApiPatient as Patient } from "@/lib/api/patients-client"
 
 interface ConfirmBookingModalProps {
   open: boolean
@@ -87,7 +87,7 @@ export function ConfirmBookingModal({
                 <Input
                   id="contact"
                   name="contact"
-                  value={selectedPatient?.mobileNumber || ""}
+                  value={selectedPatient?.contactPhone || ""}
                   readOnly
                   inputMode="tel"
                 />

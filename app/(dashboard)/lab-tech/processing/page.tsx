@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { UserRole } from "@/lib/auth/roles"
@@ -14,18 +14,106 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import {
   IconTestPipe,
   IconFlask,
-  IconShieldCheck,
   IconAlertTriangle,
   IconSearch,
   IconDroplet,
   IconPlayerPlay,
   IconChecks,
 } from "@tabler/icons-react"
+import { toast } from "sonner"
 
-import { labOrders, type LabOrder } from "@/app/(dashboard)/dummy-data/dummy-lab-orders"
 import { CollectSpecimenModal } from "./components/collect-specimen-modal"
 import { ResultEntryModal } from "./components/result-entry-modal"
 import { ValidateResultModal } from "./components/validate-result-modal"
+import type { ProcessingOrder, LabResultPayload } from "./types"
+
+// ---------------------------------------------------------------------------
+// API type (shape returned by /api/orders/lab-queue)
+// ---------------------------------------------------------------------------
+
+interface LabQueueOrder {
+  id: string
+  orderType: string
+  status: string
+  priority: string
+  clinicalIndication: string | null
+  createdAt: string
+  details: {
+    orderType: string
+    testName?: string
+    specimen?: string
+  }
+  placer: { id: string; firstName: string; lastName: string }
+  encounter: {
+    id: string
+    type: string
+    patient: {
+      id: string
+      mrn: string
+      firstName: string
+      lastName: string
+      dateOfBirth: string
+      gender: string | null
+    }
+  }
+  labResults: Array<{
+    id: string
+    analyteName: string | null
+    value: string | null
+    unit: string | null
+    referenceRange: string | null
+    flag: string | null
+    loincCode: string | null
+  }>
+}
+
+// ---------------------------------------------------------------------------
+// Mapper: DB order → ProcessingOrder
+// ---------------------------------------------------------------------------
+
+function toProcessingOrder(o: LabQueueOrder): ProcessingOrder {
+  const patient = o.encounter.patient
+  const analytes = (o.labResults ?? [])
+    .filter((r) => r.analyteName)
+    .map((r, i) => ({
+      id: r.id,
+      name: r.analyteName ?? `Analyte ${i + 1}`,
+      value: r.value ?? "",
+      unit: r.unit ?? "",
+      referenceRange: r.referenceRange ?? "",
+      flag: r.flag ?? "Normal",
+    }))
+
+  return {
+    id: o.id,
+    patient: {
+      id: patient.id,
+      name: `${patient.firstName} ${patient.lastName}`,
+      mrn: patient.mrn,
+      dob: patient.dateOfBirth,
+      gender: patient.gender ?? "Unknown",
+    },
+    testPanel: o.details.testName ?? "Lab Test",
+    specimenType: o.details.specimen ?? "Blood",
+    priority: o.priority as "STAT" | "URGENT" | "ROUTINE",
+    status: o.status as ProcessingOrder["status"],
+    orderedBy: `${o.placer.firstName} ${o.placer.lastName}`,
+    orderedAt: new Date(o.createdAt).toLocaleString(),
+    encounterType: o.encounter.type,
+    results:
+      analytes.length > 0
+        ? {
+            analytes,
+            enteredBy: "Lab Tech",
+            enteredAt: new Date().toISOString(),
+          }
+        : undefined,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Helper components
+// ---------------------------------------------------------------------------
 
 function priorityVariant(priority: string): "destructive" | "warning" | "secondary" {
   switch (priority) {
@@ -35,70 +123,138 @@ function priorityVariant(priority: string): "destructive" | "warning" | "seconda
   }
 }
 
-function statusVariant(status: string): "default" | "secondary" | "outline" | "warning" {
-  switch (status) {
-    case "COLLECTED": return "outline"
-    case "IN_PROGRESS": return "warning"
-    default: return "secondary"
-  }
-}
+// ---------------------------------------------------------------------------
+// Page Component
+// ---------------------------------------------------------------------------
 
 export default function ProcessingPage() {
-  const [orders, setOrders] = useState<LabOrder[]>(labOrders)
+  const [orders, setOrders] = useState<ProcessingOrder[]>([])
   const [search, setSearch] = useState("")
   const [collectOpen, setCollectOpen] = useState(false)
   const [resultEntryOpen, setResultEntryOpen] = useState(false)
   const [validateOpen, setValidateOpen] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<LabOrder | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<ProcessingOrder | null>(null)
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orders/lab-queue")
+      if (!res.ok) return
+      const { data } = await res.json()
+      setOrders((data ?? []).map(toProcessingOrder))
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => { fetchOrders() }, [fetchOrders])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return orders.filter(o =>
+    return orders.filter((o) =>
       o.patient.name.toLowerCase().includes(q) ||
       o.patient.mrn.toLowerCase().includes(q) ||
       o.testPanel.toLowerCase().includes(q)
     )
   }, [orders, search])
 
-  const placed = filtered.filter(o => o.status === "PLACED")
-  const collected = filtered.filter(o => o.status === "COLLECTED")
-  const inProgress = filtered.filter(o => o.status === "IN_PROGRESS")
+  const placed = filtered.filter((o) => o.status === "PLACED")
+  const collected = filtered.filter((o) => o.status === "COLLECTED")
+  const inProgress = filtered.filter((o) => o.status === "IN_PROGRESS")
 
   // Stats
-  const collectedCount = orders.filter(o => o.status === "COLLECTED").length
-  const runningCount = orders.filter(o => o.status === "IN_PROGRESS").length
-  const placedCount = orders.filter(o => o.status === "PLACED").length
-  const criticalAlerts = orders.filter(o => o.priority === "STAT" && (o.status === "PLACED" || o.status === "COLLECTED")).length
+  const collectedCount = orders.filter((o) => o.status === "COLLECTED").length
+  const runningCount = orders.filter((o) => o.status === "IN_PROGRESS").length
+  const placedCount = orders.filter((o) => o.status === "PLACED").length
+  const criticalAlerts = orders.filter(
+    (o) => o.priority === "STAT" && (o.status === "PLACED" || o.status === "COLLECTED")
+  ).length
 
-  const handleCollect = (orderId: string) => {
-    setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, status: "COLLECTED" as const, collectedAt: new Date().toISOString(), collectedBy: "Tech. R. Martinez", specimenCondition: "Satisfactory" as const } : o
-    ))
+  function handleCollect(orderId: string, data: { collectedAt: string; collectedBy: string; specimenCondition: string }) {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? {
+              ...o,
+              status: "COLLECTED" as const,
+              collectedAt: data.collectedAt,
+              collectedBy: data.collectedBy,
+              specimenCondition: data.specimenCondition,
+            }
+          : o
+      )
+    )
   }
 
-  const handleStartProcessing = (orderId: string) => {
-    setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, status: "IN_PROGRESS" as const } : o
-    ))
+  function handleStartProcessing(orderId: string) {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId ? { ...o, status: "IN_PROGRESS" as const } : o
+      )
+    )
   }
 
-  const handleResultSubmit = (orderId: string) => {
-    // In a real app, this would save entered results. Here we just move to awaiting validation (keep IN_PROGRESS).
+  async function handleResultSubmit(orderId: string, results: LabResultPayload[]) {
+    try {
+      const res = await fetch("/api/lab-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, results }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to enter results")
+        return
+      }
+      // Update local state with entered results + advance to IN_PROGRESS
+      setOrders((prev) =>
+        prev.map((o) => {
+          if (o.id !== orderId) return o
+          return {
+            ...o,
+            status: "IN_PROGRESS" as const,
+            results: {
+              analytes: results.map((r, i) => ({
+                id: `r-${i}`,
+                name: r.analyteName,
+                value: r.value,
+                unit: r.unit ?? "",
+                referenceRange: r.referenceRange ?? "",
+                flag: r.flag ?? "Normal",
+              })),
+              enteredBy: "Lab Tech",
+              enteredAt: new Date().toISOString(),
+            },
+          }
+        })
+      )
+      toast.success("Results entered successfully")
+    } catch {
+      toast.error("Failed to enter results")
+    }
   }
 
-  const handleApprove = (orderId: string) => {
-    setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, status: "COMPLETED" as const, completedAt: new Date().toISOString() } : o
-    ))
+  async function handleApprove(orderId: string) {
+    try {
+      const res = await fetch(`/api/lab-results/${orderId}/validate`, { method: "POST" })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to validate results")
+        return
+      }
+      setOrders((prev) => prev.filter((o) => o.id !== orderId))
+      toast.success("Results validated and finalized")
+    } catch {
+      toast.error("Failed to validate results")
+    }
   }
 
-  const handleReject = (orderId: string) => {
-    setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, status: "COLLECTED" as const } : o
-    ))
+  function handleReject(orderId: string) {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId ? { ...o, status: "COLLECTED" as const } : o
+      )
+    )
   }
 
-  function renderTable(items: LabOrder[], tab: "placed" | "collected" | "in-progress") {
+  function renderTable(items: ProcessingOrder[], tab: "placed" | "collected" | "in-progress") {
     if (items.length === 0) {
       return (
         <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -122,7 +278,7 @@ export default function ProcessingPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map(order => (
+          {items.map((order) => (
             <TableRow key={order.id}>
               <TableCell className="font-medium">{order.patient.name}</TableCell>
               <TableCell>{order.patient.mrn}</TableCell>
@@ -153,21 +309,19 @@ export default function ProcessingPage() {
                     </Tooltip>
                   )}
                   {tab === "collected" && (
-                    <>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="border"
-                            onClick={() => handleStartProcessing(order.id)}
-                          >
-                            <IconPlayerPlay className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Begin Processing</TooltipContent>
-                      </Tooltip>
-                    </>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="border"
+                          onClick={() => handleStartProcessing(order.id)}
+                        >
+                          <IconPlayerPlay className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Begin Processing</TooltipContent>
+                    </Tooltip>
                   )}
                   {tab === "in-progress" && (
                     <>
@@ -274,7 +428,7 @@ export default function ProcessingPage() {
                     <Input
                       placeholder="Search patient, MRN, or test..."
                       value={search}
-                      onChange={e => setSearch(e.target.value)}
+                      onChange={(e) => setSearch(e.target.value)}
                       className="pl-9"
                     />
                   </div>
@@ -316,7 +470,7 @@ export default function ProcessingPage() {
           open={collectOpen}
           onOpenChange={setCollectOpen}
           order={selectedOrder}
-          onConfirm={(id, data) => handleCollect(id)}
+          onConfirm={(id, data) => handleCollect(id, data)}
         />
         <ResultEntryModal
           open={resultEntryOpen}

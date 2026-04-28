@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { MedicationProfile } from "@/app/(dashboard)/dummy-data/dummy-medication-admin"
+import { MedicationProfile } from "@/lib/api/medications-client"
 import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable, ColumnDef, SortingState, getSortedRowModel } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination"

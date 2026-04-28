@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { useState, useEffect } from "react"
-import { dummyRegistrations, PatientRecord } from "./dummyregistration"
+import { useState, useMemo } from "react"
+import type { ApiPatient } from "@/lib/api/patients-client"
 import { RegistrationForm } from "./registrationForm"
 import { EditPatientModal } from "./editPatient"
 import { ViewPatientModal } from "./viewPatient"
@@ -23,56 +23,58 @@ import {
   ChevronRight,
   ArrowUpDown,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
 } from "lucide-react"
 import { format } from "date-fns"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { patientsClient } from "@/lib/api/patients-client"
 
 type SortOption = "name" | "id" | "date"
 
-function getLocalStoragePatients(): PatientRecord[] {
-  try {
-    const raw = JSON.parse(localStorage.getItem("pgh-registered-patients") ?? "[]")
-    return raw.map((p: any) => {
-      // Calculate age from dateOfBirth or registeredAt
-      let age = 0
-      if (p.dateOfBirth) {
-        const birthDate = new Date(p.dateOfBirth)
-        const today = new Date()
-        age = today.getFullYear() - birthDate.getFullYear()
-        const m = today.getMonth() - birthDate.getMonth()
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--
-      }
+interface PatientRecord {
+  id: string
+  firstName: string
+  middleName: string
+  lastName: string
+  gender: "MALE" | "FEMALE"
+  age: number
+  contactNumber: string
+  dateRegistered: string
+  status: "ACTIVE" | "PENDING" | "INACTIVE"
+}
 
-      const statusMap: Record<string, "ACTIVE" | "PENDING" | "INACTIVE"> = {
-        active: "ACTIVE",
-        ACTIVE: "ACTIVE",
-        pending: "PENDING",
-        PENDING: "PENDING",
-        inactive: "INACTIVE",
-        INACTIVE: "INACTIVE",
-      }
+function calcAge(dateOfBirth: string): number {
+  const dob = new Date(dateOfBirth)
+  const today = new Date()
+  let age = today.getFullYear() - dob.getFullYear()
+  const m = today.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--
+  return Math.max(0, age)
+}
 
-      return {
-        id: p.hospitalNumber || p.id || "UNKNOWN",
-        firstName: p.firstName || "",
-        middleName: p.middleName || "",
-        lastName: p.lastName || "",
-        gender: (p.gender === "FEMALE" ? "FEMALE" : "MALE") as "MALE" | "FEMALE",
-        age,
-        contactNumber: p.mobileNumber || p.contactNumber || "",
-        dateRegistered: p.registeredAt
-          ? new Date(p.registeredAt).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        status: statusMap[p.status] || "ACTIVE",
-      }
-    })
-  } catch {
-    return []
+function toPatientRecord(p: ApiPatient): PatientRecord {
+  return {
+    id: p.mrn,
+    firstName: p.firstName,
+    middleName: "",
+    lastName: p.lastName,
+    gender: (p.gender?.toUpperCase() === "FEMALE" ? "FEMALE" : "MALE") as "MALE" | "FEMALE",
+    age: calcAge(p.dateOfBirth),
+    contactNumber: p.contactPhone ?? "",
+    dateRegistered: p.createdAt.split("T")[0],
+    status: "ACTIVE",
   }
 }
 
 export default function PatientRegistrationPage() {
-  const [patients, setPatients] = useState<PatientRecord[]>(dummyRegistrations)
+  const queryClient = useQueryClient()
+  const { data: apiPatients = [], isLoading } = useQuery({
+    queryKey: ["patients"],
+    queryFn: () => patientsClient.list(),
+  })
+
+  const patients = useMemo(() => apiPatients.map(toPatientRecord), [apiPatients])
+
   const [searchQuery, setSearchQuery] = useState("")
   const [genderFilter, setGenderFilter] = useState<string>("all")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -84,43 +86,37 @@ export default function PatientRegistrationPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-  // Load localStorage patients on mount and when form closes
-  useEffect(() => {
-    const stored = getLocalStoragePatients()
-    setPatients([...stored, ...dummyRegistrations])
-  }, [isRegistrationOpen])
+  const filteredPatients = useMemo(
+    () =>
+      patients
+        .filter((patient) => {
+          const matchesSearch =
+            patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            `${patient.firstName} ${patient.lastName}`
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+          const matchesGender = genderFilter === "all" || patient.gender === genderFilter
+          const matchesStatus = statusFilter === "all" || patient.status === statusFilter
+          return matchesSearch && matchesGender && matchesStatus
+        })
+        .sort((a, b) => {
+          switch (sortBy) {
+            case "name": {
+              const lastNameCompare = a.lastName.localeCompare(b.lastName)
+              if (lastNameCompare !== 0) return lastNameCompare
+              return a.firstName.localeCompare(b.firstName)
+            }
+            case "id":
+              return a.id.localeCompare(b.id)
+            case "date":
+              return new Date(b.dateRegistered).getTime() - new Date(a.dateRegistered).getTime()
+            default:
+              return 0
+          }
+        }),
+    [patients, searchQuery, genderFilter, statusFilter, sortBy]
+  )
 
-  // Filter and sort patients
-  const filteredPatients = patients
-    .filter(patient => {
-      const matchesSearch =
-        patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesGender = genderFilter === "all" || patient.gender === genderFilter
-      const matchesStatus = statusFilter === "all" || patient.status === statusFilter
-
-      return matchesSearch && matchesGender && matchesStatus
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          const lastNameCompare = a.lastName.localeCompare(b.lastName)
-          if (lastNameCompare !== 0) return lastNameCompare
-          return a.firstName.localeCompare(b.firstName)
-
-        case "id":
-          return a.id.localeCompare(b.id)
-
-        case "date":
-          return new Date(b.dateRegistered).getTime() - new Date(a.dateRegistered).getTime()
-
-        default:
-          return 0
-      }
-    })
-
-  // Pagination
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
@@ -130,7 +126,7 @@ export default function PatientRegistrationPage() {
     const variants: Record<string, "default" | "secondary" | "destructive"> = {
       ACTIVE: "default",
       PENDING: "secondary",
-      INACTIVE: "destructive"
+      INACTIVE: "destructive",
     }
     return <Badge variant={variants[status]}>{status}</Badge>
   }
@@ -147,41 +143,39 @@ export default function PatientRegistrationPage() {
 
   const getSortLabel = () => {
     switch (sortBy) {
-      case "name":
-        return "Alphabetical (A-Z)"
-      case "id":
-        return "Patient ID"
-      case "date":
-        return "Registration Date"
-      default:
-        return "Sort by"
+      case "name": return "Alphabetical (A-Z)"
+      case "id": return "Patient ID"
+      case "date": return "Registration Date"
+      default: return "Sort by"
+    }
+  }
+
+  const handleRegistrationClose = (open: boolean) => {
+    setIsRegistrationOpen(open)
+    if (!open) {
+      queryClient.invalidateQueries({ queryKey: ["patients"] })
     }
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole={UserRole.REGISTRAR}>
       <DashboardLayout role={UserRole.REGISTRAR}>
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Header */}
           <div className="px-4 lg:px-6">
             <h1 className="text-2xl font-bold">Patient Registration</h1>
-            <p className="text-muted-foreground">
-              Manage patient records and registrations
-            </p>
+            <p className="text-muted-foreground">Manage patient records and registrations</p>
           </div>
 
-          {/* Toolbar */}
           <div className="px-4 lg:px-6">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col gap-4">
-                  {/* Search and Filters Row */}
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex flex-1 gap-2">
                       <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                          placeholder="Search by name or ID..."
+                          placeholder="Search by name or MRN..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="pl-8"
@@ -209,11 +203,13 @@ export default function PatientRegistrationPage() {
                         </SelectContent>
                       </Select>
 
-                      {/* Sort By */}
                       <div className="flex items-center gap-2 ml-2">
                         <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">Sort by:</span>
-                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                        <Select
+                          value={sortBy}
+                          onValueChange={(value) => setSortBy(value as SortOption)}
+                        >
                           <SelectTrigger className="w-[200px]">
                             <SelectValue />
                           </SelectTrigger>
@@ -225,7 +221,7 @@ export default function PatientRegistrationPage() {
                         </Select>
                       </div>
                     </div>
-                    
+
                     <Button onClick={() => setIsRegistrationOpen(true)}>
                       <UserPlus className="mr-2 h-4 w-4" />
                       New Registration
@@ -236,7 +232,6 @@ export default function PatientRegistrationPage() {
             </Card>
           </div>
 
-          {/* Table */}
           <div className="px-4 lg:px-6">
             <Card>
               <CardHeader>
@@ -244,7 +239,9 @@ export default function PatientRegistrationPage() {
                   <div>
                     <CardTitle>Patient Records</CardTitle>
                     <CardDescription>
-                      Showing {startIndex + 1}-{Math.min(endIndex, filteredPatients.length)} of {filteredPatients.length} patients • Sorted by {getSortLabel()}
+                      Showing {filteredPatients.length === 0 ? 0 : startIndex + 1}-
+                      {Math.min(endIndex, filteredPatients.length)} of {filteredPatients.length} patients
+                      {" "}• Sorted by {getSortLabel()}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -286,7 +283,13 @@ export default function PatientRegistrationPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {currentPatients.length > 0 ? (
+                      {isLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                            Loading patients...
+                          </TableCell>
+                        </TableRow>
+                      ) : currentPatients.length > 0 ? (
                         currentPatients.map((patient) => (
                           <TableRow key={patient.id}>
                             <TableCell className="font-medium">{patient.id}</TableCell>
@@ -300,17 +303,17 @@ export default function PatientRegistrationPage() {
                             <TableCell>{getStatusBadge(patient.status)}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   title="View Details"
                                   onClick={() => handleViewPatient(patient)}
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   title="Edit Record"
                                   onClick={() => handleEditPatient(patient)}
                                 >
@@ -331,13 +334,12 @@ export default function PatientRegistrationPage() {
                   </Table>
                 </div>
 
-                {/* Pagination Controls */}
                 {filteredPatients.length > 0 && (
                   <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
                       Page {currentPage} of {totalPages}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
@@ -350,21 +352,15 @@ export default function PatientRegistrationPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </Button>
-                      
+
                       <div className="flex items-center gap-1">
                         {Array.from({ length: totalPages }, (_, i) => i + 1)
-                          .filter(page => {
-                            return (
-                              page === 1 ||
-                              page === totalPages ||
-                              Math.abs(page - currentPage) <= 1
-                            )
-                          })
+                          .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
                           .map((page, index, array) => (
                             <div key={page} className="flex items-center">
                               {index > 0 && array[index - 1] !== page - 1 && (
@@ -385,7 +381,7 @@ export default function PatientRegistrationPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
                       >
                         <ChevronRight className="h-4 w-4" />
@@ -406,18 +402,14 @@ export default function PatientRegistrationPage() {
           </div>
         </div>
 
-        {/* Modals */}
-        <RegistrationForm 
-          open={isRegistrationOpen}
-          onOpenChange={setIsRegistrationOpen}
-        />
-        <ViewPatientModal 
-          open={isViewModalOpen} 
+        <RegistrationForm open={isRegistrationOpen} onOpenChange={handleRegistrationClose} />
+        <ViewPatientModal
+          open={isViewModalOpen}
           onOpenChange={setIsViewModalOpen}
           patient={selectedPatient}
         />
-        <EditPatientModal 
-          open={isEditModalOpen} 
+        <EditPatientModal
+          open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
           patient={selectedPatient}
         />

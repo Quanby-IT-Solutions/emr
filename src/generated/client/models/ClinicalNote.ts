@@ -34,6 +34,7 @@ export type ClinicalNoteMinAggregateOutputType = {
   isSensitive: boolean | null
   signedAt: Date | null
   cosignerId: string | null
+  parentNoteId: string | null
 }
 
 export type ClinicalNoteMaxAggregateOutputType = {
@@ -47,6 +48,7 @@ export type ClinicalNoteMaxAggregateOutputType = {
   isSensitive: boolean | null
   signedAt: Date | null
   cosignerId: string | null
+  parentNoteId: string | null
 }
 
 export type ClinicalNoteCountAggregateOutputType = {
@@ -60,6 +62,7 @@ export type ClinicalNoteCountAggregateOutputType = {
   isSensitive: number
   signedAt: number
   cosignerId: number
+  parentNoteId: number
   _all: number
 }
 
@@ -75,6 +78,7 @@ export type ClinicalNoteMinAggregateInputType = {
   isSensitive?: true
   signedAt?: true
   cosignerId?: true
+  parentNoteId?: true
 }
 
 export type ClinicalNoteMaxAggregateInputType = {
@@ -88,6 +92,7 @@ export type ClinicalNoteMaxAggregateInputType = {
   isSensitive?: true
   signedAt?: true
   cosignerId?: true
+  parentNoteId?: true
 }
 
 export type ClinicalNoteCountAggregateInputType = {
@@ -101,6 +106,7 @@ export type ClinicalNoteCountAggregateInputType = {
   isSensitive?: true
   signedAt?: true
   cosignerId?: true
+  parentNoteId?: true
   _all?: true
 }
 
@@ -187,6 +193,7 @@ export type ClinicalNoteGroupByOutputType = {
   isSensitive: boolean
   signedAt: Date | null
   cosignerId: string | null
+  parentNoteId: string | null
   _count: ClinicalNoteCountAggregateOutputType | null
   _min: ClinicalNoteMinAggregateOutputType | null
   _max: ClinicalNoteMaxAggregateOutputType | null
@@ -221,9 +228,12 @@ export type ClinicalNoteWhereInput = {
   isSensitive?: Prisma.BoolFilter<"ClinicalNote"> | boolean
   signedAt?: Prisma.DateTimeNullableFilter<"ClinicalNote"> | Date | string | null
   cosignerId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
+  parentNoteId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
   encounter?: Prisma.XOR<Prisma.EncounterScalarRelationFilter, Prisma.EncounterWhereInput>
   author?: Prisma.XOR<Prisma.StaffScalarRelationFilter, Prisma.StaffWhereInput>
   cosigner?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
+  parent?: Prisma.XOR<Prisma.ClinicalNoteNullableScalarRelationFilter, Prisma.ClinicalNoteWhereInput> | null
+  addenda?: Prisma.ClinicalNoteListRelationFilter
 }
 
 export type ClinicalNoteOrderByWithRelationInput = {
@@ -237,9 +247,12 @@ export type ClinicalNoteOrderByWithRelationInput = {
   isSensitive?: Prisma.SortOrder
   signedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cosignerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  parentNoteId?: Prisma.SortOrderInput | Prisma.SortOrder
   encounter?: Prisma.EncounterOrderByWithRelationInput
   author?: Prisma.StaffOrderByWithRelationInput
   cosigner?: Prisma.StaffOrderByWithRelationInput
+  parent?: Prisma.ClinicalNoteOrderByWithRelationInput
+  addenda?: Prisma.ClinicalNoteOrderByRelationAggregateInput
 }
 
 export type ClinicalNoteWhereUniqueInput = Prisma.AtLeast<{
@@ -256,9 +269,12 @@ export type ClinicalNoteWhereUniqueInput = Prisma.AtLeast<{
   isSensitive?: Prisma.BoolFilter<"ClinicalNote"> | boolean
   signedAt?: Prisma.DateTimeNullableFilter<"ClinicalNote"> | Date | string | null
   cosignerId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
+  parentNoteId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
   encounter?: Prisma.XOR<Prisma.EncounterScalarRelationFilter, Prisma.EncounterWhereInput>
   author?: Prisma.XOR<Prisma.StaffScalarRelationFilter, Prisma.StaffWhereInput>
   cosigner?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
+  parent?: Prisma.XOR<Prisma.ClinicalNoteNullableScalarRelationFilter, Prisma.ClinicalNoteWhereInput> | null
+  addenda?: Prisma.ClinicalNoteListRelationFilter
 }, "id">
 
 export type ClinicalNoteOrderByWithAggregationInput = {
@@ -272,6 +288,7 @@ export type ClinicalNoteOrderByWithAggregationInput = {
   isSensitive?: Prisma.SortOrder
   signedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cosignerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  parentNoteId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClinicalNoteCountOrderByAggregateInput
   _max?: Prisma.ClinicalNoteMaxOrderByAggregateInput
   _min?: Prisma.ClinicalNoteMinOrderByAggregateInput
@@ -291,6 +308,7 @@ export type ClinicalNoteScalarWhereWithAggregatesInput = {
   isSensitive?: Prisma.BoolWithAggregatesFilter<"ClinicalNote"> | boolean
   signedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ClinicalNote"> | Date | string | null
   cosignerId?: Prisma.StringNullableWithAggregatesFilter<"ClinicalNote"> | string | null
+  parentNoteId?: Prisma.StringNullableWithAggregatesFilter<"ClinicalNote"> | string | null
 }
 
 export type ClinicalNoteCreateInput = {
@@ -304,6 +322,8 @@ export type ClinicalNoteCreateInput = {
   encounter: Prisma.EncounterCreateNestedOneWithoutClinicalNotesInput
   author: Prisma.StaffCreateNestedOneWithoutClinicalNotesInput
   cosigner?: Prisma.StaffCreateNestedOneWithoutCosignedNotesInput
+  parent?: Prisma.ClinicalNoteCreateNestedOneWithoutAddendaInput
+  addenda?: Prisma.ClinicalNoteCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteUncheckedCreateInput = {
@@ -317,6 +337,8 @@ export type ClinicalNoteUncheckedCreateInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
+  addenda?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteUpdateInput = {
@@ -330,6 +352,8 @@ export type ClinicalNoteUpdateInput = {
   encounter?: Prisma.EncounterUpdateOneRequiredWithoutClinicalNotesNestedInput
   author?: Prisma.StaffUpdateOneRequiredWithoutClinicalNotesNestedInput
   cosigner?: Prisma.StaffUpdateOneWithoutCosignedNotesNestedInput
+  parent?: Prisma.ClinicalNoteUpdateOneWithoutAddendaNestedInput
+  addenda?: Prisma.ClinicalNoteUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateInput = {
@@ -343,6 +367,8 @@ export type ClinicalNoteUncheckedUpdateInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addenda?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteCreateManyInput = {
@@ -356,6 +382,7 @@ export type ClinicalNoteCreateManyInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
 }
 
 export type ClinicalNoteUpdateManyMutationInput = {
@@ -379,6 +406,7 @@ export type ClinicalNoteUncheckedUpdateManyInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClinicalNoteListRelationFilter = {
@@ -389,6 +417,11 @@ export type ClinicalNoteListRelationFilter = {
 
 export type ClinicalNoteOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ClinicalNoteNullableScalarRelationFilter = {
+  is?: Prisma.ClinicalNoteWhereInput | null
+  isNot?: Prisma.ClinicalNoteWhereInput | null
 }
 
 export type ClinicalNoteCountOrderByAggregateInput = {
@@ -402,6 +435,7 @@ export type ClinicalNoteCountOrderByAggregateInput = {
   isSensitive?: Prisma.SortOrder
   signedAt?: Prisma.SortOrder
   cosignerId?: Prisma.SortOrder
+  parentNoteId?: Prisma.SortOrder
 }
 
 export type ClinicalNoteMaxOrderByAggregateInput = {
@@ -415,6 +449,7 @@ export type ClinicalNoteMaxOrderByAggregateInput = {
   isSensitive?: Prisma.SortOrder
   signedAt?: Prisma.SortOrder
   cosignerId?: Prisma.SortOrder
+  parentNoteId?: Prisma.SortOrder
 }
 
 export type ClinicalNoteMinOrderByAggregateInput = {
@@ -428,6 +463,7 @@ export type ClinicalNoteMinOrderByAggregateInput = {
   isSensitive?: Prisma.SortOrder
   signedAt?: Prisma.SortOrder
   cosignerId?: Prisma.SortOrder
+  parentNoteId?: Prisma.SortOrder
 }
 
 export type ClinicalNoteCreateNestedManyWithoutAuthorInput = {
@@ -556,12 +592,70 @@ export type ClinicalNoteUncheckedUpdateManyWithoutEncounterNestedInput = {
   deleteMany?: Prisma.ClinicalNoteScalarWhereInput | Prisma.ClinicalNoteScalarWhereInput[]
 }
 
+export type ClinicalNoteCreateNestedOneWithoutAddendaInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedCreateWithoutAddendaInput>
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutAddendaInput
+  connect?: Prisma.ClinicalNoteWhereUniqueInput
+}
+
+export type ClinicalNoteCreateNestedManyWithoutParentInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput> | Prisma.ClinicalNoteCreateWithoutParentInput[] | Prisma.ClinicalNoteUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutParentInput | Prisma.ClinicalNoteCreateOrConnectWithoutParentInput[]
+  createMany?: Prisma.ClinicalNoteCreateManyParentInputEnvelope
+  connect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+}
+
+export type ClinicalNoteUncheckedCreateNestedManyWithoutParentInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput> | Prisma.ClinicalNoteCreateWithoutParentInput[] | Prisma.ClinicalNoteUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutParentInput | Prisma.ClinicalNoteCreateOrConnectWithoutParentInput[]
+  createMany?: Prisma.ClinicalNoteCreateManyParentInputEnvelope
+  connect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+}
+
 export type EnumClinicalNoteTypeFieldUpdateOperationsInput = {
   set?: $Enums.ClinicalNoteType
 }
 
 export type EnumClinicalNoteStatusFieldUpdateOperationsInput = {
   set?: $Enums.ClinicalNoteStatus
+}
+
+export type ClinicalNoteUpdateOneWithoutAddendaNestedInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedCreateWithoutAddendaInput>
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutAddendaInput
+  upsert?: Prisma.ClinicalNoteUpsertWithoutAddendaInput
+  disconnect?: Prisma.ClinicalNoteWhereInput | boolean
+  delete?: Prisma.ClinicalNoteWhereInput | boolean
+  connect?: Prisma.ClinicalNoteWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClinicalNoteUpdateToOneWithWhereWithoutAddendaInput, Prisma.ClinicalNoteUpdateWithoutAddendaInput>, Prisma.ClinicalNoteUncheckedUpdateWithoutAddendaInput>
+}
+
+export type ClinicalNoteUpdateManyWithoutParentNestedInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput> | Prisma.ClinicalNoteCreateWithoutParentInput[] | Prisma.ClinicalNoteUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutParentInput | Prisma.ClinicalNoteCreateOrConnectWithoutParentInput[]
+  upsert?: Prisma.ClinicalNoteUpsertWithWhereUniqueWithoutParentInput | Prisma.ClinicalNoteUpsertWithWhereUniqueWithoutParentInput[]
+  createMany?: Prisma.ClinicalNoteCreateManyParentInputEnvelope
+  set?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  disconnect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  delete?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  connect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  update?: Prisma.ClinicalNoteUpdateWithWhereUniqueWithoutParentInput | Prisma.ClinicalNoteUpdateWithWhereUniqueWithoutParentInput[]
+  updateMany?: Prisma.ClinicalNoteUpdateManyWithWhereWithoutParentInput | Prisma.ClinicalNoteUpdateManyWithWhereWithoutParentInput[]
+  deleteMany?: Prisma.ClinicalNoteScalarWhereInput | Prisma.ClinicalNoteScalarWhereInput[]
+}
+
+export type ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput = {
+  create?: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput> | Prisma.ClinicalNoteCreateWithoutParentInput[] | Prisma.ClinicalNoteUncheckedCreateWithoutParentInput[]
+  connectOrCreate?: Prisma.ClinicalNoteCreateOrConnectWithoutParentInput | Prisma.ClinicalNoteCreateOrConnectWithoutParentInput[]
+  upsert?: Prisma.ClinicalNoteUpsertWithWhereUniqueWithoutParentInput | Prisma.ClinicalNoteUpsertWithWhereUniqueWithoutParentInput[]
+  createMany?: Prisma.ClinicalNoteCreateManyParentInputEnvelope
+  set?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  disconnect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  delete?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  connect?: Prisma.ClinicalNoteWhereUniqueInput | Prisma.ClinicalNoteWhereUniqueInput[]
+  update?: Prisma.ClinicalNoteUpdateWithWhereUniqueWithoutParentInput | Prisma.ClinicalNoteUpdateWithWhereUniqueWithoutParentInput[]
+  updateMany?: Prisma.ClinicalNoteUpdateManyWithWhereWithoutParentInput | Prisma.ClinicalNoteUpdateManyWithWhereWithoutParentInput[]
+  deleteMany?: Prisma.ClinicalNoteScalarWhereInput | Prisma.ClinicalNoteScalarWhereInput[]
 }
 
 export type ClinicalNoteCreateWithoutAuthorInput = {
@@ -574,6 +668,8 @@ export type ClinicalNoteCreateWithoutAuthorInput = {
   signedAt?: Date | string | null
   encounter: Prisma.EncounterCreateNestedOneWithoutClinicalNotesInput
   cosigner?: Prisma.StaffCreateNestedOneWithoutCosignedNotesInput
+  parent?: Prisma.ClinicalNoteCreateNestedOneWithoutAddendaInput
+  addenda?: Prisma.ClinicalNoteCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteUncheckedCreateWithoutAuthorInput = {
@@ -586,6 +682,8 @@ export type ClinicalNoteUncheckedCreateWithoutAuthorInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
+  addenda?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteCreateOrConnectWithoutAuthorInput = {
@@ -608,6 +706,8 @@ export type ClinicalNoteCreateWithoutCosignerInput = {
   signedAt?: Date | string | null
   encounter: Prisma.EncounterCreateNestedOneWithoutClinicalNotesInput
   author: Prisma.StaffCreateNestedOneWithoutClinicalNotesInput
+  parent?: Prisma.ClinicalNoteCreateNestedOneWithoutAddendaInput
+  addenda?: Prisma.ClinicalNoteCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteUncheckedCreateWithoutCosignerInput = {
@@ -620,6 +720,8 @@ export type ClinicalNoteUncheckedCreateWithoutCosignerInput = {
   status: $Enums.ClinicalNoteStatus
   isSensitive: boolean
   signedAt?: Date | string | null
+  parentNoteId?: string | null
+  addenda?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteCreateOrConnectWithoutCosignerInput = {
@@ -662,6 +764,7 @@ export type ClinicalNoteScalarWhereInput = {
   isSensitive?: Prisma.BoolFilter<"ClinicalNote"> | boolean
   signedAt?: Prisma.DateTimeNullableFilter<"ClinicalNote"> | Date | string | null
   cosignerId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
+  parentNoteId?: Prisma.StringNullableFilter<"ClinicalNote"> | string | null
 }
 
 export type ClinicalNoteUpsertWithWhereUniqueWithoutCosignerInput = {
@@ -690,6 +793,8 @@ export type ClinicalNoteCreateWithoutEncounterInput = {
   signedAt?: Date | string | null
   author: Prisma.StaffCreateNestedOneWithoutClinicalNotesInput
   cosigner?: Prisma.StaffCreateNestedOneWithoutCosignedNotesInput
+  parent?: Prisma.ClinicalNoteCreateNestedOneWithoutAddendaInput
+  addenda?: Prisma.ClinicalNoteCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteUncheckedCreateWithoutEncounterInput = {
@@ -702,6 +807,8 @@ export type ClinicalNoteUncheckedCreateWithoutEncounterInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
+  addenda?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutParentInput
 }
 
 export type ClinicalNoteCreateOrConnectWithoutEncounterInput = {
@@ -730,6 +837,132 @@ export type ClinicalNoteUpdateManyWithWhereWithoutEncounterInput = {
   data: Prisma.XOR<Prisma.ClinicalNoteUpdateManyMutationInput, Prisma.ClinicalNoteUncheckedUpdateManyWithoutEncounterInput>
 }
 
+export type ClinicalNoteCreateWithoutAddendaInput = {
+  id?: string
+  noteType: $Enums.ClinicalNoteType
+  title?: string | null
+  content?: string | null
+  status: $Enums.ClinicalNoteStatus
+  isSensitive: boolean
+  signedAt?: Date | string | null
+  encounter: Prisma.EncounterCreateNestedOneWithoutClinicalNotesInput
+  author: Prisma.StaffCreateNestedOneWithoutClinicalNotesInput
+  cosigner?: Prisma.StaffCreateNestedOneWithoutCosignedNotesInput
+  parent?: Prisma.ClinicalNoteCreateNestedOneWithoutAddendaInput
+}
+
+export type ClinicalNoteUncheckedCreateWithoutAddendaInput = {
+  id?: string
+  encounterId: string
+  authorId: string
+  noteType: $Enums.ClinicalNoteType
+  title?: string | null
+  content?: string | null
+  status: $Enums.ClinicalNoteStatus
+  isSensitive: boolean
+  signedAt?: Date | string | null
+  cosignerId?: string | null
+  parentNoteId?: string | null
+}
+
+export type ClinicalNoteCreateOrConnectWithoutAddendaInput = {
+  where: Prisma.ClinicalNoteWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedCreateWithoutAddendaInput>
+}
+
+export type ClinicalNoteCreateWithoutParentInput = {
+  id?: string
+  noteType: $Enums.ClinicalNoteType
+  title?: string | null
+  content?: string | null
+  status: $Enums.ClinicalNoteStatus
+  isSensitive: boolean
+  signedAt?: Date | string | null
+  encounter: Prisma.EncounterCreateNestedOneWithoutClinicalNotesInput
+  author: Prisma.StaffCreateNestedOneWithoutClinicalNotesInput
+  cosigner?: Prisma.StaffCreateNestedOneWithoutCosignedNotesInput
+  addenda?: Prisma.ClinicalNoteCreateNestedManyWithoutParentInput
+}
+
+export type ClinicalNoteUncheckedCreateWithoutParentInput = {
+  id?: string
+  encounterId: string
+  authorId: string
+  noteType: $Enums.ClinicalNoteType
+  title?: string | null
+  content?: string | null
+  status: $Enums.ClinicalNoteStatus
+  isSensitive: boolean
+  signedAt?: Date | string | null
+  cosignerId?: string | null
+  addenda?: Prisma.ClinicalNoteUncheckedCreateNestedManyWithoutParentInput
+}
+
+export type ClinicalNoteCreateOrConnectWithoutParentInput = {
+  where: Prisma.ClinicalNoteWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput>
+}
+
+export type ClinicalNoteCreateManyParentInputEnvelope = {
+  data: Prisma.ClinicalNoteCreateManyParentInput | Prisma.ClinicalNoteCreateManyParentInput[]
+  skipDuplicates?: boolean
+}
+
+export type ClinicalNoteUpsertWithoutAddendaInput = {
+  update: Prisma.XOR<Prisma.ClinicalNoteUpdateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedUpdateWithoutAddendaInput>
+  create: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedCreateWithoutAddendaInput>
+  where?: Prisma.ClinicalNoteWhereInput
+}
+
+export type ClinicalNoteUpdateToOneWithWhereWithoutAddendaInput = {
+  where?: Prisma.ClinicalNoteWhereInput
+  data: Prisma.XOR<Prisma.ClinicalNoteUpdateWithoutAddendaInput, Prisma.ClinicalNoteUncheckedUpdateWithoutAddendaInput>
+}
+
+export type ClinicalNoteUpdateWithoutAddendaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  noteType?: Prisma.EnumClinicalNoteTypeFieldUpdateOperationsInput | $Enums.ClinicalNoteType
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
+  isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  encounter?: Prisma.EncounterUpdateOneRequiredWithoutClinicalNotesNestedInput
+  author?: Prisma.StaffUpdateOneRequiredWithoutClinicalNotesNestedInput
+  cosigner?: Prisma.StaffUpdateOneWithoutCosignedNotesNestedInput
+  parent?: Prisma.ClinicalNoteUpdateOneWithoutAddendaNestedInput
+}
+
+export type ClinicalNoteUncheckedUpdateWithoutAddendaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  encounterId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  noteType?: Prisma.EnumClinicalNoteTypeFieldUpdateOperationsInput | $Enums.ClinicalNoteType
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
+  isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ClinicalNoteUpsertWithWhereUniqueWithoutParentInput = {
+  where: Prisma.ClinicalNoteWhereUniqueInput
+  update: Prisma.XOR<Prisma.ClinicalNoteUpdateWithoutParentInput, Prisma.ClinicalNoteUncheckedUpdateWithoutParentInput>
+  create: Prisma.XOR<Prisma.ClinicalNoteCreateWithoutParentInput, Prisma.ClinicalNoteUncheckedCreateWithoutParentInput>
+}
+
+export type ClinicalNoteUpdateWithWhereUniqueWithoutParentInput = {
+  where: Prisma.ClinicalNoteWhereUniqueInput
+  data: Prisma.XOR<Prisma.ClinicalNoteUpdateWithoutParentInput, Prisma.ClinicalNoteUncheckedUpdateWithoutParentInput>
+}
+
+export type ClinicalNoteUpdateManyWithWhereWithoutParentInput = {
+  where: Prisma.ClinicalNoteScalarWhereInput
+  data: Prisma.XOR<Prisma.ClinicalNoteUpdateManyMutationInput, Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentInput>
+}
+
 export type ClinicalNoteCreateManyAuthorInput = {
   id?: string
   encounterId: string
@@ -740,6 +973,7 @@ export type ClinicalNoteCreateManyAuthorInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
 }
 
 export type ClinicalNoteCreateManyCosignerInput = {
@@ -752,6 +986,7 @@ export type ClinicalNoteCreateManyCosignerInput = {
   status: $Enums.ClinicalNoteStatus
   isSensitive: boolean
   signedAt?: Date | string | null
+  parentNoteId?: string | null
 }
 
 export type ClinicalNoteUpdateWithoutAuthorInput = {
@@ -764,6 +999,8 @@ export type ClinicalNoteUpdateWithoutAuthorInput = {
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   encounter?: Prisma.EncounterUpdateOneRequiredWithoutClinicalNotesNestedInput
   cosigner?: Prisma.StaffUpdateOneWithoutCosignedNotesNestedInput
+  parent?: Prisma.ClinicalNoteUpdateOneWithoutAddendaNestedInput
+  addenda?: Prisma.ClinicalNoteUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateWithoutAuthorInput = {
@@ -776,6 +1013,8 @@ export type ClinicalNoteUncheckedUpdateWithoutAuthorInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addenda?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateManyWithoutAuthorInput = {
@@ -788,6 +1027,7 @@ export type ClinicalNoteUncheckedUpdateManyWithoutAuthorInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClinicalNoteUpdateWithoutCosignerInput = {
@@ -800,6 +1040,8 @@ export type ClinicalNoteUpdateWithoutCosignerInput = {
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   encounter?: Prisma.EncounterUpdateOneRequiredWithoutClinicalNotesNestedInput
   author?: Prisma.StaffUpdateOneRequiredWithoutClinicalNotesNestedInput
+  parent?: Prisma.ClinicalNoteUpdateOneWithoutAddendaNestedInput
+  addenda?: Prisma.ClinicalNoteUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateWithoutCosignerInput = {
@@ -812,6 +1054,8 @@ export type ClinicalNoteUncheckedUpdateWithoutCosignerInput = {
   status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addenda?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateManyWithoutCosignerInput = {
@@ -824,6 +1068,7 @@ export type ClinicalNoteUncheckedUpdateManyWithoutCosignerInput = {
   status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ClinicalNoteCreateManyEncounterInput = {
@@ -836,6 +1081,7 @@ export type ClinicalNoteCreateManyEncounterInput = {
   isSensitive: boolean
   signedAt?: Date | string | null
   cosignerId?: string | null
+  parentNoteId?: string | null
 }
 
 export type ClinicalNoteUpdateWithoutEncounterInput = {
@@ -848,6 +1094,8 @@ export type ClinicalNoteUpdateWithoutEncounterInput = {
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   author?: Prisma.StaffUpdateOneRequiredWithoutClinicalNotesNestedInput
   cosigner?: Prisma.StaffUpdateOneWithoutCosignedNotesNestedInput
+  parent?: Prisma.ClinicalNoteUpdateOneWithoutAddendaNestedInput
+  addenda?: Prisma.ClinicalNoteUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateWithoutEncounterInput = {
@@ -860,6 +1108,8 @@ export type ClinicalNoteUncheckedUpdateWithoutEncounterInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addenda?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput
 }
 
 export type ClinicalNoteUncheckedUpdateManyWithoutEncounterInput = {
@@ -872,8 +1122,92 @@ export type ClinicalNoteUncheckedUpdateManyWithoutEncounterInput = {
   isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parentNoteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
+export type ClinicalNoteCreateManyParentInput = {
+  id?: string
+  encounterId: string
+  authorId: string
+  noteType: $Enums.ClinicalNoteType
+  title?: string | null
+  content?: string | null
+  status: $Enums.ClinicalNoteStatus
+  isSensitive: boolean
+  signedAt?: Date | string | null
+  cosignerId?: string | null
+}
+
+export type ClinicalNoteUpdateWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  noteType?: Prisma.EnumClinicalNoteTypeFieldUpdateOperationsInput | $Enums.ClinicalNoteType
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
+  isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  encounter?: Prisma.EncounterUpdateOneRequiredWithoutClinicalNotesNestedInput
+  author?: Prisma.StaffUpdateOneRequiredWithoutClinicalNotesNestedInput
+  cosigner?: Prisma.StaffUpdateOneWithoutCosignedNotesNestedInput
+  addenda?: Prisma.ClinicalNoteUpdateManyWithoutParentNestedInput
+}
+
+export type ClinicalNoteUncheckedUpdateWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  encounterId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  noteType?: Prisma.EnumClinicalNoteTypeFieldUpdateOperationsInput | $Enums.ClinicalNoteType
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
+  isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addenda?: Prisma.ClinicalNoteUncheckedUpdateManyWithoutParentNestedInput
+}
+
+export type ClinicalNoteUncheckedUpdateManyWithoutParentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  encounterId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  noteType?: Prisma.EnumClinicalNoteTypeFieldUpdateOperationsInput | $Enums.ClinicalNoteType
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumClinicalNoteStatusFieldUpdateOperationsInput | $Enums.ClinicalNoteStatus
+  isSensitive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  signedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cosignerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+
+/**
+ * Count Type ClinicalNoteCountOutputType
+ */
+
+export type ClinicalNoteCountOutputType = {
+  addenda: number
+}
+
+export type ClinicalNoteCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  addenda?: boolean | ClinicalNoteCountOutputTypeCountAddendaArgs
+}
+
+/**
+ * ClinicalNoteCountOutputType without action
+ */
+export type ClinicalNoteCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClinicalNoteCountOutputType
+   */
+  select?: Prisma.ClinicalNoteCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ClinicalNoteCountOutputType without action
+ */
+export type ClinicalNoteCountOutputTypeCountAddendaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClinicalNoteWhereInput
+}
 
 
 export type ClinicalNoteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -887,9 +1221,13 @@ export type ClinicalNoteSelect<ExtArgs extends runtime.Types.Extensions.Internal
   isSensitive?: boolean
   signedAt?: boolean
   cosignerId?: boolean
+  parentNoteId?: boolean
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
+  addenda?: boolean | Prisma.ClinicalNote$addendaArgs<ExtArgs>
+  _count?: boolean | Prisma.ClinicalNoteCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["clinicalNote"]>
 
 export type ClinicalNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -903,9 +1241,11 @@ export type ClinicalNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   isSensitive?: boolean
   signedAt?: boolean
   cosignerId?: boolean
+  parentNoteId?: boolean
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
 }, ExtArgs["result"]["clinicalNote"]>
 
 export type ClinicalNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -919,9 +1259,11 @@ export type ClinicalNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   isSensitive?: boolean
   signedAt?: boolean
   cosignerId?: boolean
+  parentNoteId?: boolean
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
 }, ExtArgs["result"]["clinicalNote"]>
 
 export type ClinicalNoteSelectScalar = {
@@ -935,23 +1277,29 @@ export type ClinicalNoteSelectScalar = {
   isSensitive?: boolean
   signedAt?: boolean
   cosignerId?: boolean
+  parentNoteId?: boolean
 }
 
-export type ClinicalNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "encounterId" | "authorId" | "noteType" | "title" | "content" | "status" | "isSensitive" | "signedAt" | "cosignerId", ExtArgs["result"]["clinicalNote"]>
+export type ClinicalNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "encounterId" | "authorId" | "noteType" | "title" | "content" | "status" | "isSensitive" | "signedAt" | "cosignerId" | "parentNoteId", ExtArgs["result"]["clinicalNote"]>
 export type ClinicalNoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
+  addenda?: boolean | Prisma.ClinicalNote$addendaArgs<ExtArgs>
+  _count?: boolean | Prisma.ClinicalNoteCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClinicalNoteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
 }
 export type ClinicalNoteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   encounter?: boolean | Prisma.EncounterDefaultArgs<ExtArgs>
   author?: boolean | Prisma.StaffDefaultArgs<ExtArgs>
   cosigner?: boolean | Prisma.ClinicalNote$cosignerArgs<ExtArgs>
+  parent?: boolean | Prisma.ClinicalNote$parentArgs<ExtArgs>
 }
 
 export type $ClinicalNotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -960,6 +1308,8 @@ export type $ClinicalNotePayload<ExtArgs extends runtime.Types.Extensions.Intern
     encounter: Prisma.$EncounterPayload<ExtArgs>
     author: Prisma.$StaffPayload<ExtArgs>
     cosigner: Prisma.$StaffPayload<ExtArgs> | null
+    parent: Prisma.$ClinicalNotePayload<ExtArgs> | null
+    addenda: Prisma.$ClinicalNotePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -972,6 +1322,7 @@ export type $ClinicalNotePayload<ExtArgs extends runtime.Types.Extensions.Intern
     isSensitive: boolean
     signedAt: Date | null
     cosignerId: string | null
+    parentNoteId: string | null
   }, ExtArgs["result"]["clinicalNote"]>
   composites: {}
 }
@@ -1369,6 +1720,8 @@ export interface Prisma__ClinicalNoteClient<T, Null = never, ExtArgs extends run
   encounter<T extends Prisma.EncounterDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EncounterDefaultArgs<ExtArgs>>): Prisma.Prisma__EncounterClient<runtime.Types.Result.GetResult<Prisma.$EncounterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   author<T extends Prisma.StaffDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffDefaultArgs<ExtArgs>>): Prisma.Prisma__StaffClient<runtime.Types.Result.GetResult<Prisma.$StaffPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   cosigner<T extends Prisma.ClinicalNote$cosignerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClinicalNote$cosignerArgs<ExtArgs>>): Prisma.Prisma__StaffClient<runtime.Types.Result.GetResult<Prisma.$StaffPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  parent<T extends Prisma.ClinicalNote$parentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClinicalNote$parentArgs<ExtArgs>>): Prisma.Prisma__ClinicalNoteClient<runtime.Types.Result.GetResult<Prisma.$ClinicalNotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  addenda<T extends Prisma.ClinicalNote$addendaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClinicalNote$addendaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClinicalNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1408,6 +1761,7 @@ export interface ClinicalNoteFieldRefs {
   readonly isSensitive: Prisma.FieldRef<"ClinicalNote", 'Boolean'>
   readonly signedAt: Prisma.FieldRef<"ClinicalNote", 'DateTime'>
   readonly cosignerId: Prisma.FieldRef<"ClinicalNote", 'String'>
+  readonly parentNoteId: Prisma.FieldRef<"ClinicalNote", 'String'>
 }
     
 
@@ -1820,6 +2174,49 @@ export type ClinicalNote$cosignerArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.StaffInclude<ExtArgs> | null
   where?: Prisma.StaffWhereInput
+}
+
+/**
+ * ClinicalNote.parent
+ */
+export type ClinicalNote$parentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClinicalNote
+   */
+  select?: Prisma.ClinicalNoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClinicalNote
+   */
+  omit?: Prisma.ClinicalNoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClinicalNoteInclude<ExtArgs> | null
+  where?: Prisma.ClinicalNoteWhereInput
+}
+
+/**
+ * ClinicalNote.addenda
+ */
+export type ClinicalNote$addendaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClinicalNote
+   */
+  select?: Prisma.ClinicalNoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClinicalNote
+   */
+  omit?: Prisma.ClinicalNoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClinicalNoteInclude<ExtArgs> | null
+  where?: Prisma.ClinicalNoteWhereInput
+  orderBy?: Prisma.ClinicalNoteOrderByWithRelationInput | Prisma.ClinicalNoteOrderByWithRelationInput[]
+  cursor?: Prisma.ClinicalNoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClinicalNoteScalarFieldEnum | Prisma.ClinicalNoteScalarFieldEnum[]
 }
 
 /**

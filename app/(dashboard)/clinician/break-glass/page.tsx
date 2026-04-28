@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { IconAlertTriangle, IconClock, IconExternalLink, IconShieldLock } from "@tabler/icons-react"
@@ -35,70 +35,18 @@ interface AccessLogEntry {
   duration: string
   reviewedBy: string
   status: "Pending Review" | "Reviewed" | "Flagged"
-  grantedAt?: number
 }
 
 interface ActiveSession {
+  id: string
   patientId: string
   patientName: string
-  grantedAt: number
-  expiresAt: number
+  patientMrn: string
+  reason: string
+  grantedAt: string
+  expiresAt: string
+  minutesRemaining: number
 }
-
-const STORAGE_KEY = "emr_break_glass_log"
-const SESSION_KEY = "emr_break_glass_sessions"
-const SESSION_DURATION_MS = 60 * 60 * 1000 // 1 hour
-
-const mockPatients: BreakGlassPatient[] = [
-  { id: "1", name: "John Doe", mrn: "MRN-001", encounter: "Inpatient - Med Ward Rm 301-A" },
-  { id: "2", name: "Jane Smith", mrn: "MRN-002", encounter: "Outpatient - Pulmonology" },
-  { id: "3", name: "Robert Chen", mrn: "MRN-009", encounter: "Inpatient - ICU Bed 4" },
-  { id: "4", name: "Maria Garcia", mrn: "MRN-007", encounter: "Emergency - ER Bay 3" },
-  { id: "5", name: "James Lee", mrn: "MRN-012", encounter: "Outpatient - Orthopedics" },
-  { id: "6", name: "Linda Park", mrn: "MRN-011", encounter: "Inpatient - Cardiology Rm 205-B" },
-  { id: "7", name: "Sarah Kim", mrn: "MRN-015", encounter: "Outpatient - Psychiatry" },
-  { id: "8", name: "Ahmed Hassan", mrn: "MRN-018", encounter: "Outpatient - Internal Medicine" },
-  { id: "9", name: "Emily Chen", mrn: "MRN-022", encounter: "Emergency - Discharged" },
-  { id: "10", name: "David Wilson", mrn: "MRN-003", encounter: "Outpatient - Pain Management" },
-  { id: "11", name: "Patricia Martinez", mrn: "MRN-025", encounter: "Inpatient - Ortho (Discharged)" },
-  { id: "12", name: "Michael Brown", mrn: "MRN-030", encounter: "Emergency - ER Bay 7" },
-]
-
-const seedLog: AccessLogEntry[] = [
-  {
-    id: "bg-001",
-    date: "Apr 8, 2026 10:10 PM",
-    patient: "Carlos Mendez",
-    patientId: "",
-    reason: "Direct Patient Care Emergency",
-    justification: "Patient presented unconscious in ER, required immediate allergy and medication history review for resuscitation protocol.",
-    duration: "18 min",
-    reviewedBy: "Privacy Officer Lane",
-    status: "Reviewed",
-  },
-  {
-    id: "bg-002",
-    date: "Apr 7, 2026 03:40 AM",
-    patient: "Susan Chen",
-    patientId: "",
-    reason: "Consultation Requested",
-    justification: "Consulting on post-operative complication case — needed to review surgical notes and lab trends for urgent recommendation.",
-    duration: "11 min",
-    reviewedBy: "Pending",
-    status: "Pending Review",
-  },
-  {
-    id: "bg-003",
-    date: "Apr 6, 2026 02:05 PM",
-    patient: "Anna Petrov",
-    patientId: "",
-    reason: "Other",
-    justification: "Reviewed chart during quality assurance meeting to discuss treatment pathway and outcome — access flagged for non-emergency use.",
-    duration: "29 min",
-    reviewedBy: "Privacy Officer Lane",
-    status: "Flagged",
-  },
-]
 
 const logStatusClass: Record<AccessLogEntry["status"], string> = {
   "Pending Review": "bg-yellow-100 text-yellow-800 border-yellow-300",
@@ -106,79 +54,79 @@ const logStatusClass: Record<AccessLogEntry["status"], string> = {
   Flagged: "bg-red-100 text-red-800 border-red-300",
 }
 
-function loadLog(): AccessLogEntry[] {
-  if (typeof window === "undefined") return seedLog
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as AccessLogEntry[]
-  } catch { /* ignore */ }
-  return seedLog
-}
-
-function saveLog(log: AccessLogEntry[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(log)) } catch { /* ignore */ }
-}
-
-function loadSessions(): ActiveSession[] {
-  if (typeof window === "undefined") return []
-  try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    if (raw) {
-      const sessions = JSON.parse(raw) as ActiveSession[]
-      return sessions.filter((s) => s.expiresAt > Date.now())
-    }
-  } catch { /* ignore */ }
-  return []
-}
-
-function saveSessions(sessions: ActiveSession[]) {
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(sessions)) } catch { /* ignore */ }
-}
-
-function formatTimeRemaining(ms: number): string {
+function formatTimeRemaining(expiresAt: string): string {
+  const ms = new Date(expiresAt).getTime() - Date.now()
   if (ms <= 0) return "Expired"
   const minutes = Math.floor(ms / 60000)
   const seconds = Math.floor((ms % 60000) / 1000)
   return `${minutes}m ${seconds.toString().padStart(2, "0")}s`
 }
 
+function formatEncounterLocation(patient: any): string {
+  const enc = (patient.encounters ?? [])[0]
+  if (!enc) return "No active encounter"
+  const loc = enc.currentLocation
+  if (loc) return `${loc.unit} ${loc.roomNumber ?? ""}`.trim()
+  return enc.status === "ACTIVE" ? "Active Encounter" : enc.status
+}
+
 export default function BreakGlassPage() {
   const router = useRouter()
   const [search, setSearch] = useState("")
+  const [patients, setPatients] = useState<BreakGlassPatient[]>([])
   const [selectedPatient, setSelectedPatient] = useState<BreakGlassPatient | null>(null)
   const [reason, setReason] = useState("")
   const [justification, setJustification] = useState("")
   const [acknowledged, setAcknowledged] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [accessLog, setAccessLog] = useState<AccessLogEntry[]>(() => loadLog())
-  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(() => loadSessions())
-  const [nowMs, setNowMs] = useState(() => Date.now())
+  const [accessLog, setAccessLog] = useState<AccessLogEntry[]>([])
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([])
+  const [submitting, setSubmitting] = useState(false)
   const [, setTick] = useState(0)
 
-  // Tick every second to update active session countdowns
+  // Tick every second to update countdowns
   useEffect(() => {
     if (activeSessions.length === 0) return
-    const interval = setInterval(() => {
-      const currentNow = Date.now()
-      const updated = activeSessions.filter((s) => s.expiresAt > Date.now())
-      if (updated.length !== activeSessions.length) {
-        setActiveSessions(updated)
-        saveSessions(updated)
-      }
-      setNowMs(currentNow)
-      setTick((t) => t + 1)
-    }, 1000)
+    const interval = setInterval(() => setTick((t) => t + 1), 1000)
     return () => clearInterval(interval)
-  }, [activeSessions])
+  }, [activeSessions.length])
+
+  // Fetch patients on mount
+  useEffect(() => {
+    fetch("/api/patients?withEncounters=true")
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const mapped: BreakGlassPatient[] = (data ?? []).map((p: any) => ({
+          id: p.id,
+          name: `${p.firstName} ${p.lastName}`,
+          mrn: p.mrn,
+          encounter: formatEncounterLocation(p),
+        }))
+        setPatients(mapped)
+      })
+      .catch(() => {})
+  }, [])
+
+  const fetchSessions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/break-glass/sessions")
+      if (!res.ok) return
+      const { data } = await res.json()
+      setActiveSessions(data?.activeSessions ?? [])
+      setAccessLog(data?.log ?? [])
+    } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => { fetchSessions() }, [fetchSessions])
 
   const filteredPatients = useMemo(() => {
     const query = search.trim().toLowerCase()
-    if (!query) return mockPatients
-    return mockPatients.filter(
-      (patient) =>
-        patient.name.toLowerCase().includes(query) || patient.mrn.toLowerCase().includes(query)
+    if (!query) return patients
+    return patients.filter(
+      (p) =>
+        p.name.toLowerCase().includes(query) || p.mrn.toLowerCase().includes(query)
     )
-  }, [search])
+  }, [search, patients])
 
   const validationState = {
     patientSelected: Boolean(selectedPatient),
@@ -201,7 +149,9 @@ export default function BreakGlassPage() {
   ].filter(Boolean) as string[]
 
   const isSessionActive = (patientId: string) =>
-    activeSessions.some((s) => s.patientId === patientId && s.expiresAt > nowMs)
+    activeSessions.some(
+      (s) => s.patientId === patientId && new Date(s.expiresAt) > new Date()
+    )
 
   const resetForm = () => {
     setSearch("")
@@ -212,58 +162,46 @@ export default function BreakGlassPage() {
     setConfirmOpen(false)
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedPatient) return
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/break-glass", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          patientId: selectedPatient.id,
+          reason,
+          justification,
+        }),
+      })
 
-    const now = Date.now()
-    const timestamp = new Date(now).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error?.message ?? "Failed to request access")
+        return
+      }
 
-    const newEntry: AccessLogEntry = {
-      id: `bg-${now}`,
-      date: timestamp,
-      patient: selectedPatient.name,
-      patientId: selectedPatient.id,
-      reason,
-      justification,
-      duration: "In Progress",
-      reviewedBy: "Pending",
-      status: "Pending Review",
-      grantedAt: now,
+      const { data } = await res.json()
+
+      toast.success(`Emergency access granted for ${selectedPatient.name}`, {
+        description: "Redirecting to patient chart — all activity is being logged.",
+        duration: 4000,
+      })
+
+      await fetchSessions()
+
+      const patientId = data?.patient?.id ?? selectedPatient.id
+      resetForm()
+
+      setTimeout(() => {
+        router.push(`/clinician/chart?patientId=${patientId}`)
+      }, 1500)
+    } catch {
+      toast.error("Failed to request break-glass access")
+    } finally {
+      setSubmitting(false)
     }
-
-    const updatedLog = [newEntry, ...accessLog]
-    setAccessLog(updatedLog)
-    saveLog(updatedLog)
-
-    // Create active session
-    const newSession: ActiveSession = {
-      patientId: selectedPatient.id,
-      patientName: selectedPatient.name,
-      grantedAt: now,
-      expiresAt: now + SESSION_DURATION_MS,
-    }
-    const updatedSessions = [...activeSessions.filter((s) => s.patientId !== selectedPatient.id), newSession]
-    setActiveSessions(updatedSessions)
-    saveSessions(updatedSessions)
-
-    toast.success(`Emergency access granted for ${selectedPatient.name}`, {
-      description: "Redirecting to patient chart — all activity is being logged.",
-      duration: 4000,
-    })
-
-    const patientId = selectedPatient.id
-    resetForm()
-
-    // Navigate to the patient chart after a short delay
-    setTimeout(() => {
-      router.push(`/clinician/chart?patientId=${patientId}`)
-    }, 1500)
   }
 
   const handleViewChart = (patientId: string) => {
@@ -319,14 +257,14 @@ export default function BreakGlassPage() {
                 <CardContent className="space-y-2">
                   {activeSessions.map((session) => (
                     <div
-                      key={session.patientId}
+                      key={session.id}
                       className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-white p-3"
                     >
                       <div className="flex items-center gap-3">
                         <Badge className="bg-red-100 text-red-800 border-red-300">ACTIVE</Badge>
                         <span className="font-medium">{session.patientName}</span>
                         <span className="text-sm text-muted-foreground">
-                          Expires in {formatTimeRemaining(session.expiresAt - nowMs)}
+                          Expires in {formatTimeRemaining(session.expiresAt)}
                         </span>
                       </div>
                       <Button
@@ -378,7 +316,9 @@ export default function BreakGlassPage() {
                               <p className="text-sm text-muted-foreground">{patient.mrn}</p>
                             </div>
                             <div className="flex flex-col items-end gap-1 shrink-0">
-                              <Badge variant="outline" className="text-[10px] px-1.5">{patient.encounter}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5">
+                                {patient.encounter}
+                              </Badge>
                               {hasActive && (
                                 <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-[10px] px-1.5">
                                   Access Active
@@ -421,7 +361,13 @@ export default function BreakGlassPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <Label>Detailed Justification</Label>
-                    <span className={`text-xs ${justification.trim().length >= 50 ? "text-green-700" : "text-muted-foreground"}`}>
+                    <span
+                      className={`text-xs ${
+                        justification.trim().length >= 50
+                          ? "text-green-700"
+                          : "text-muted-foreground"
+                      }`}
+                    >
                       {justification.trim().length}/50 minimum characters
                     </span>
                   </div>
@@ -434,25 +380,28 @@ export default function BreakGlassPage() {
                 </div>
 
                 <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4">
-                  <Checkbox checked={acknowledged} onCheckedChange={(checked) => setAcknowledged(Boolean(checked))} />
+                  <Checkbox
+                    checked={acknowledged}
+                    onCheckedChange={(checked) => setAcknowledged(Boolean(checked))}
+                  />
                   <div className="space-y-1 text-sm">
                     <p className="font-medium text-amber-900">Acknowledge audited access</p>
                     <p className="text-amber-800">
-                      I understand this action is extraordinary, will be audited, and must be justified for immediate clinical need.
+                      I understand this action is extraordinary, will be audited, and must be
+                      justified for immediate clinical need.
                     </p>
                   </div>
                 </div>
 
                 <Button
                   className={`h-12 text-white ${
-                    isValid
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-red-400 hover:bg-red-500"
+                    isValid ? "bg-red-600 hover:bg-red-700" : "bg-red-400 hover:bg-red-500"
                   }`}
                   onClick={handleRequestAccessClick}
+                  disabled={submitting}
                 >
                   <IconShieldLock className="mr-2 h-4 w-4" />
-                  Request Emergency Access
+                  {submitting ? "Requesting..." : "Request Emergency Access"}
                 </Button>
                 {!isValid && (
                   <p className="text-xs text-muted-foreground">
@@ -469,7 +418,9 @@ export default function BreakGlassPage() {
               </CardHeader>
               <CardContent>
                 {accessLog.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No break-glass access events recorded.</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No break-glass access events recorded.
+                  </p>
                 ) : (
                   <Table>
                     <TableHeader>
@@ -484,39 +435,36 @@ export default function BreakGlassPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {accessLog.map((entry) => {
-                        const hasActiveSession = entry.patientId && isSessionActive(entry.patientId)
-                        return (
-                          <TableRow key={entry.id}>
-                            <TableCell className="text-sm whitespace-nowrap">{entry.date}</TableCell>
-                            <TableCell className="font-medium">{entry.patient}</TableCell>
-                            <TableCell className="text-sm">{entry.reason}</TableCell>
-                            <TableCell className="text-sm">
-                              {hasActiveSession ? (
-                                <span className="text-amber-700 font-medium">In Progress</span>
-                              ) : (
-                                entry.duration
-                              )}
-                            </TableCell>
-                            <TableCell className="text-sm">{entry.reviewedBy}</TableCell>
-                            <TableCell>
-                              <Badge className={logStatusClass[entry.status]}>{entry.status}</Badge>
-                            </TableCell>
-                            <TableCell>
-                              {entry.patientId && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 px-2"
-                                  onClick={() => handleViewChart(entry.patientId)}
-                                >
-                                  <IconExternalLink className="h-3.5 w-3.5" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
+                      {accessLog.map((entry) => (
+                        <TableRow key={entry.id}>
+                          <TableCell className="text-sm whitespace-nowrap">{entry.date}</TableCell>
+                          <TableCell className="font-medium">{entry.patient}</TableCell>
+                          <TableCell className="text-sm">{entry.reason}</TableCell>
+                          <TableCell className="text-sm">
+                            {isSessionActive(entry.patientId) ? (
+                              <span className="text-amber-700 font-medium">In Progress</span>
+                            ) : (
+                              entry.duration
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm">{entry.reviewedBy}</TableCell>
+                          <TableCell>
+                            <Badge className={logStatusClass[entry.status]}>{entry.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {entry.patientId && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2"
+                                onClick={() => handleViewChart(entry.patientId)}
+                              >
+                                <IconExternalLink className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 )}
