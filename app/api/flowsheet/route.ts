@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth/guard'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'
 import * as encountersService from '@/lib/services/encounters'
 

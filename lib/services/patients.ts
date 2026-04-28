@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { AuditActionType, AllergyStatus, EncounterStatus } from '@/src/generated/client/enums'
+import { AuditActionType, AllergyStatus, EncounterStatus } from '@/src/generated/client'
 
 export interface CreatePatientInput {
   firstName: string

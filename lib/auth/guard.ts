@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 import { getSessionUser, readSessionCookie } from '@/lib/auth/session'
 import type { AuthUser } from '@/lib/auth/session'
 import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'

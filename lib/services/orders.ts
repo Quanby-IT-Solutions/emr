@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { NotFoundError, ConflictError } from '@/lib/api/errors'
 import { OrderDetailsSchema } from '@/lib/services/orders/schemas'
-import { OrderType, OrderPriority } from '@/src/generated/client/enums'
+import { OrderType, OrderPriority } from '@/src/generated/client'
 
 const PlaceOrderInputSchema = z.object({
   encounterId: z.string().min(1),

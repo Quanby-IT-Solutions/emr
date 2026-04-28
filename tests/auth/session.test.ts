@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 
 vi.mock('@/lib/db', () => ({
   db: {

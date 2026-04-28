@@ -1,7 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import { db } from '@/lib/db'
-import { AuditActionType } from '@/src/generated/client/client'
-import { UserRole } from '@/src/generated/client/enums'
+import { AuditActionType } from '@/src/generated/client'
+import { UserRole } from '@/src/generated/client'
 import { createSession, getSessionUser, revokeSession } from '@/lib/auth/session'
 import { runWithUser } from '@/lib/request-context'
 

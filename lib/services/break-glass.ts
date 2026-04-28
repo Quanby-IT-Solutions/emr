@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { NotFoundError } from '@/lib/api/errors'
-import { AuditActionType } from '@/src/generated/client/enums'
+import { AuditActionType } from '@/src/generated/client'
 
 const RequestAccessInputSchema = z.object({
   patientId: z.string().min(1),

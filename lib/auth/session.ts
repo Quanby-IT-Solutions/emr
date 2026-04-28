@@ -1,6 +1,6 @@
 import type { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 
 const COOKIE_NAME = 'emr_session'
 const SESSION_MS = 24 * 60 * 60 * 1000

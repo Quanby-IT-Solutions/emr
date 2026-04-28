@@ -11,7 +11,7 @@ import {
   OrderType,
   InvoiceStatus,
   OrderStatus,
-} from '@/src/generated/client/enums'
+} from '@/src/generated/client'
 import { NotFoundError, ConflictError } from '@/lib/api/errors'
 
 export { DISCHARGE_STEPS, type DischargeStep } from '@/lib/services/encounters-constants'

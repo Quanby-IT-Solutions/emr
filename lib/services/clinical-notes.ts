@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { ClinicalNoteType, ClinicalNoteStatus, AuditActionType } from '@/src/generated/client/enums'
+import { ClinicalNoteType, ClinicalNoteStatus, AuditActionType } from '@/src/generated/client'
 import { NotFoundError, ForbiddenError } from '@/lib/api/errors'
 
 export interface CreateNoteInput {

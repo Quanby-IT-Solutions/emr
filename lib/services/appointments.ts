@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
-import { AppointmentStatus, EncounterType, EncounterStatus } from '@/src/generated/client/enums'
-import { AuditActionType } from '@/src/generated/client/client'
+import { AppointmentStatus, EncounterType, EncounterStatus } from '@/src/generated/client'
+import { AuditActionType } from '@/src/generated/client'
 
 export interface CreateAppointmentInput {
   patientId: string

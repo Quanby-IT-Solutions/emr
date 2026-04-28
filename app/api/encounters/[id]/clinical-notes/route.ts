@@ -1,11 +1,11 @@
 import { type NextRequest } from 'next/server'
 import { ok, error } from '@/lib/api/respond'
 import { requireRole } from '@/lib/auth/guard'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'
 import { getClinicalNotes } from '@/lib/services/encounters'
 import { create } from '@/lib/services/clinical-notes'
-import { ClinicalNoteType } from '@/src/generated/client/enums'
+import { ClinicalNoteType } from '@/src/generated/client'
 
 const ALLOWED = [UserRole.CLINICIAN, UserRole.NURSE]
 

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { InvoiceStatus } from '@/src/generated/client/enums'
+import { InvoiceStatus } from '@/src/generated/client'
 
 const INCLUDE_FULL = {
   patient: { select: { id: true, mrn: true, firstName: true, lastName: true } },

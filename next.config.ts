@@ -1,19 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Externalize Prisma so Next.js doesn't try to bundle the native engine
-  // and instead loads it from disk at runtime.
-  serverExternalPackages: ["@prisma/client", "@prisma/engines", "prisma"],
-  // Ensure all generated Prisma client files (engine binaries, schema,
-  // runtime helpers) are traced into every serverless function bundle.
-  // The custom output path (src/generated/client) lives outside the default
-  // node_modules trace root, so we must include it explicitly.
+  // Ensure Prisma's generated client engine binaries (in src/generated/client)
+  // are bundled into every serverless function on Vercel.
   outputFileTracingIncludes: {
-    "/**/*": [
-      "./src/generated/client/**/*",
-      "./prisma/schema.prisma",
-    ],
+    "**/*": ["./src/generated/client/**/*"],
   },
+  serverExternalPackages: ["@prisma/client", "@prisma/engines"],
   async redirects() {
     return [
       { source: "/biller/ready", destination: "/biller/charges", permanent: true },

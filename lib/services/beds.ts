@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { AuditActionType } from '@/src/generated/client/client'
+import { AuditActionType } from '@/src/generated/client'
 
 export interface AssignBedInput {
   bedId: string

@@ -1,4 +1,4 @@
-import { PrismaClient, AuditActionType } from '@/src/generated/client/client'
+import { PrismaClient, AuditActionType } from '@/src/generated/client'
 import { getCurrentUser } from '@/lib/request-context'
 
 export async function _writeAudit(

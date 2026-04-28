@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { z } from 'zod'
-import { MedAdminStatus, OrderType, OrderStatus, EncounterStatus } from '@/src/generated/client/enums'
+import { MedAdminStatus, OrderType, OrderStatus, EncounterStatus } from '@/src/generated/client'
 import { ConflictError, NotFoundError } from '@/lib/api/errors'
 
 export const AdministerInputSchema = z.object({

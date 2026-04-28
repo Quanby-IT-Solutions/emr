@@ -1,7 +1,7 @@
 // import { UserRole } from '@/lib/generated/prisma/enums'
 // import { UserRole } from '@prisma/client'
 
-import { UserRole } from "@/src/generated/client/enums"
+import { UserRole } from "@/src/generated/client"
 
 export { UserRole }
 

@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { ok, error } from '@/lib/api/respond'
 import { requireRole } from '@/lib/auth/guard'
-import { UserRole, ClinicalNoteType } from '@/src/generated/client/enums'
+import { UserRole, ClinicalNoteType } from '@/src/generated/client'
 import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'
 import { db } from '@/lib/db'
 import { create } from '@/lib/services/clinical-notes'

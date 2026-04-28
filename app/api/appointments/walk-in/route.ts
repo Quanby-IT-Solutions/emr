@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { ok, error } from '@/lib/api/respond'
 import { requireRole } from '@/lib/auth/guard'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 import { UnauthorizedError, ForbiddenError } from '@/lib/api/errors'
 import * as apptsService from '@/lib/services/appointments'
 

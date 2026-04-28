@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionUser, readSessionCookie } from '@/lib/auth/session'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 
 // Must run on Node runtime — session lookup hits Postgres via the singleton.
 // Edge runtime cannot load bcryptjs or use the Prisma singleton.

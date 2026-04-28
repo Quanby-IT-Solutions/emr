@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { _writeAudit } from '@/lib/db'
-import type { PrismaClient } from '@/src/generated/client/client'
+import type { PrismaClient } from '@/src/generated/client'
 
 function makeMockPrisma(auditCreate: ReturnType<typeof vi.fn>) {
   return {

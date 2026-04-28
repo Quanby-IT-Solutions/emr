@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { ok, error } from '@/lib/api/respond'
 import { requireRole } from '@/lib/auth/guard'
-import { UserRole } from '@/src/generated/client/enums'
+import { UserRole } from '@/src/generated/client'
 import { UnauthorizedError, ForbiddenError, NotFoundError } from '@/lib/api/errors'
 import { getById } from '@/lib/services/orders'
 
