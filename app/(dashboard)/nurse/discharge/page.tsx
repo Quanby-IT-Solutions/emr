@@ -17,7 +17,7 @@ import { toast } from "sonner"
 import { IconChecklist, IconClipboardCheck } from "@tabler/icons-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { encountersClient, type ApiEncounterDetail } from "@/lib/api/encounters-client"
-import { DISCHARGE_STEPS } from "@/lib/services/encounters"
+import { DISCHARGE_STEPS } from "@/lib/services/encounters-constants"
 
 const CHECKLIST_STEPS = DISCHARGE_STEPS as readonly DischargeStep[]
 

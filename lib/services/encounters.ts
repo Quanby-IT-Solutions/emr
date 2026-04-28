@@ -14,18 +14,8 @@ import {
 } from '@/src/generated/client/enums'
 import { NotFoundError, ConflictError } from '@/lib/api/errors'
 
-export const DISCHARGE_STEPS = [
-  'Discharge Summary',
-  'Medications Explained',
-  'Home Instructions',
-  'Follow-up Booked',
-  'PhilHealth Clearance',
-  'Pharmacy Clearance',
-  'Final Vitals',
-  'Wheeled Out',
-] as const
-
-export type DischargeStep = typeof DISCHARGE_STEPS[number]
+export { DISCHARGE_STEPS, type DischargeStep } from '@/lib/services/encounters-constants'
+import { DISCHARGE_STEPS } from '@/lib/services/encounters-constants'
 
 const DischargeChecklistPartialSchema = z.object({
   'Discharge Summary': z.boolean().optional(),
