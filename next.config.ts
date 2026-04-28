@@ -1,10 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Include Prisma engine binary in serverless function bundles.
-  // Required because the generated client lives outside the default node_modules path.
+  // Externalize Prisma so Next.js doesn't try to bundle the native engine
+  // and instead loads it from disk at runtime.
+  serverExternalPackages: ["@prisma/client", "@prisma/engines", "prisma"],
+  // Ensure all generated Prisma client files (engine binaries, schema,
+  // runtime helpers) are traced into every serverless function bundle.
+  // The custom output path (src/generated/client) lives outside the default
+  // node_modules trace root, so we must include it explicitly.
   outputFileTracingIncludes: {
-    "/api/**/*": ["./src/generated/client/**/*.node"],
+    "/**/*": [
+      "./src/generated/client/**/*",
+      "./prisma/schema.prisma",
+    ],
   },
   async redirects() {
     return [
